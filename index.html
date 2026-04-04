@@ -50,6 +50,15 @@ window.dispatchEvent(new Event('fbReady'));
   --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
   --r:14px;--r-sm:9px;
 }
+body.light{
+  --bg:#f5f5f5;--bg2:#ffffff;--bg3:#ebebeb;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.18);
+  --text:#1a1a2e;--text2:#4a4a6a;--text3:#8888aa;
+  --day-r-bg:rgba(245,158,11,.13);--day-s-bg:rgba(252,211,77,.13);
+  --ngt-r-bg:rgba(99,102,241,.13);--ngt-s-bg:rgba(165,180,252,.13);
+  --off-bg:rgba(55,65,81,.1);--vac-bg:rgba(16,185,129,.13);
+}
+*,body{transition:background-color .2s,color .2s,border-color .2s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none}
 body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
@@ -260,7 +269,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 <!-- PAGE: 달력 -->
 <div class="page active" id="page-cal">
   <div class="cal-nav">
-    <div class="cal-nav-title" id="cal-month-label"></div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <div class="cal-nav-title" id="cal-month-label"></div>
+      <!-- 팀 이름 배지 -->
+      <div id="cal-team-badge" style="display:none;align-items:center;gap:5px">
+        <div id="cal-team-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
+        <span id="cal-team-name" style="font-size:.7rem;font-weight:700;color:var(--text2)"></span>
+      </div>
+    </div>
     <div class="cal-nav-btns">
       <button class="icon-btn" onclick="gotoToday()" style="font-size:.7rem;font-weight:800">오늘</button>
       <button class="icon-btn" onclick="changeMonth(-1)">◀</button>
@@ -277,13 +293,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
   </div>
 
   <div id="cal-main" style="display:none">
-    <!-- 현재 팀 표시 -->
-    <div id="cal-team-info" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm)">
-      <div id="cal-team-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
-      <span id="cal-team-name" style="font-size:.8rem;font-weight:700;flex:1"></span>
-      <span style="font-size:.68rem;color:var(--text3)">팀 패턴 적용 중</span>
-    </div>
-
     <div class="stats-strip">
       <div class="stat-chip">
         <div class="sc-title" style="color:var(--day-r)">☀️ 주간</div>
@@ -377,11 +386,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
   </div>
 </div>
 
-<!-- BOTTOM NAV (3탭) -->
-<nav class="bottom-nav">
+<!-- BOTTOM NAV (4탭) -->
+<nav class="bottom-nav" style="grid-template-columns:repeat(4,1fr)">
   <button class="nav-item active" id="nav-cal"      onclick="goTab('cal')">      <span class="nav-icon">📅</span>내 달력</button>
   <button class="nav-item"        id="nav-team-cal" onclick="goTab('team-cal')"> <span class="nav-icon">📋</span>팀 달력</button>
   <button class="nav-item"        id="nav-team"     onclick="goTab('team')">     <span class="nav-icon">👥</span>팀 관리</button>
+  <button class="nav-item"        id="nav-settings" onclick="goTab('settings')"> <span class="nav-icon">⚙️</span>설정</button>
 </nav>
 
 <!-- SHEETS -->
@@ -481,31 +491,48 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 </div>
 
 <!-- 설정 시트 (연차 설정) -->
-<div class="sheet-overlay" id="settings-sheet-overlay">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">⚙️ 설정</div>
-    <div style="font-size:.85rem;color:var(--text2);margin-bottom:16px">👤 <span id="settings-name"></span></div>
-    <div class="form-group">
-      <div class="form-label">연간 총 연차 일수</div>
-      <input type="number" id="total-vacation-input" min="0" max="365" placeholder="예: 15"
-        style="font-size:1.1rem;font-weight:700;text-align:center" oninput="saveTotalVacation()">
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--r-sm);margin-bottom:16px">
-      <span style="font-size:.78rem;color:var(--text2)">올해 사용 / 총 연차</span>
-      <span id="vac-summary" style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--vac)">0 / 0</span>
-    </div>
-    <button class="btn btn-secondary btn-full" onclick="closeSheet('settings-sheet-overlay')">닫기</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-danger btn-full" onclick="doLogout()">로그아웃</button>
-  </div>
-</div>
+<!-- PAGE: 설정 -->
+<div class="page" id="page-settings">
+  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;margin-bottom:20px">⚙️ 설정</div>
 
-<!-- 설정 버튼 (달력 우상단에 플로팅) -->
-<button onclick="openSettings()"
-  style="position:fixed;top:16px;right:16px;z-index:90;width:36px;height:36px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;color:var(--text2);font-size:1rem;display:flex;align-items:center;justify-content:center;max-width:480px">
-  ⚙️
-</button>
+  <!-- 계정 -->
+  <div class="section-card">
+    <div class="section-title">계정</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div id="settings-avatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#000;flex-shrink:0"></div>
+      <span id="settings-name" style="font-size:.95rem;font-weight:700"></span>
+    </div>
+  </div>
+
+  <!-- 화면 모드 -->
+  <div class="section-card">
+    <div class="section-title">화면 모드</div>
+    <div style="display:flex;gap:10px">
+      <button id="btn-dark" class="btn btn-full" onclick="setTheme('dark')"
+        style="display:flex;align-items:center;justify-content:center;gap:6px">🌙 다크 모드</button>
+      <button id="btn-light" class="btn btn-full" onclick="setTheme('light')"
+        style="display:flex;align-items:center;justify-content:center;gap:6px">☀️ 라이트 모드</button>
+    </div>
+  </div>
+
+  <!-- 연차 -->
+  <div class="section-card">
+    <div class="section-title">연차 설정</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div class="form-label">연간 총 연차 일수</div>
+        <input type="number" id="total-vacation-input" min="0" max="365" placeholder="예: 15"
+          style="font-size:1.1rem;font-weight:700;text-align:center" oninput="saveTotalVacation()">
+      </div>
+      <div style="text-align:center;min-width:80px">
+        <div style="font-size:.65rem;color:var(--text3);margin-bottom:4px">올해 사용 / 총</div>
+        <div id="vac-summary" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--vac)">0 / 0</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-danger btn-full" onclick="doLogout()">로그아웃</button>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -686,7 +713,7 @@ function doLogout(){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  TABS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TABS=['cal','team-cal','team'];
+const TABS=['cal','team-cal','team','settings'];
 function goTab(name){
   TABS.forEach(t=>{
     document.getElementById('page-'+t).classList.toggle('active',t===name);
@@ -695,6 +722,7 @@ function goTab(name){
   if(name==='team-cal') renderTeamCal();
   if(name==='team')     renderTeamListPage();
   if(name==='cal')      refreshCalFromTeam();
+  if(name==='settings') renderSettingsPage();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1129,11 +1157,37 @@ async function sendChat(){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  SETTINGS (연차)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openSettings(){
-  document.getElementById('settings-name').textContent=S.myName;
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SETTINGS PAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSettingsPage(){
+  const av=document.getElementById('settings-avatar');
+  if(av){ av.textContent=S.myName?S.myName[0]:'?'; av.style.background=S.myColor||'#f59e0b'; }
+  const nm=document.getElementById('settings-name');
+  if(nm) nm.textContent=S.myName||'';
   document.getElementById('total-vacation-input').value=S.totalVacation||'';
   updateVacSummary();
-  document.getElementById('settings-sheet-overlay').classList.add('open');
+  // 현재 테마 버튼 강조
+  const isDark=!document.body.classList.contains('light');
+  document.getElementById('btn-dark').className='btn btn-full'+(isDark?' btn-primary':'');
+  document.getElementById('btn-light').className='btn btn-full'+(!isDark?' btn-primary':'');
+}
+
+function setTheme(mode){
+  if(mode==='light'){
+    document.body.classList.add('light');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#f5f5f5');
+  } else {
+    document.body.classList.remove('light');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#0f1117');
+  }
+  ls.set('theme',mode);
+  renderSettingsPage();
+}
+
+function applyTheme(){
+  const saved=ls.get('theme');
+  if(saved==='light') setTheme('light');
 }
 async function saveTotalVacation(){
   S.totalVacation=parseInt(document.getElementById('total-vacation-input').value)||0;
@@ -1153,7 +1207,7 @@ function updateVacSummary(){
 //  UTILS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function closeSheet(id){document.getElementById(id).classList.remove('open');}
-['day-sheet-overlay','new-team-sheet-overlay','team-info-sheet-overlay','settings-sheet-overlay'].forEach(id=>{
+['day-sheet-overlay','new-team-sheet-overlay','team-info-sheet-overlay'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeSheet(id);});
 });
 let toastTimer;
@@ -1179,12 +1233,18 @@ async function boot(){
   S.year=t.getFullYear(); S.month=t.getMonth();
   S.teamYear=t.getFullYear(); S.teamMonth=t.getMonth();
 
-  // 팀 이름 달력 상단에 표시
+  applyTheme();
+
+  // 팀 배지 (cal-nav 안)
   if(S.activeTeamId){
     const info=await dbGet('teamIndex/'+S.activeTeamId);
     if(info){
-      document.getElementById('cal-team-name').textContent=info.name;
-      document.getElementById('cal-team-dot').style.background=info.color||'#f59e0b';
+      const badge=document.getElementById('cal-team-badge');
+      const dot=document.getElementById('cal-team-dot');
+      const nm=document.getElementById('cal-team-name');
+      if(badge){ badge.style.display='flex'; }
+      if(dot)  { dot.style.background=info.color||'#f59e0b'; }
+      if(nm)   { nm.textContent=info.name; }
     }
     // 팀 패턴 로드
     const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
