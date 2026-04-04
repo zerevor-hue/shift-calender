@@ -7,12 +7,10 @@
 <title>교대근무 달력</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-<!-- ★★★ Firebase SDK ★★★ -->
 <script type="module">
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  ★ 여기에 Firebase 설정값을 붙여넣으세요 ★
-//  Firebase 콘솔 → 프로젝트 설정 → 내 앱 → SDK 설정
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Firebase 설정
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
   authDomain:        "shift-calender-17a58.firebaseapp.com",
@@ -22,40 +20,28 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "434862222996",
   appId:             "1:434862222996:web:e7e2a67c5188542bc90e81",
 };
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-import { initializeApp }           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, off, serverTimestamp }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, off }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getDatabase(app);
 
-// ── Firebase 래퍼 ──
-async function fbGet(path){
-  try{ const snap=await get(ref(db,path)); return snap.exists()?snap.val():null; }
-  catch(e){ console.error('fbGet',path,e); return null; }
-}
-async function fbSet(path,val){
-  try{ await set(ref(db,path),val); }
-  catch(e){ console.error('fbSet',path,e); }
-}
-function fbOn(path,cb){
-  const r=ref(db,path);
-  onValue(r,snap=>cb(snap.exists()?snap.val():null));
-  return ()=>off(r);
-}
-
-// DB에 노출
-window._fb={ fbGet, fbSet, fbOn, serverTimestamp, push, ref, db };
-window._fbReady = true;
+window._fb = {
+  async get(path){ try{ const s=await get(ref(db,path)); return s.exists()?s.val():null; }catch{ return null; } },
+  async set(path,val){ await set(ref(db,path),val); },
+  async push(path,val){ await push(ref(db,path),val); },
+  listen(path,cb){ const r=ref(db,path); onValue(r,s=>cb(s.exists()?s.val():null)); return ()=>off(r); },
+};
+window._fbReady=true;
 window.dispatchEvent(new Event('fbReady'));
 </script>
 
 <style>
 :root{
   --day-r:#f59e0b;--day-s:#fcd34d;--ngt-r:#6366f1;--ngt-s:#a5b4fc;
-  --off:#374151;--vac:#10b981;
+  --vac:#10b981;
   --day-r-bg:rgba(245,158,11,.18);--day-s-bg:rgba(252,211,77,.18);
   --ngt-r-bg:rgba(99,102,241,.18);--ngt-s-bg:rgba(165,180,252,.18);
   --off-bg:rgba(55,65,81,.25);--vac-bg:rgba(16,185,129,.18);
@@ -71,18 +57,16 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text
 /* SPLASH */
 #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 #splash.hidden{display:none}
-.splash-logo{font-size:3rem}
-.splash-txt{font-size:.8rem;color:var(--text3)}
 
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:20px;overflow-y:auto}
 #login-screen.hidden{display:none}
 .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
-.saved-acct-btn{width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--text2);cursor:pointer;text-align:left}
-.saved-acct-btn:active{background:var(--bg3)}
+.quick-acct{width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 16px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--text2);cursor:pointer;text-align:left}
+.quick-acct:active{background:var(--bg3)}
 
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
 .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;gap:3px;background:none;border:none;color:var(--text3);font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:color .15s}
 .nav-item.active{color:var(--day-r)}
 .nav-icon{font-size:1.3rem;line-height:1}
@@ -104,7 +88,7 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text
 .sc-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}
 .sc-body{display:flex;align-items:center;justify-content:center;gap:4px}
 .sc-col{display:flex;flex-direction:column;align-items:center;gap:2px}
-.sc-sub{font-size:.55rem;color:var(--text3);font-weight:700;letter-spacing:.03em;line-height:1}
+.sc-sub{font-size:.55rem;color:var(--text3);font-weight:700;line-height:1}
 .sc-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;line-height:1}
 .sc-sep{color:var(--text3);font-size:.8rem;line-height:1;margin-top:10px}
 
@@ -128,7 +112,7 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text
 .cb-dr{background:var(--day-r-bg);color:var(--day-r)}.cb-ds{background:var(--day-s-bg);color:var(--day-s)}
 .cb-nr{background:var(--ngt-r-bg);color:var(--ngt-r)}.cb-ns{background:var(--ngt-s-bg);color:var(--ngt-s)}
 .cb-of{background:rgba(239,68,68,.15);color:#f87171}.cb-vc{background:var(--vac-bg);color:var(--vac)}
-.cell-memo{font-size:.5rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:2px;padding-left:1px}
+.cell-memo{font-size:.5rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:2px}
 
 /* LEGEND */
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -150,7 +134,7 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text
 .tc-none{color:var(--text3);font-size:.5rem}
 
 /* CHAT */
-.chat-messages{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 0;-webkit-overflow-scrolling:touch;height:240px}
+.chat-messages{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 0;height:220px}
 .chat-msg{display:flex;flex-direction:column;max-width:82%}
 .chat-msg.me{align-self:flex-end;align-items:flex-end}
 .chat-msg.other{align-self:flex-start;align-items:flex-start}
@@ -159,10 +143,10 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text
 .chat-msg.other .chat-bubble{background:var(--bg3);color:var(--text);border-bottom-left-radius:4px}
 .chat-name{font-size:.6rem;color:var(--text3);margin-bottom:3px;font-weight:700}
 .chat-time{font-size:.55rem;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
-.chat-input-row{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.chat-input-row{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
 .chat-input-row textarea{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--r-sm);font-family:inherit;font-size:.88rem;outline:none;resize:none;min-height:42px;max-height:100px}
 .chat-input-row textarea:focus{border-color:var(--day-r)}
-.chat-send-btn{width:42px;height:42px;background:var(--day-r);border:none;border-radius:var(--r-sm);color:#000;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit}
+.chat-send-btn{width:42px;height:42px;background:var(--day-r);border:none;border-radius:var(--r-sm);color:#000;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-family:inherit;display:flex;align-items:center;justify-content:center}
 
 /* SECTION */
 .section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
@@ -175,7 +159,6 @@ button{font-family:inherit;cursor:pointer;border:none;transition:all .18s}
 .btn-primary{background:var(--day-r);color:#000;border-color:var(--day-r)}
 .btn-secondary{background:var(--bg3);color:var(--text2);border-color:var(--border)}
 .btn-danger{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3)}
-.btn-ghost{background:transparent;color:var(--text2);border-color:transparent}
 .btn-full{width:100%}
 .btn-sm{padding:7px 12px;font-size:.78rem}
 
@@ -201,7 +184,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 .sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px}
 .sheet-title{font-size:1rem;font-weight:800;margin-bottom:18px}
 
-/* PATTERN */
+/* PATTERN EDITOR */
 .pick-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .pick-shift-btn{padding:7px 11px;border-radius:var(--r-sm);border:2px solid var(--border);background:var(--bg3);font-size:.68rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text2);transition:all .12s}
 .psb-dr.sel{border-color:var(--day-r);color:var(--day-r);background:var(--day-r-bg)}
@@ -219,13 +202,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 .patt-cell .pc-ico{font-size:1rem;line-height:1}
 .patt-cell .pc-n{font-size:.5rem;opacity:.7}
 
-/* TEAM */
-.team-list-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s}
-.team-list-card:active{background:var(--bg3)}
+/* TEAM CARDS */
+.team-list-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
 .team-list-card.joined{border-color:var(--day-r)}
+.team-list-card:active{background:var(--bg3)}
 .team-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#000;flex-shrink:0}
 .team-tab-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.team-tab-btn{padding:7px 16px;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.team-tab-btn{padding:7px 16px;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit}
 .team-tab-btn.active{background:var(--day-r);color:#000;border-color:var(--day-r)}
 
 /* TOAST & SPINNER */
@@ -234,23 +217,26 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 .spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--day-r);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{display:none}
+
+/* 팀 없음 배너 */
+.no-team-banner{background:var(--bg2);border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;margin-bottom:12px}
 </style>
 </head>
 <body>
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-logo">🔄</div>
+  <div style="font-size:3rem">🔄</div>
   <div class="spinner"></div>
-  <div class="splash-txt">연결 중...</div>
+  <div style="font-size:.8rem;color:var(--text3)">연결 중...</div>
 </div>
 
 <!-- LOGIN -->
 <div id="login-screen" class="hidden">
   <div style="font-size:2.8rem">🔄</div>
-  <div>
-    <div style="font-size:1.4rem;font-weight:800;text-align:center;letter-spacing:-.03em">교대근무 달력</div>
-    <div style="font-size:.75rem;color:var(--text3);text-align:center;margin-top:4px">이름과 비밀번호로 시작하세요</div>
+  <div style="text-align:center">
+    <div style="font-size:1.4rem;font-weight:800;letter-spacing:-.03em">교대근무 달력</div>
+    <div style="font-size:.75rem;color:var(--text3);margin-top:4px">이름과 비밀번호로 시작하세요</div>
   </div>
   <div class="login-card">
     <div class="form-group">
@@ -266,9 +252,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
     </div>
     <div id="login-err" style="font-size:.72rem;color:#f87171;text-align:center;display:none;margin-top:2px"></div>
     <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:6px">로그인 / 가입</button>
-    <div style="font-size:.68rem;color:var(--text3);text-align:center;line-height:1.6">
-      처음이면 자동 가입 · 기존 계정은 로그인
-    </div>
+    <div style="font-size:.68rem;color:var(--text3);text-align:center;line-height:1.6">처음이면 자동 가입 · 기존 계정은 로그인</div>
   </div>
   <div id="saved-accounts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
@@ -283,51 +267,70 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
       <button class="icon-btn" onclick="changeMonth(1)">▶</button>
     </div>
   </div>
-  <div class="stats-strip">
-    <div class="stat-chip">
-      <div class="sc-title" style="color:var(--day-r)">☀️ 주간</div>
-      <div class="sc-body">
-        <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-dr" style="color:var(--day-r)">0</span></div>
-        <span class="sc-sep">/</span>
-        <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ds" style="color:var(--day-s)">0</span></div>
-      </div>
-    </div>
-    <div class="stat-chip">
-      <div class="sc-title" style="color:var(--ngt-r)">🌙 야간</div>
-      <div class="sc-body">
-        <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-nr" style="color:var(--ngt-r)">0</span></div>
-        <span class="sc-sep">/</span>
-        <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ns" style="color:var(--ngt-s)">0</span></div>
-      </div>
-    </div>
-    <div class="stat-chip">
-      <div class="sc-title" style="color:var(--vac)">🌴 연차</div>
-      <div class="sc-body">
-        <div class="sc-col"><span class="sc-sub">사용</span><span class="sc-num" id="st-vc" style="color:var(--vac)">0</span></div>
-        <span class="sc-sep">/</span>
-        <div class="sc-col"><span class="sc-sub">연차</span><span id="st-vc-total" class="sc-num" style="color:var(--text3)">-</span></div>
-      </div>
-    </div>
+
+  <!-- 팀 없을 때 배너 -->
+  <div id="no-team-cal-banner" class="no-team-banner" style="display:none">
+    <div style="font-size:1.5rem;margin-bottom:8px">👥</div>
+    <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
+    <div style="font-size:.75rem;color:var(--text3);margin-bottom:14px">팀에 참여하면 팀 패턴이 달력에 적용됩니다</div>
+    <button class="btn btn-primary btn-sm" onclick="goTab('team')">팀 관리로 →</button>
   </div>
-  <div class="cal-grid">
-    <div class="dow-row">
-      <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
-      <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+
+  <div id="cal-main" style="display:none">
+    <!-- 현재 팀 표시 -->
+    <div id="cal-team-info" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm)">
+      <div id="cal-team-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
+      <span id="cal-team-name" style="font-size:.8rem;font-weight:700;flex:1"></span>
+      <span style="font-size:.68rem;color:var(--text3)">팀 패턴 적용 중</span>
     </div>
-    <div class="days-grid" id="days-grid"></div>
-  </div>
-  <div class="legend">
-    <div class="leg"><div class="leg-dot" style="background:var(--day-r)"></div>주간정규</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--day-s)"></div>주간대근</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--ngt-r)"></div>야간정규</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--ngt-s)"></div>야간대근</div>
-    <div class="leg"><div class="leg-dot" style="background:#f87171"></div>휴무</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--vac)"></div>연차</div>
+
+    <div class="stats-strip">
+      <div class="stat-chip">
+        <div class="sc-title" style="color:var(--day-r)">☀️ 주간</div>
+        <div class="sc-body">
+          <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-dr" style="color:var(--day-r)">0</span></div>
+          <span class="sc-sep">/</span>
+          <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ds" style="color:var(--day-s)">0</span></div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-title" style="color:var(--ngt-r)">🌙 야간</div>
+        <div class="sc-body">
+          <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-nr" style="color:var(--ngt-r)">0</span></div>
+          <span class="sc-sep">/</span>
+          <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ns" style="color:var(--ngt-s)">0</span></div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-title" style="color:var(--vac)">🌴 연차</div>
+        <div class="sc-body">
+          <div class="sc-col"><span class="sc-sub">사용</span><span class="sc-num" id="st-vc" style="color:var(--vac)">0</span></div>
+          <span class="sc-sep">/</span>
+          <div class="sc-col"><span class="sc-sub">연차</span><span id="st-vc-total" class="sc-num" style="color:var(--text3)">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cal-grid">
+      <div class="dow-row">
+        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
+        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--day-r)"></div>주간정규</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--day-s)"></div>주간대근</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--ngt-r)"></div>야간정규</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--ngt-s)"></div>야간대근</div>
+      <div class="leg"><div class="leg-dot" style="background:#f87171"></div>휴무</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--vac)"></div>연차</div>
+    </div>
   </div>
 </div>
 
 <!-- PAGE: 팀 달력 -->
-<div class="page" id="page-team">
+<div class="page" id="page-team-cal">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px">
     <div>
       <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">📋 팀 달력</div>
@@ -339,11 +342,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
     </div>
   </div>
   <div class="team-tab-strip" id="team-tab-strip"></div>
-  <div id="no-team-msg" class="section-card" style="text-align:center;padding:28px 16px">
+  <div id="no-team-msg" class="no-team-banner">
     <div style="font-size:2rem;margin-bottom:8px">👥</div>
     <div style="font-weight:800;margin-bottom:6px">참여 중인 팀 없음</div>
     <div style="font-size:.78rem;color:var(--text3);margin-bottom:14px">팀 관리 탭에서 팀에 참여하세요</div>
-    <button class="btn btn-primary" onclick="goTab('share')">팀 관리로 →</button>
+    <button class="btn btn-primary btn-sm" onclick="goTab('team')">팀 관리로 →</button>
   </div>
   <div id="team-cal-wrap" style="display:none">
     <div class="section-card" style="padding:12px">
@@ -351,7 +354,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
       <div class="team-scroll"><table class="team-table" id="team-table"></table></div>
     </div>
     <div class="section-card" style="padding:12px">
-      <div class="section-title">💬 팀 채팅 <span id="chat-team-name" style="font-weight:400;color:var(--text3)"></span></div>
+      <div class="section-title">💬 팀 채팅</div>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-row">
         <textarea id="chat-input" placeholder="메시지 입력..." rows="1"
@@ -363,78 +366,35 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 </div>
 
 <!-- PAGE: 팀 관리 -->
-<div class="page" id="page-share">
+<div class="page" id="page-team">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">👥 팀 관리</div>
     <button class="btn btn-sm btn-primary" onclick="openNewTeamSheet()">+ 새 팀</button>
   </div>
   <div style="font-size:.72rem;color:var(--text3);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">전체 팀 목록</div>
   <div id="all-teams-list">
-    <div style="text-align:center;padding:24px;color:var(--text3)"><div class="spinner"></div><br>불러오는 중...</div>
+    <div style="text-align:center;padding:24px;color:var(--text3)"><div class="spinner"></div></div>
   </div>
 </div>
 
-<!-- PAGE: 설정 -->
-<div class="page" id="page-pattern">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">⚙️ 설정</div>
-    <div id="settings-me" style="font-size:.8rem;font-weight:700;color:var(--text2)"></div>
-  </div>
-  <div class="section-card">
-    <div class="section-title">연차 설정</div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="flex:1">
-        <div class="form-label">연간 총 연차 일수</div>
-        <input type="number" id="total-vacation-input" min="0" max="365" placeholder="예: 15"
-          style="font-size:1.1rem;font-weight:700;text-align:center" oninput="saveTotalVacation()">
-      </div>
-      <div style="text-align:center;min-width:80px">
-        <div style="font-size:.65rem;color:var(--text3);margin-bottom:4px">올해 사용 / 총</div>
-        <div id="vac-summary" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--vac)">0 / 0</div>
-      </div>
-    </div>
-  </div>
-  <div class="section-card">
-    <div class="section-title">시작 날짜</div>
-    <input type="date" id="patt-start-input">
-  </div>
-  <div class="section-card">
-    <div class="section-title">패턴</div>
-    <div class="patt-len-row">
-      <button onclick="patLenChange(-1)">−</button>
-      <span id="patt-len-lbl">4일 반복</span>
-      <button onclick="patLenChange(1)">+</button>
-    </div>
-    <div class="section-title" style="margin-bottom:8px">근무 선택</div>
-    <div class="pick-strip">
-      <button class="pick-shift-btn psb-dr" onclick="setPick('dr')">☀️ 주간</button>
-      <button class="pick-shift-btn psb-nr" onclick="setPick('nr')">🌙 야간</button>
-      <button class="pick-shift-btn psb-of" onclick="setPick('of')">🏠 휴무</button>
-    </div>
-    <div class="patt-cells" id="patt-cells"></div>
-  </div>
-  <div class="section-card">
-    <div class="section-title">14일 미리보기</div>
-    <div id="preview-list" style="display:flex;flex-direction:column;gap:6px"></div>
-  </div>
-  <button class="btn btn-primary btn-full" onclick="savePattern()">✓ 저장</button>
-  <div style="height:10px"></div>
-  <button class="btn btn-secondary btn-full" onclick="doLogout()">로그아웃</button>
-</div>
-
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV (3탭) -->
 <nav class="bottom-nav">
-  <button class="nav-item active" id="nav-cal"     onclick="goTab('cal')">    <span class="nav-icon">📅</span>달력</button>
-  <button class="nav-item"        id="nav-team"    onclick="goTab('team')">   <span class="nav-icon">📋</span>팀 달력</button>
-  <button class="nav-item"        id="nav-share"   onclick="goTab('share')">  <span class="nav-icon">👥</span>팀 관리</button>
-  <button class="nav-item"        id="nav-pattern" onclick="goTab('pattern')"><span class="nav-icon">⚙️</span>설정</button>
+  <button class="nav-item active" id="nav-cal"      onclick="goTab('cal')">      <span class="nav-icon">📅</span>내 달력</button>
+  <button class="nav-item"        id="nav-team-cal" onclick="goTab('team-cal')"> <span class="nav-icon">📋</span>팀 달력</button>
+  <button class="nav-item"        id="nav-team"     onclick="goTab('team')">     <span class="nav-icon">👥</span>팀 관리</button>
 </nav>
 
 <!-- SHEETS -->
+
+<!-- 날짜 클릭 시트 -->
 <div class="sheet-overlay" id="day-sheet-overlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="day-sheet-title">날짜 상세</div>
+    <div style="font-size:.75rem;color:var(--text3);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:var(--r-sm)">
+      팀 패턴: <span id="day-base-shift" style="color:var(--day-r);font-weight:700"></span> →
+      아래에서 변경하면 개인 수정으로 저장됩니다
+    </div>
     <div class="form-group">
       <div class="form-label">근무 유형</div>
       <div class="shift-picker">
@@ -463,6 +423,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
   </div>
 </div>
 
+<!-- 새 팀 만들기 시트 (이름 + 패턴 설정) -->
 <div class="sheet-overlay" id="new-team-sheet-overlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -471,17 +432,47 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
       <div class="form-label">팀 이름</div>
       <input type="text" id="new-team-name" placeholder="예: A조, 주간팀" maxlength="15">
     </div>
+    <!-- 팀 패턴 설정 -->
+    <div class="section-title">교대 패턴 설정</div>
+    <div class="form-group">
+      <div class="form-label">패턴 시작 날짜</div>
+      <input type="date" id="new-team-start">
+    </div>
+    <div class="form-group">
+      <div class="form-label">패턴 길이</div>
+      <div class="patt-len-row">
+        <button onclick="ntPatLenChange(-1)">−</button>
+        <span id="nt-patt-len-lbl">4일 반복</span>
+        <button onclick="ntPatLenChange(1)">+</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">근무 선택 후 셀 클릭으로 편집</div>
+      <div class="pick-strip">
+        <button class="pick-shift-btn psb-dr" id="nt-pb-dr" onclick="ntSetPick('dr')">☀️ 주간</button>
+        <button class="pick-shift-btn psb-nr" id="nt-pb-nr" onclick="ntSetPick('nr')">🌙 야간</button>
+        <button class="pick-shift-btn psb-of" id="nt-pb-of" onclick="ntSetPick('of')">🏠 휴무</button>
+      </div>
+      <div class="patt-cells" id="nt-patt-cells"></div>
+    </div>
+    <!-- 14일 미리보기 -->
+    <div class="form-group">
+      <div class="form-label">14일 미리보기</div>
+      <div id="nt-preview" style="display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-secondary" onclick="closeSheet('new-team-sheet-overlay')">취소</button>
-      <button class="btn btn-primary" onclick="createTeam()">만들기</button>
+      <button class="btn btn-primary" onclick="createTeam()">팀 만들기</button>
     </div>
   </div>
 </div>
 
+<!-- 팀 정보 시트 -->
 <div class="sheet-overlay" id="team-info-sheet-overlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="team-info-title">팀 정보</div>
+    <div id="team-info-pattern" style="margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:var(--r-sm);font-size:.78rem;color:var(--text2)"></div>
     <div id="team-info-members" style="margin-bottom:16px"></div>
     <button id="team-join-btn" class="btn btn-primary btn-full" onclick="toggleJoinTeam()">이 팀에 참여하기</button>
     <div style="height:8px"></div>
@@ -489,13 +480,40 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
   </div>
 </div>
 
+<!-- 설정 시트 (연차 설정) -->
+<div class="sheet-overlay" id="settings-sheet-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">⚙️ 설정</div>
+    <div style="font-size:.85rem;color:var(--text2);margin-bottom:16px">👤 <span id="settings-name"></span></div>
+    <div class="form-group">
+      <div class="form-label">연간 총 연차 일수</div>
+      <input type="number" id="total-vacation-input" min="0" max="365" placeholder="예: 15"
+        style="font-size:1.1rem;font-weight:700;text-align:center" oninput="saveTotalVacation()">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--r-sm);margin-bottom:16px">
+      <span style="font-size:.78rem;color:var(--text2)">올해 사용 / 총 연차</span>
+      <span id="vac-summary" style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--vac)">0 / 0</span>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="closeSheet('settings-sheet-overlay')">닫기</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-danger btn-full" onclick="doLogout()">로그아웃</button>
+  </div>
+</div>
+
+<!-- 설정 버튼 (달력 우상단에 플로팅) -->
+<button onclick="openSettings()"
+  style="position:fixed;top:16px;right:16px;z-index:90;width:36px;height:36px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;color:var(--text2);font-size:1rem;display:flex;align-items:center;justify-content:center;max-width:480px">
+  ⚙️
+</button>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  CONSTANTS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const SHIFT_META={
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SM={
   dr:{label:'주간정규',icon:'☀️',cls:'cb-dr',tcls:'tc-dr',short:'주'},
   ds:{label:'주간대근',icon:'🌤',cls:'cb-ds',tcls:'tc-ds',short:'주대'},
   nr:{label:'야간정규',icon:'🌙',cls:'cb-nr',tcls:'tc-nr',short:'야'},
@@ -506,97 +524,124 @@ const SHIFT_META={
 const CELL_LBL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
 const TEAM_LBL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+const PCLS={dr:'pc-dr',nr:'pc-nr',of:'pc-of'};
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  STATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let S={
   myName:'',myColor:'',myId:'',
   year:0,month:0,teamYear:0,teamMonth:0,
-  pattern:['dr','nr','of','of'],patternStart:null,
-  overrides:{},totalVacation:0,
-  joinedTeamIds:[],activeTeamId:'',
-  tempPattern:[],tempStart:null,curPick:'dr',
-  chatUnsub:null,viewingTeamId:'',viewingTeamData:null,
+  // 내 개인 수정 데이터 (팀 패턴 위에 덮어씌우기)
+  overrides:{},          // {'YYYY-MM-DD':{shift,memo}}
+  totalVacation:0,
+  joinedTeamIds:[],      // 참여 중인 팀 ID 목록
+  activeTeamId:'',       // 현재 보고 있는 팀
+  viewingTeamId:'',
+  viewingTeamData:null,
+  // 팀 패턴 (Firebase에서 로드, 로컬 캐시)
+  teamPatternCache:{},   // teamId -> {pattern, patternStart}
 };
 
-// Firebase 함수 참조 (module에서 노출)
-let FB=null;
+// 새 팀 패턴 편집기 상태
+let NT={pattern:['dr','nr','of','of'],pick:'dr'};
 
+let FB=null;
 function dkey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function uid(){return Math.random().toString(36).slice(2,10).toUpperCase()}
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  FIREBASE DB 헬퍼
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function dbGet(path){
-  if(!FB) return null;
-  return await FB.fbGet(path);
-}
-async function dbSet(path,val){
-  if(!FB) return;
-  await FB.fbSet(path,val);
-}
-function dbListen(path,cb){
-  if(!FB) return ()=>{};
-  return FB.fbOn(path,cb);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  FIREBASE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const dbGet=p=>FB.get(p);
+const dbSet=(p,v)=>FB.set(p,v);
+const dbListen=(p,cb)=>FB.listen(p,cb);
+const dbPush=(p,v)=>FB.push(p,v);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  LOCAL STORAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ls={
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},
+  get:(k)=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},
+  del:(k)=>{try{localStorage.removeItem(k)}catch{}},
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SHIFT CALC
+//  팀 패턴 기반 + 개인 오버라이드
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getTeamPattern(){
+  if(!S.activeTeamId) return null;
+  return S.teamPatternCache[S.activeTeamId]||null;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  LOCAL STORAGE (내 계정 세션)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
-function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}
-function lsDel(k){try{localStorage.removeItem(k)}catch{}}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PASSWORD HASH
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function hashPw(pw){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('sc2025'+pw));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,20);
+function getBaseShift(date){
+  // 팀 패턴으로 계산한 기본 근무
+  const tp=getTeamPattern();
+  if(!tp||!tp.pattern||!tp.patternStart) return null;
+  const base=new Date(tp.patternStart);
+  const diff=Math.floor((date-base)/86400000);
+  if(diff<0) return null;
+  return tp.pattern[diff%tp.pattern.length];
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SAVE / LOAD PROFILE (Firebase)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getShift(date){
+  // 개인 오버라이드 우선, 없으면 팀 패턴
+  const k=dkey(date);
+  if(S.overrides[k]) return S.overrides[k].shift;
+  return getBaseShift(date);
+}
+
+// 팀원의 근무 계산 (팀 패턴 + 개인 오버라이드)
+function getMemberShift(date, memberOverrides){
+  const k=dkey(date);
+  if(memberOverrides&&memberOverrides[k]) return memberOverrides[k].shift;
+  return getBaseShift(date); // 팀 패턴은 동일
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SAVE / LOAD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function saveProfile(){
   if(!S.myId) return;
   const data={
-    myName:S.myName, myColor:S.myColor,
-    pattern:S.pattern,
-    patternStart:S.patternStart?.toISOString?.()??'',
-    overrides:S.overrides,
-    totalVacation:S.totalVacation,
-    joinedTeamIds:S.joinedTeamIds,
-    activeTeamId:S.activeTeamId,
+    myName:S.myName,myColor:S.myColor,
+    overrides:S.overrides,totalVacation:S.totalVacation,
+    joinedTeamIds:S.joinedTeamIds,activeTeamId:S.activeTeamId,
     updatedAt:Date.now(),
   };
-  // Firebase에 저장
   await dbSet('profiles/'+S.myId, data);
-  // 로컬에도 캐시 (오프라인 대비)
-  lsSet('profile_'+S.myId, data);
+  ls.set('profile_'+S.myId, data);
+  // 현재 참여 팀에 내 오버라이드 업데이트
+  if(S.activeTeamId){
+    await dbSet('teams/'+S.activeTeamId+'/members/'+S.myId+'/overrides', S.overrides||{});
+  }
 }
 
 async function loadProfile(){
   if(!S.myId) return;
-  // Firebase 우선, 실패 시 로컬 캐시
-  let data = await dbGet('profiles/'+S.myId);
-  if(!data) data = lsGet('profile_'+S.myId);
+  let data=await dbGet('profiles/'+S.myId);
+  if(!data) data=ls.get('profile_'+S.myId);
   if(!data) return;
-  if(data.myName)        S.myName=data.myName;
   if(data.myColor)       S.myColor=data.myColor;
-  if(data.pattern)       S.pattern=data.pattern;
-  if(data.patternStart)  S.patternStart=new Date(data.patternStart);
   if(data.overrides)     S.overrides=data.overrides;
   if(data.totalVacation!=null) S.totalVacation=data.totalVacation;
   if(data.joinedTeamIds) S.joinedTeamIds=data.joinedTeamIds;
   if(data.activeTeamId)  S.activeTeamId=data.activeTeamId;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PASSWORD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function hashPw(pw){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('sc2025'+pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,20);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  LOGIN
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function doLogin(){
   const name=document.getElementById('login-name').value.trim();
   const pw=document.getElementById('login-pw').value;
@@ -606,32 +651,26 @@ async function doLogin(){
   btn.innerHTML='<div class="spinner"></div>';
   try{
     const hash=await hashPw(pw);
-    // Firebase에서 계정 확인
     const acct=await dbGet('accounts/'+name);
     if(acct){
-      // 기존 계정 — 비밀번호 확인
       if(acct.pwHash!==hash){showLoginErr('비밀번호가 틀렸습니다');btn.textContent='로그인 / 가입';return;}
-      S.myId=acct.myId; S.myColor=acct.color; S.myName=name;
+      S.myId=acct.myId; S.myColor=acct.color;
     } else {
-      // 신규 가입
-      const myId=uid();
-      const color=COLORS[Math.floor(Math.random()*COLORS.length)];
+      const myId=uid(), color=COLORS[Math.floor(Math.random()*COLORS.length)];
       await dbSet('accounts/'+name,{pwHash:hash,myId,color,createdAt:Date.now()});
-      S.myId=myId; S.myColor=color; S.myName=name;
-      S.pattern=['dr','nr','of','of'];
-      S.patternStart=new Date(new Date().getFullYear(),0,1);
+      S.myId=myId; S.myColor=color;
       S.overrides={}; S.joinedTeamIds=[]; S.activeTeamId=''; S.totalVacation=0;
     }
+    S.myName=name;
     await loadProfile();
     S.myName=name;
-    // 세션 저장
-    lsSet('session',{name,id:S.myId,color:S.myColor});
+    ls.set('session',{name,id:S.myId,color:S.myColor});
     btn.textContent='로그인 / 가입';
     document.getElementById('login-screen').classList.add('hidden');
     await boot();
   }catch(e){
     console.error(e);
-    showLoginErr('오류가 발생했어요. Firebase 설정을 확인해주세요.');
+    showLoginErr('오류: Firebase 설정을 확인해주세요');
     btn.textContent='로그인 / 가입';
   }
 }
@@ -641,56 +680,67 @@ function showLoginErr(msg){
 }
 function doLogout(){
   if(!confirm('로그아웃 할까요?'))return;
-  lsDel('session');
-  location.reload();
+  ls.del('session'); location.reload();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  TABS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TABS=['cal','team','share','pattern'];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TABS=['cal','team-cal','team'];
 function goTab(name){
   TABS.forEach(t=>{
     document.getElementById('page-'+t).classList.toggle('active',t===name);
     document.getElementById('nav-'+t).classList.toggle('active',t===name);
   });
-  if(name==='team')   { renderTeamCal(); }
-  else                { stopChat(); }
-  if(name==='share')  renderTeamListPage();
-  if(name==='pattern')renderPatternPage();
+  if(name==='team-cal') renderTeamCal();
+  if(name==='team')     renderTeamListPage();
+  if(name==='cal')      refreshCalFromTeam();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  CALENDAR
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function getShift(date,ov,patt,pStart){
-  ov=ov??S.overrides; patt=patt??S.pattern; pStart=pStart??S.patternStart;
-  const k=dkey(date);
-  if(ov&&ov[k]) return ov[k].shift;
-  if(!pStart||!patt||!patt.length) return null;
-  const base=pStart instanceof Date?pStart:new Date(pStart);
-  const diff=Math.floor((date-base)/86400000);
-  if(diff<0) return null;
-  return patt[diff%patt.length];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CALENDAR (내 달력)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function refreshCalFromTeam(){
+  // 팀 패턴 최신화 후 렌더
+  if(S.activeTeamId){
+    const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
+    if(tp) S.teamPatternCache[S.activeTeamId]=tp;
+  }
+  renderCal();
 }
+
 function renderCal(){
+  const hasTeam=S.joinedTeamIds.length>0&&S.activeTeamId;
+  document.getElementById('no-team-cal-banner').style.display=hasTeam?'none':'';
+  document.getElementById('cal-main').style.display=hasTeam?'block':'none';
+  if(!hasTeam) return;
+
+  // 팀 이름 표시
+  const tp=getTeamPattern();
   const{year:yr,month:mo}=S;
   const today=new Date();today.setHours(0,0,0,0);
   const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
   document.getElementById('cal-month-label').textContent=`${yr}년 ${mo+1}월`;
+
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
   const grid=document.getElementById('days-grid');
   grid.innerHTML='';
   for(let i=0;i<first.getDay();i++) grid.appendChild(buildCell(new Date(yr,mo,i-first.getDay()+1),true));
-  for(let d=1;d<=last.getDate();d++){const date=new Date(yr,mo,d);const sh=getShift(date);if(sh)stats[sh]=(stats[sh]||0)+1;grid.appendChild(buildCell(date,false));}
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(yr,mo,d);
+    const sh=getShift(date); if(sh) stats[sh]=(stats[sh]||0)+1;
+    grid.appendChild(buildCell(date,false));
+  }
   const trail=(7-(first.getDay()+last.getDate())%7)%7;
   for(let i=1;i<=trail;i++) grid.appendChild(buildCell(new Date(yr,mo+1,i),true));
   const cells=grid.querySelectorAll('.day-cell'),tot=cells.length;
   for(let i=tot-7;i<tot;i++) cells[i].classList.add('last-row');
+
   document.getElementById('st-dr').textContent=stats.dr;
   document.getElementById('st-ds').textContent=stats.ds;
   document.getElementById('st-nr').textContent=stats.nr;
   document.getElementById('st-ns').textContent=stats.ns;
+
   let usedVac=0;
   for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))
     if(getShift(new Date(d))==='vc') usedVac++;
@@ -699,34 +749,53 @@ function renderCal(){
   te.textContent=S.totalVacation>0?S.totalVacation:'-';
   te.style.color=S.totalVacation>0?'var(--vac)':'var(--text3)';
 }
+
 function buildCell(date,other){
-  const cell=document.createElement('div');cell.className='day-cell';
+  const cell=document.createElement('div'); cell.className='day-cell';
   if(other){cell.classList.add('other-month');return cell;}
   const dow=date.getDay();
-  if(dow===0)cell.classList.add('sunday');if(dow===6)cell.classList.add('saturday');
-  if(date.toDateString()===new Date().toDateString())cell.classList.add('is-today');
+  if(dow===0)cell.classList.add('sunday');
+  if(dow===6)cell.classList.add('saturday');
+  if(date.toDateString()===new Date().toDateString()) cell.classList.add('is-today');
   const sh=getShift(date);
-  const row=document.createElement('div');row.className='day-row';
-  const num=document.createElement('div');num.className='day-num';num.textContent=date.getDate();row.appendChild(num);
-  if(sh){const b=document.createElement('div');b.className=`cell-badge ${sh==='of'?'cb-of':SHIFT_META[sh].cls}`;b.textContent=CELL_LBL[sh];row.appendChild(b);}
+  const isOverride=!!S.overrides[dkey(date)];
+  const row=document.createElement('div'); row.className='day-row';
+  const num=document.createElement('div'); num.className='day-num'; num.textContent=date.getDate();
+  row.appendChild(num);
+  if(sh){
+    const b=document.createElement('div');
+    b.className=`cell-badge ${sh==='of'?'cb-of':SM[sh].cls}`;
+    b.textContent=CELL_LBL[sh];
+    // 개인 수정된 날은 테두리 표시
+    if(isOverride) b.style.outline='1.5px solid currentColor';
+    row.appendChild(b);
+  }
   cell.appendChild(row);
   const memo=S.overrides[dkey(date)]?.memo;
   if(memo){const m=document.createElement('div');m.className='cell-memo';m.textContent='📝 '+memo;cell.appendChild(m);}
   cell.addEventListener('click',()=>openDaySheet(date));
   return cell;
 }
+
 function changeMonth(d){S.month+=d;if(S.month>11){S.month=0;S.year++;}if(S.month<0){S.month=11;S.year--;}renderCal();}
 function gotoToday(){const t=new Date();S.year=t.getFullYear();S.month=t.getMonth();renderCal();}
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DAY SHEET
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let editDate=null;
 function openDaySheet(date){
   editDate=date;
-  const k=dkey(date),sh=getShift(date)||'of',memo=S.overrides[k]?.memo||'';
-  document.getElementById('day-sheet-title').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
-  document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
+  const k=dkey(date);
+  const baseSh=getBaseShift(date);
+  const currentSh=getShift(date)||'of';
+  const memo=S.overrides[k]?.memo||'';
+
+  document.getElementById('day-sheet-title').textContent=
+    `${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
+  document.getElementById('day-base-shift').textContent=
+    baseSh?`${SM[baseSh].icon} ${SM[baseSh].label}`:'미설정';
+  document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===currentSh);
   document.getElementById('day-memo').value=memo;
   document.getElementById('day-sheet-overlay').classList.add('open');
 }
@@ -736,36 +805,128 @@ async function saveDaySheet(){
   const k=dkey(editDate);
   const sh=document.querySelector('input[name="sh"]:checked')?.value;
   const memo=document.getElementById('day-memo').value.trim();
-  if(!S.overrides[k]) S.overrides[k]={};
-  if(sh) S.overrides[k].shift=sh;
-  if(memo) S.overrides[k].memo=memo; else delete S.overrides[k].memo;
-  closeDaySheet();
-  renderCal();
-  await saveProfile();         // Firebase에 저장
-  await pushMyDataToTeams();   // 팀에 내 데이터 업데이트
+  const baseSh=getBaseShift(editDate);
+  // 팀 패턴과 동일하고 메모도 없으면 오버라이드 삭제 (원래대로)
+  if(sh===baseSh&&!memo){
+    delete S.overrides[k];
+  } else {
+    if(!S.overrides[k]) S.overrides[k]={};
+    if(sh) S.overrides[k].shift=sh;
+    if(memo) S.overrides[k].memo=memo; else delete S.overrides[k].memo;
+  }
+  closeDaySheet(); renderCal();
+  await saveProfile();
   showToast('저장됨 ✓');
 }
 document.getElementById('day-sheet-overlay').addEventListener('click',function(e){if(e.target===this)closeDaySheet();});
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  TEAM
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function myMemberData(){
-  return{name:S.myName,color:S.myColor,pattern:S.pattern,patternStart:S.patternStart?.toISOString?.()??'',overrides:S.overrides,updatedAt:Date.now()};
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  NEW TEAM PATTERN EDITOR
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openNewTeamSheet(){
+  // 초기화
+  NT.pattern=['dr','nr','of','of']; NT.pick='dr';
+  const today=new Date();
+  document.getElementById('new-team-name').value='';
+  document.getElementById('new-team-start').value=dkey(today);
+  ntRenderPattCells();
+  ntUpdatePickBtns();
+  ntRenderPreview();
+  document.getElementById('new-team-sheet-overlay').classList.add('open');
 }
-async function pushMyDataToTeams(){
-  const me=myMemberData();
-  for(const id of S.joinedTeamIds){
-    await dbSet('teams/'+id+'/members/'+S.myId, me);
+function ntSetPick(sh){NT.pick=sh;ntUpdatePickBtns();}
+function ntUpdatePickBtns(){
+  ['dr','nr','of'].forEach(k=>{
+    const b=document.getElementById('nt-pb-'+k);
+    b.className='pick-shift-btn psb-'+k+(NT.pick===k?' sel':'');
+  });
+}
+function ntPatLenChange(d){
+  const nl=NT.pattern.length+d;
+  if(nl<1||nl>28) return;
+  if(d>0) NT.pattern.push(NT.pick); else NT.pattern.pop();
+  ntRenderPattCells(); ntRenderPreview();
+}
+function ntRenderPattCells(){
+  document.getElementById('nt-patt-len-lbl').textContent=`${NT.pattern.length}일 반복`;
+  const grid=document.getElementById('nt-patt-cells'); grid.innerHTML='';
+  NT.pattern.forEach((sh,i)=>{
+    const m=SM[sh]||SM.of;
+    const cell=document.createElement('div');
+    cell.className=`patt-cell ${PCLS[sh]||'pc-of'}`;
+    cell.innerHTML=`<span class="pc-ico">${m.icon}</span><span>${m.short}</span><span class="pc-n">${i+1}일</span>`;
+    cell.onclick=()=>{NT.pattern[i]=NT.pick;ntRenderPattCells();ntRenderPreview();};
+    grid.appendChild(cell);
+  });
+}
+function ntRenderPreview(){
+  const startVal=document.getElementById('new-team-start').value;
+  if(!startVal) return;
+  const p=startVal.split('-');
+  const start=new Date(+p[0],+p[1]-1,+p[2]);
+  const today=new Date();
+  const list=document.getElementById('nt-preview'); list.innerHTML='';
+  for(let i=0;i<14;i++){
+    const date=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);
+    const diff=Math.floor((date-start)/86400000);
+    const sh=diff>=0?NT.pattern[diff%NT.pattern.length]:null;
+    const isToday=i===0; const m=sh?SM[sh]:null;
+    const row=document.createElement('div');
+    row.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--bg3);border:1px solid ${isToday?'var(--day-r)':'var(--border)'}`;
+    const dow=['일','월','화','수','목','금','토'][date.getDay()];
+    row.innerHTML=`<span style="font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text2)">${date.getMonth()+1}/${date.getDate()} (${dow})${isToday?' <b style="color:var(--day-r)">오늘</b>':''}</span>
+      ${m?`<span class="cell-badge ${m.cls}" style="font-size:.7rem;padding:3px 8px">${m.icon} ${m.label}</span>`:''}`;
+    list.appendChild(row);
   }
 }
+// start date 변경 시 미리보기 갱신
+document.getElementById('new-team-start').addEventListener('change', ntRenderPreview);
 
-// 팀 전체 목록 렌더링 (Firebase 실시간)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TEAM CRUD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function createTeam(){
+  const name=document.getElementById('new-team-name').value.trim();
+  const startVal=document.getElementById('new-team-start').value;
+  if(!name){showToast('팀 이름을 입력해주세요');return;}
+  if(!startVal){showToast('시작 날짜를 입력해주세요');return;}
+  if(!NT.pattern.length){showToast('패턴을 설정해주세요');return;}
+
+  const p=startVal.split('-');
+  const patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
+
+  const id='T'+uid();
+  const color=COLORS[Math.floor(Math.random()*COLORS.length)];
+
+  // 팀 패턴 (모두 공유)
+  const teamPattern={pattern:NT.pattern,patternStart};
+
+  // Firebase 팀 생성
+  await dbSet('teams/'+id,{
+    id, name, color, createdBy:S.myId, createdAt:Date.now(),
+    pattern:teamPattern,
+    members:{[S.myId]:{name:S.myName,color:S.myColor,overrides:{},updatedAt:Date.now()}},
+  });
+  await dbSet('teamIndex/'+id,{name,color,memberCount:1,createdAt:Date.now()});
+
+  // 팀 패턴 캐시
+  S.teamPatternCache[id]=teamPattern;
+  S.joinedTeamIds.push(id);
+  S.activeTeamId=id;
+
+  await saveProfile();
+  closeSheet('new-team-sheet-overlay');
+  renderCal();
+  showToast(`"${name}" 팀 만들어짐 🎉`);
+}
+
+// 팀 목록 (실시간)
+let teamsUnsub=null;
 function renderTeamListPage(){
   const box=document.getElementById('all-teams-list');
   box.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div class="spinner"></div></div>';
-  // 실시간 리스닝
-  dbListen('teamIndex', teams=>{
+  if(teamsUnsub){teamsUnsub();teamsUnsub=null;}
+  teamsUnsub=dbListen('teamIndex',teams=>{
     box.innerHTML='';
     if(!teams||!Object.keys(teams).length){
       box.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:.82rem">아직 만들어진 팀이 없어요.<br>위의 버튼으로 팀을 만들어보세요!</div>';
@@ -779,15 +940,9 @@ function renderTeamListPage(){
         <div class="team-icon" style="background:${info.color||'#f59e0b'}">${(info.name||'?')[0]}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:.9rem;font-weight:800">${info.name||'팀'}</div>
-          <div style="font-size:.65rem;color:var(--text3);margin-top:2px">
-            팀원 ${info.memberCount||0}명
-            ${joined?'· <span style="color:var(--day-r);font-weight:700">참여 중</span>':''}
-          </div>
+          <div style="font-size:.65rem;color:var(--text3);margin-top:2px">팀원 ${info.memberCount||0}명${joined?' · <span style="color:var(--day-r);font-weight:700">참여 중</span>':''}</div>
         </div>
-        <button class="btn btn-sm ${joined?'btn-danger':'btn-primary'}"
-          onclick="event.stopPropagation();openTeamInfo('${id}')">
-          ${joined?'상세':'참여'}
-        </button>`;
+        <button class="btn btn-sm ${joined?'btn-danger':'btn-primary'}" onclick="event.stopPropagation();openTeamInfo('${id}')">${joined?'상세':'참여'}</button>`;
       card.onclick=()=>openTeamInfo(id);
       box.appendChild(card);
     });
@@ -800,6 +955,17 @@ async function openTeamInfo(teamId){
   S.viewingTeamData=team;
   const joined=S.joinedTeamIds.includes(teamId);
   document.getElementById('team-info-title').textContent=(team?.name||'팀')+' 정보';
+
+  // 패턴 표시
+  const tp=team?.pattern;
+  const patEl=document.getElementById('team-info-pattern');
+  if(tp){
+    const start=new Date(tp.patternStart);
+    patEl.innerHTML=`📅 시작일: <b>${start.getFullYear()}년 ${start.getMonth()+1}월 ${start.getDate()}일</b><br>
+      🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.icon+SM[s]?.short||s).join(' → ')} 반복`;
+  } else { patEl.textContent='패턴 정보 없음'; }
+
+  // 팀원
   const membersEl=document.getElementById('team-info-members');
   membersEl.innerHTML='<div class="section-title">팀원</div>';
   Object.entries(team?.members||{}).forEach(([id,m])=>{
@@ -810,8 +976,9 @@ async function openTeamInfo(teamId){
       <span style="font-size:.85rem;font-weight:700">${m.name||'?'}${isMe?' <span style="color:var(--day-r);font-size:.65rem">나</span>':''}</span>`;
     membersEl.appendChild(row);
   });
+
   const joinBtn=document.getElementById('team-join-btn');
-  joinBtn.textContent=joined?'팀 나가기':'이 팀에 참여하기';
+  joinBtn.textContent=joined?'팀 나가기':'이 팀에 참여하기 (팀 패턴 적용)';
   joinBtn.className='btn btn-full '+(joined?'btn-danger':'btn-primary');
   document.getElementById('team-info-sheet-overlay').classList.add('open');
 }
@@ -820,124 +987,116 @@ async function toggleJoinTeam(){
   const id=S.viewingTeamId;
   const joined=S.joinedTeamIds.includes(id);
   if(joined){
-    if(!confirm('이 팀을 나가시겠어요?'))return;
+    if(!confirm('팀을 나가면 해당 팀의 달력이 사라져요. 나가시겠어요?'))return;
     S.joinedTeamIds=S.joinedTeamIds.filter(x=>x!==id);
     if(S.activeTeamId===id) S.activeTeamId=S.joinedTeamIds[0]||'';
-    await dbSet('teams/'+id+'/members/'+S.myId, null); // 삭제
+    await dbSet('teams/'+id+'/members/'+S.myId, null);
     showToast('팀을 나갔어요');
   } else {
+    // 팀 패턴 가져와서 캐시
+    const team=S.viewingTeamData||await dbGet('teams/'+id);
+    if(team?.pattern) S.teamPatternCache[id]=team.pattern;
     S.joinedTeamIds.push(id);
     if(!S.activeTeamId) S.activeTeamId=id;
-    const me=myMemberData();
-    await dbSet('teams/'+id+'/members/'+S.myId, me);
-    showToast('팀에 참여했어요 👋');
+    // 팀에 나를 추가
+    await dbSet('teams/'+id+'/members/'+S.myId,{name:S.myName,color:S.myColor,overrides:{},updatedAt:Date.now()});
+    showToast('팀에 참여했어요! 팀 패턴이 달력에 적용됩니다 👋');
   }
-  // 팀 인덱스 memberCount 업데이트
-  const count=Object.keys((await dbGet('teams/'+id+'/members'))||{}).length;
+  // memberCount 업데이트
+  const members=await dbGet('teams/'+id+'/members');
+  const cnt=Object.keys(members||{}).length;
   const info=await dbGet('teamIndex/'+id);
-  if(info) await dbSet('teamIndex/'+id,{...info,memberCount:count});
+  if(info) await dbSet('teamIndex/'+id,{...info,memberCount:cnt});
+
   await saveProfile();
   closeSheet('team-info-sheet-overlay');
-  renderTeamCal();
+  renderCal();
+  renderTeamListPage();
 }
 
-function openNewTeamSheet(){
-  document.getElementById('new-team-name').value='';
-  document.getElementById('new-team-sheet-overlay').classList.add('open');
-}
-async function createTeam(){
-  const name=document.getElementById('new-team-name').value.trim();
-  if(!name){showToast('팀 이름을 입력해주세요');return;}
-  const id='T'+uid();
-  const color=COLORS[Math.floor(Math.random()*COLORS.length)];
-  const me=myMemberData();
-  // Firebase에 팀 생성
-  await dbSet('teams/'+id,{id,name,color,createdBy:S.myId,createdAt:Date.now(),members:{[S.myId]:me}});
-  // 팀 인덱스에 추가
-  await dbSet('teamIndex/'+id,{name,color,memberCount:1,createdAt:Date.now()});
-  S.joinedTeamIds.push(id);
-  S.activeTeamId=id;
-  await saveProfile();
-  closeSheet('new-team-sheet-overlay');
-  renderTeamCal();
-  showToast(`"${name}" 팀 만들어짐 🎉`);
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  TEAM CALENDAR (실시간)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let teamUnsub=null;
-function renderTeamCal(){
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let teamCalUnsub=null, chatUnsub=null, currentChatTeam='';
+
+async function renderTeamCal(){
   document.getElementById('team-month-label').textContent=`${S.teamYear}년 ${S.teamMonth+1}월`;
-  const strip=document.getElementById('team-tab-strip');
-  strip.innerHTML='';
-  const noMsg=document.getElementById('no-team-msg'),wrap=document.getElementById('team-cal-wrap');
-  if(!S.joinedTeamIds.length){noMsg.style.display='';wrap.style.display='none';stopChat();return;}
-  noMsg.style.display='none';wrap.style.display='';
+  const strip=document.getElementById('team-tab-strip'); strip.innerHTML='';
+  const noMsg=document.getElementById('no-team-msg'), wrap=document.getElementById('team-cal-wrap');
+
+  if(!S.joinedTeamIds.length){noMsg.style.display='';wrap.style.display='none';return;}
+  noMsg.style.display='none'; wrap.style.display='';
   if(!S.activeTeamId||!S.joinedTeamIds.includes(S.activeTeamId)) S.activeTeamId=S.joinedTeamIds[0];
-  // 팀 인덱스에서 이름 가져오기
-  dbGet('teamIndex').then(idx=>{
-    const nameMap=idx||{};
-    strip.innerHTML='';
-    S.joinedTeamIds.forEach(id=>{
-      const btn=document.createElement('button');
-      btn.className='team-tab-btn'+(id===S.activeTeamId?' active':'');
-      btn.textContent=nameMap[id]?.name||id;
-      btn.onclick=()=>{S.activeTeamId=id;saveProfile();renderTeamCal();};
-      strip.appendChild(btn);
-    });
+
+  // 탭 버튼 (팀 이름)
+  const idx=await dbGet('teamIndex')||{};
+  S.joinedTeamIds.forEach(id=>{
+    const btn=document.createElement('button');
+    btn.className='team-tab-btn'+(id===S.activeTeamId?' active':'');
+    btn.textContent=idx[id]?.name||id;
+    btn.onclick=async()=>{S.activeTeamId=id;await saveProfile();renderTeamCal();};
+    strip.appendChild(btn);
   });
-  // 실시간 리스닝
-  if(teamUnsub){teamUnsub();teamUnsub=null;}
-  teamUnsub=dbListen('teams/'+S.activeTeamId, team=>{
-    if(!team) return;
-    buildTeamTable(team);
+
+  // 팀 패턴 캐시 업데이트
+  const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
+  if(tp) S.teamPatternCache[S.activeTeamId]=tp;
+
+  // 실시간으로 팀원 데이터 리스닝
+  if(teamCalUnsub){teamCalUnsub();teamCalUnsub=null;}
+  teamCalUnsub=dbListen('teams/'+S.activeTeamId+'/members', members=>{
+    buildTeamTable(members||{});
   });
+
+  // 채팅 시작
   startChat(S.activeTeamId);
 }
 
-function buildTeamTable(team){
-  const yr=S.teamYear,mo=S.teamMonth,last=new Date(yr,mo+1,0);
-  const members=Object.entries(team.members||{}).map(([id,m])=>({
-    id,name:m.name||'?',color:m.color||'#999',
-    pattern:m.pattern||[],
-    patternStart:m.patternStart?new Date(m.patternStart):null,
-    overrides:m.overrides||{},isMe:id===S.myId,
+function buildTeamTable(members){
+  const yr=S.teamYear, mo=S.teamMonth, last=new Date(yr,mo+1,0);
+  const list=Object.entries(members).map(([id,m])=>({
+    id, name:m.name||'?', color:m.color||'#999',
+    overrides:m.overrides||{}, isMe:id===S.myId,
   }));
-  members.sort((a,b)=>a.isMe?-1:b.isMe?1:0);
-  const tbl=document.getElementById('team-table');tbl.innerHTML='';
+  list.sort((a,b)=>a.isMe?-1:b.isMe?1:0);
+
+  const tbl=document.getElementById('team-table'); tbl.innerHTML='';
   const htr=document.createElement('tr');
   htr.innerHTML='<th class="name-col">이름</th>';
-  for(let d=1;d<=last.getDate();d++){const date=new Date(yr,mo,d),dow=date.getDay();const th=document.createElement('th');th.className=`day-th ${dow===0?'sun':dow===6?'sat':''}`;th.textContent=d;htr.appendChild(th);}
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(yr,mo,d), dow=date.getDay();
+    const th=document.createElement('th');
+    th.className=`day-th ${dow===0?'sun':dow===6?'sat':''}`;
+    th.textContent=d; htr.appendChild(th);
+  }
   tbl.appendChild(htr);
-  members.forEach(m=>{
+
+  list.forEach(m=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td class="name-col"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:4px;vertical-align:middle"></span>${m.name}${m.isMe?' ★':''}</td>`;
     for(let d=1;d<=last.getDate();d++){
-      const date=new Date(yr,mo,d),sh=getShift(date,m.overrides,m.pattern,m.patternStart);
+      const date=new Date(yr,mo,d);
+      const sh=getMemberShift(date, m.overrides);
       const td=document.createElement('td');
-      td.innerHTML=sh?`<span class="team-cell ${SHIFT_META[sh].tcls}">${TEAM_LBL[sh]}</span>`:`<span class="team-cell tc-none">-</span>`;
+      td.innerHTML=sh?`<span class="team-cell ${SM[sh].tcls}">${TEAM_LBL[sh]}</span>`:`<span class="team-cell tc-none">-</span>`;
       tr.appendChild(td);
     }
     tbl.appendChild(tr);
   });
 }
+
 function changeTeamMonth(d){S.teamMonth+=d;if(S.teamMonth>11){S.teamMonth=0;S.teamYear++;}if(S.teamMonth<0){S.teamMonth=11;S.teamYear--;}renderTeamCal();}
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  CHAT (Firebase 실시간)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let chatUnsub=null,currentChatTeam='';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CHAT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function startChat(teamId){
-  stopChat();
+  if(chatUnsub){chatUnsub();chatUnsub=null;}
   currentChatTeam=teamId;
-  document.getElementById('chat-team-name').textContent='';
   chatUnsub=dbListen('chats/'+teamId, msgs=>{
     renderChatMsgs(msgs);
   });
 }
-function stopChat(){if(chatUnsub){chatUnsub();chatUnsub=null;}currentChatTeam='';}
-
 function renderChatMsgs(msgs){
   const box=document.getElementById('chat-messages');
   const wasBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
@@ -946,12 +1105,9 @@ function renderChatMsgs(msgs){
     box.innerHTML='<div style="text-align:center;color:var(--text3);font-size:.75rem;padding:16px">첫 메시지를 남겨보세요 💬</div>';
     return;
   }
-  // Firebase 객체를 배열로 변환 후 시간순 정렬
-  const list=Object.values(msgs).sort((a,b)=>a.ts-b.ts);
-  list.forEach(msg=>{
+  Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(msg=>{
     const isMe=msg.uid===S.myId;
-    const div=document.createElement('div');
-    div.className=`chat-msg ${isMe?'me':'other'}`;
+    const div=document.createElement('div'); div.className=`chat-msg ${isMe?'me':'other'}`;
     const t=new Date(msg.ts);
     const ts=`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
     const escaped=String(msg.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
@@ -962,78 +1118,30 @@ function renderChatMsgs(msgs){
   });
   if(wasBottom) box.scrollTop=box.scrollHeight;
 }
-
 async function sendChat(){
   const inp=document.getElementById('chat-input');
   const text=inp.value.trim();
   if(!text||!currentChatTeam) return;
   inp.value='';
-  // Firebase push로 메시지 추가
-  const{push,ref,db}=FB;
-  await push(ref(db,'chats/'+currentChatTeam),{
-    uid:S.myId, name:S.myName, text, ts:Date.now(),
-  });
+  await dbPush('chats/'+currentChatTeam,{uid:S.myId,name:S.myName,text,ts:Date.now()});
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SETTINGS / PATTERN
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let curPick='dr';
-function renderPatternPage(){
-  S.tempPattern=[...S.pattern];
-  S.tempStart=S.patternStart?new Date(S.patternStart):new Date();
-  const inp=document.getElementById('patt-start-input');
-  inp.value=dkey(S.tempStart);
-  inp.onchange=()=>{const p=inp.value.split('-');S.tempStart=new Date(+p[0],+p[1]-1,+p[2]);renderPreview();};
-  const vi=document.getElementById('total-vacation-input');
-  if(vi) vi.value=S.totalVacation||'';
-  document.getElementById('settings-me').textContent='👤 '+S.myName;
-  updateVacSummary();updatePickBtns();renderPattCells();renderPreview();
-}
-function setPick(sh){curPick=sh;updatePickBtns();}
-function updatePickBtns(){document.querySelectorAll('.pick-shift-btn').forEach(b=>{const k=['dr','nr','of'].find(x=>b.classList.contains('psb-'+x));if(k)b.classList.toggle('sel',k===curPick);});}
-function patLenChange(d){const nl=S.tempPattern.length+d;if(nl<1||nl>28)return;if(d>0)S.tempPattern.push(curPick);else S.tempPattern.pop();renderPattCells();renderPreview();}
-function renderPattCells(){
-  document.getElementById('patt-len-lbl').textContent=`${S.tempPattern.length}일 반복`;
-  const grid=document.getElementById('patt-cells');grid.innerHTML='';
-  const PCLS={dr:'pc-dr',nr:'pc-nr',of:'pc-of'};
-  S.tempPattern.forEach((sh,i)=>{
-    const m=SHIFT_META[sh]||SHIFT_META.of;
-    const cell=document.createElement('div');
-    cell.className=`patt-cell ${PCLS[sh]||'pc-of'}`;
-    cell.innerHTML=`<span class="pc-ico">${m.icon}</span><span>${m.short}</span><span class="pc-n">${i+1}일</span>`;
-    cell.onclick=()=>{S.tempPattern[i]=curPick;renderPattCells();renderPreview();};
-    grid.appendChild(cell);
-  });
-}
-function renderPreview(){
-  const today=new Date(),list=document.getElementById('preview-list');list.innerHTML='';
-  for(let i=0;i<14;i++){
-    const date=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);
-    const sh=getShift(date,S.overrides,S.tempPattern,S.tempStart);
-    const isToday=i===0,m=sh?SHIFT_META[sh]:null;
-    const row=document.createElement('div');
-    row.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:var(--bg3);border:1px solid ${isToday?'var(--day-r)':'var(--border)'}`;
-    const dow=['일','월','화','수','목','금','토'][date.getDay()];
-    row.innerHTML=`<span style="font-size:.78rem;font-family:'JetBrains Mono',monospace;color:var(--text2)">${date.getMonth()+1}/${date.getDate()} (${dow})${isToday?' <b style="color:var(--day-r)">오늘</b>':''}</span>
-      ${m?`<span class="cell-badge ${m.cls}" style="font-size:.72rem;padding:3px 8px">${m.icon} ${m.label}</span>`:'<span style="color:var(--text3);font-size:.72rem">미설정</span>'}`;
-    list.appendChild(row);
-  }
-}
-async function savePattern(){
-  S.pattern=[...S.tempPattern];S.patternStart=new Date(S.tempStart);
-  renderCal();
-  await saveProfile();
-  await pushMyDataToTeams();
-  showToast('저장됨 ✓');
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SETTINGS (연차)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openSettings(){
+  document.getElementById('settings-name').textContent=S.myName;
+  document.getElementById('total-vacation-input').value=S.totalVacation||'';
+  updateVacSummary();
+  document.getElementById('settings-sheet-overlay').classList.add('open');
 }
 async function saveTotalVacation(){
   S.totalVacation=parseInt(document.getElementById('total-vacation-input').value)||0;
-  renderCal();updateVacSummary();
+  renderCal(); updateVacSummary();
   await saveProfile();
 }
 function updateVacSummary(){
-  const today=new Date();today.setHours(0,0,0,0);
+  const today=new Date(); today.setHours(0,0,0,0);
   let used=0;
   for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))
     if(getShift(new Date(d))==='vc') used++;
@@ -1041,75 +1149,78 @@ function updateVacSummary(){
   if(el) el.textContent=`${used} / ${S.totalVacation||0}`;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  UTILS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function closeSheet(id){document.getElementById(id).classList.remove('open');}
-['day-sheet-overlay','new-team-sheet-overlay','team-info-sheet-overlay'].forEach(id=>{
+['day-sheet-overlay','new-team-sheet-overlay','team-info-sheet-overlay','settings-sheet-overlay'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeSheet(id);});
 });
 let toastTimer;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500);}
 
 function renderSavedAccounts(){
-  const box=document.getElementById('saved-accounts');box.innerHTML='';
-  const sess=lsGet('session');
+  const box=document.getElementById('saved-accounts'); box.innerHTML='';
+  const sess=ls.get('session');
   if(sess?.name){
     const lbl=document.createElement('div');lbl.style.cssText='font-size:.68rem;color:var(--text3);text-align:center;margin-bottom:6px';lbl.textContent='최근 계정';box.appendChild(lbl);
-    const btn=document.createElement('button');btn.className='saved-acct-btn';
-    btn.innerHTML=`<span>👤</span> ${sess.name}으로 빠른 로그인`;
+    const btn=document.createElement('button');btn.className='quick-acct';
+    btn.innerHTML=`<span>👤</span>${sess.name}으로 빠른 로그인`;
     btn.onclick=()=>{document.getElementById('login-name').value=sess.name;document.getElementById('login-pw').focus();};
     box.appendChild(btn);
   }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  BOOT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function boot(){
   const t=new Date();
-  S.teamYear=t.getFullYear();S.teamMonth=t.getMonth();
-  if(!S.patternStart) S.patternStart=new Date(t.getFullYear(),0,1);
+  S.year=t.getFullYear(); S.month=t.getMonth();
+  S.teamYear=t.getFullYear(); S.teamMonth=t.getMonth();
+
+  // 팀 이름 달력 상단에 표시
+  if(S.activeTeamId){
+    const info=await dbGet('teamIndex/'+S.activeTeamId);
+    if(info){
+      document.getElementById('cal-team-name').textContent=info.name;
+      document.getElementById('cal-team-dot').style.background=info.color||'#f59e0b';
+    }
+    // 팀 패턴 로드
+    const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
+    if(tp) S.teamPatternCache[S.activeTeamId]=tp;
+  }
   renderCal();
-  await pushMyDataToTeams();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  INIT — Firebase 준비 후 실행
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function onFirebaseReady(){
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function onFbReady(){
   FB=window._fb;
-  const t=new Date();
-  S.year=t.getFullYear();S.month=t.getMonth();
   renderSavedAccounts();
-  // 세션 자동 로그인
-  const sess=lsGet('session');
+  const sess=ls.get('session');
   if(sess?.name&&sess?.id){
-    S.myId=sess.id;S.myName=sess.name;S.myColor=sess.color||COLORS[0];
+    S.myId=sess.id; S.myName=sess.name; S.myColor=sess.color||COLORS[0];
     try{
-      await loadProfile();
-      S.myName=sess.name;
+      await loadProfile(); S.myName=sess.name;
       document.getElementById('splash').classList.add('hidden');
       document.getElementById('login-screen').classList.add('hidden');
-      await boot();
-      return;
-    }catch(e){console.error('auto-login failed',e);}
+      await boot(); return;
+    }catch(e){console.error(e);}
   }
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
 }
 
-// Firebase module이 로드되면 시작
-if(window._fbReady){
-  onFirebaseReady();
-} else {
-  window.addEventListener('fbReady', onFirebaseReady, {once:true});
-  // 5초 타임아웃 — Firebase 설정 안 됐을 때
+if(window._fbReady){onFbReady();}
+else{
+  window.addEventListener('fbReady',onFbReady,{once:true});
   setTimeout(()=>{
     if(!window._fbReady){
       document.getElementById('splash').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-err').textContent='⚠️ Firebase 연결 실패. 설정값을 확인해주세요.';
+      document.getElementById('login-err').textContent='⚠️ Firebase 연결 실패. 설정을 확인해주세요.';
       document.getElementById('login-err').style.display='';
     }
   },5000);
