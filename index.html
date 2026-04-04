@@ -8,318 +8,386 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
 <script type="module">
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  Firebase 설정
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
-  authDomain:        "shift-calender-17a58.firebaseapp.com",
-  databaseURL:       "https://shift-calender-17a58-default-rtdb.firebaseio.com",
-  projectId:         "shift-calender-17a58",
-  storageBucket:     "shift-calender-17a58.firebasestorage.app",
-  messagingSenderId: "434862222996",
-  appId:             "1:434862222996:web:e7e2a67c5188542bc90e81",
+const CFG = {
+  apiKey:"AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
+  authDomain:"shift-calender-17a58.firebaseapp.com",
+  databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
+  projectId:"shift-calender-17a58",
+  storageBucket:"shift-calender-17a58.firebasestorage.app",
+  messagingSenderId:"434862222996",
+  appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
 };
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, off }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const app = initializeApp(FIREBASE_CONFIG);
-const db  = getDatabase(app);
-
-window._fb = {
-  async get(path){ try{ const s=await get(ref(db,path)); return s.exists()?s.val():null; }catch{ return null; } },
-  async set(path,val){ await set(ref(db,path),val); },
-  async push(path,val){ await push(ref(db,path),val); },
-  listen(path,cb){ const r=ref(db,path); onValue(r,s=>cb(s.exists()?s.val():null)); return ()=>off(r); },
+import { getDatabase,ref,set,get,push,onValue,off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const db = getDatabase(initializeApp(CFG));
+window._fb={
+  async get(p){try{const s=await get(ref(db,p));return s.exists()?s.val():null}catch{return null}},
+  async set(p,v){await set(ref(db,p),v)},
+  async push(p,v){return await push(ref(db,p),v)},
+  listen(p,cb){const r=ref(db,p);onValue(r,s=>cb(s.exists()?s.val():null));return()=>off(r)},
 };
 window._fbReady=true;
 window.dispatchEvent(new Event('fbReady'));
 </script>
 
 <style>
+/* ── THEME ── */
 :root{
-  --day-r:#f59e0b;--day-s:#fcd34d;--ngt-r:#6366f1;--ngt-s:#a5b4fc;
-  --vac:#10b981;
-  --day-r-bg:rgba(245,158,11,.18);--day-s-bg:rgba(252,211,77,.18);
-  --ngt-r-bg:rgba(99,102,241,.18);--ngt-s-bg:rgba(165,180,252,.18);
-  --off-bg:rgba(55,65,81,.25);--vac-bg:rgba(16,185,129,.18);
+  --a:#f59e0b;--as:#fcd34d;--n:#6366f1;--ns:#a5b4fc;--vac:#10b981;
+  --a-bg:rgba(245,158,11,.16);--as-bg:rgba(252,211,77,.16);
+  --n-bg:rgba(99,102,241,.16);--ns-bg:rgba(165,180,252,.16);
+  --off-bg:rgba(239,68,68,.13);--vac-bg:rgba(16,185,129,.16);
   --bg:#0f1117;--bg2:#181b24;--bg3:#1e2130;
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
-  --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
-  --r:14px;--r-sm:9px;
+  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);
+  --tx:#f1f5f9;--tx2:#94a3b8;--tx3:#475569;
+  --r:14px;--rs:9px;
 }
 body.light{
-  --bg:#f5f5f5;--bg2:#ffffff;--bg3:#ebebeb;
-  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.18);
-  --text:#1a1a2e;--text2:#4a4a6a;--text3:#8888aa;
-  --day-r-bg:rgba(245,158,11,.13);--day-s-bg:rgba(252,211,77,.13);
-  --ngt-r-bg:rgba(99,102,241,.13);--ngt-s-bg:rgba(165,180,252,.13);
-  --off-bg:rgba(55,65,81,.1);--vac-bg:rgba(16,185,129,.13);
+  --bg:#f4f4f6;--bg2:#ffffff;--bg3:#ececef;
+  --bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);
+  --tx:#18181b;--tx2:#52525b;--tx3:#a1a1aa;
+  --a-bg:rgba(245,158,11,.12);--as-bg:rgba(252,211,77,.12);
+  --n-bg:rgba(99,102,241,.12);--ns-bg:rgba(165,180,252,.12);
+  --off-bg:rgba(239,68,68,.1);--vac-bg:rgba(16,185,129,.12);
 }
-*,body{transition:background-color .2s,color .2s,border-color .2s}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
+  transition:background-color .18s,color .18s,border-color .18s}
 html,body{height:100%;overscroll-behavior:none}
-body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
+body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--tx);
+  min-height:100vh;max-width:480px;margin:0 auto}
 
-/* SPLASH */
-#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
-#splash.hidden{display:none}
+/* ── SPLASH / LOGIN ── */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px}
+#splash.h{display:none}
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;
+  gap:18px;overflow-y:auto}
+#login-screen.h{display:none}
+.login-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);
+  padding:20px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
+.quick-btn{width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--bd);
+  border-radius:var(--rs);padding:11px 16px;display:flex;align-items:center;gap:10px;
+  font-family:inherit;font-size:.85rem;font-weight:700;color:var(--tx2);cursor:pointer}
+.quick-btn:active{background:var(--bg3)}
 
-/* LOGIN */
-#login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:20px;overflow-y:auto}
-#login-screen.hidden{display:none}
-.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
-.quick-acct{width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 16px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--text2);cursor:pointer;text-align:left}
-.quick-acct:active{background:var(--bg3)}
+/* ── NAV ── */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+  background:var(--bg2);border-top:1px solid var(--bd);display:grid;
+  grid-template-columns:repeat(4,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 0 8px;gap:3px;background:none;border:none;color:var(--tx3);
+  font-family:inherit;font-size:.63rem;font-weight:700;cursor:pointer;transition:color .15s}
+.ni.on{color:var(--a)}
+.ni-ico{font-size:1.25rem;line-height:1}
 
-/* NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
-.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;gap:3px;background:none;border:none;color:var(--text3);font-family:inherit;font-size:.65rem;font-weight:700;cursor:pointer;transition:color .15s}
-.nav-item.active{color:var(--day-r)}
-.nav-icon{font-size:1.3rem;line-height:1}
+/* ── PAGES ── */
+.page{display:none;padding:16px 12px 90px;min-height:100vh;animation:fu .22s ease}
+.page.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* PAGES */
-.page{display:none;padding:16px 12px 90px;min-height:100vh;animation:fadeUp .25s ease}
-.page.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ── COMMON ── */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.stitle{font-size:.7rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.ph{font-size:1.25rem;font-weight:800;letter-spacing:-.03em;margin-bottom:16px}
+button{font-family:inherit;cursor:pointer;border:none;transition:all .15s}
+.btn{background:var(--bg2);color:var(--tx);border:1.5px solid var(--bd);
+  padding:11px 16px;border-radius:var(--rs);font-size:.85rem;font-weight:700}
+.btn:active{filter:brightness(.87)}
+.pri{background:var(--a);color:#000;border-color:var(--a)}
+.sec{background:var(--bg3);color:var(--tx2);border-color:var(--bd)}
+.dan{background:rgba(239,68,68,.13);color:#f87171;border-color:rgba(239,68,68,.28)}
+.fw{width:100%}
+.sm{padding:7px 12px;font-size:.78rem}
+.fl{display:flex;gap:8px}
+.fg{flex:1}
+.form-g{margin-bottom:13px}
+.lbl{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--tx3);margin-bottom:5px}
+input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);
+  border:1px solid var(--bd);color:var(--tx);padding:11px 13px;border-radius:var(--rs);
+  font-size:.9rem;outline:none;transition:border-color .15s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--a)}
+textarea{resize:vertical;min-height:65px}
 
-/* CAL NAV */
-.cal-nav{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:12px}
-.cal-nav-title{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
-.cal-nav-btns{display:flex;gap:6px}
-.icon-btn{width:34px;height:34px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+/* ── CAL NAV ── */
+.cnav{display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);
+  padding:10px 14px;margin-bottom:12px}
+.cnav-l{display:flex;flex-direction:column;gap:4px}
+.cnav-title{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
+.team-badge{display:none;align-items:center;gap:5px}
+.team-badge-dot{width:7px;height:7px;border-radius:50%}
+.team-badge-name{font-size:.7rem;font-weight:700;color:var(--tx2)}
+.cnav-btns{display:flex;gap:6px}
+.ibtn{width:34px;height:34px;background:var(--bg3);border:1px solid var(--bd);
+  border-radius:var(--rs);color:var(--tx);font-size:.85rem;display:flex;
+  align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 
-/* STATS */
-.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.stat-chip{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:6px}
-.sc-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}
-.sc-body{display:flex;align-items:center;justify-content:center;gap:4px}
-.sc-col{display:flex;flex-direction:column;align-items:center;gap:2px}
-.sc-sub{font-size:.55rem;color:var(--text3);font-weight:700;line-height:1}
-.sc-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;line-height:1}
-.sc-sep{color:var(--text3);font-size:.8rem;line-height:1;margin-top:10px}
+/* ── STATS STRIP ── */
+.sstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.schip{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);
+  padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.sct{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}
+.scb{display:flex;align-items:center;justify-content:center;gap:4px}
+.scc{display:flex;flex-direction:column;align-items:center;gap:2px}
+.scs{font-size:.53rem;color:var(--tx3);font-weight:700;line-height:1}
+.scn{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;line-height:1}
+.scsep{color:var(--tx3);font-size:.78rem;margin-top:9px}
 
-/* CALENDAR */
-.cal-grid{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+/* ── MINI CALENDAR ── */
+.cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
 .dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--bg3)}
-.dow-cell{text-align:center;padding:9px 2px;font-size:.72rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.dow-cell{text-align:center;padding:8px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
 .dow-cell:first-child{color:#f87171}.dow-cell:last-child{color:#60a5fa}
 .days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-.day-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:58px;padding:5px 3px;cursor:pointer;position:relative;transition:background .12s;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;overflow:hidden;min-width:0}
-.day-cell:nth-child(7n){border-right:none}
-.day-cell.last-row{border-bottom:none}
-.day-cell:active{background:var(--bg3)}
-.day-cell.other-month{opacity:.12;pointer-events:none}
-.day-cell.sunday .day-num{color:#f87171}
-.day-cell.saturday .day-num{color:#60a5fa}
-.day-cell.is-today .day-num{background:var(--day-r);color:#000;border-radius:50%}
-.day-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
-.day-row{display:flex;flex-direction:row;align-items:center;gap:2px;width:100%;min-width:0}
-.cell-badge{font-size:.62rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;flex-shrink:1;min-width:0}
-.cb-dr{background:var(--day-r-bg);color:var(--day-r)}.cb-ds{background:var(--day-s-bg);color:var(--day-s)}
-.cb-nr{background:var(--ngt-r-bg);color:var(--ngt-r)}.cb-ns{background:var(--ngt-s-bg);color:var(--ngt-s)}
-.cb-of{background:rgba(239,68,68,.15);color:#f87171}.cb-vc{background:var(--vac-bg);color:var(--vac)}
-.cell-memo{font-size:.5rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:2px}
+.dc{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);
+  min-height:56px;padding:4px 3px;cursor:pointer;display:flex;flex-direction:column;
+  align-items:flex-start;overflow:hidden;min-width:0;transition:background .12s}
+.dc:nth-child(7n){border-right:none}
+.dc.lr{border-bottom:none}
+.dc:active{background:var(--bg3)}
+.dc.om{opacity:.12;pointer-events:none}
+.dc.sun .dn{color:#f87171}.dc.sat .dn{color:#60a5fa}
+.dc.td .dn{background:var(--a);color:#000;border-radius:50%}
+.dn{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;line-height:1}
+.dr{display:flex;align-items:center;gap:2px;width:100%;min-width:0}
+.cb{font-size:.6rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;
+  flex-shrink:1;min-width:0}
+.cb-dr{background:var(--a-bg);color:var(--a)}.cb-ds{background:var(--as-bg);color:var(--as)}
+.cb-nr{background:var(--n-bg);color:var(--n)}.cb-ns{background:var(--ns-bg);color:var(--ns)}
+.cb-of{background:var(--off-bg);color:#f87171}.cb-vc{background:var(--vac-bg);color:var(--vac)}
+.cm{font-size:.48rem;color:var(--tx3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;width:100%}
 
-/* LEGEND */
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.leg{display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text2)}
-.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+/* ── TODAY WORKERS ── */
+.tw-section{margin-bottom:10px}
+.tw-title{font-size:.72rem;font-weight:800;color:var(--tx3);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.tw-badge{font-size:.6rem;padding:2px 7px;border-radius:12px;font-weight:700}
+.tw-day{background:var(--a-bg);color:var(--a)}
+.tw-night{background:var(--n-bg);color:var(--n)}
+.tw-off{background:var(--off-bg);color:#f87171}
+.tw-vac{background:var(--vac-bg);color:var(--vac)}
+.worker-row{display:flex;align-items:center;gap:8px;padding:7px 10px;
+  background:var(--bg3);border-radius:var(--rs);margin-bottom:5px}
+.worker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.worker-name{font-size:.82rem;font-weight:700;flex:1}
+.worker-div{font-size:.65rem;color:var(--tx3)}
+.div-label{font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:8px;
+  background:var(--bg2);color:var(--tx2);border:1px solid var(--bd)}
+.empty-workers{font-size:.78rem;color:var(--tx3);text-align:center;padding:16px;
+  background:var(--bg3);border-radius:var(--rs)}
 
-/* TEAM TABLE */
-.team-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.team-table{border-collapse:collapse;min-width:100%}
-.team-table th,.team-table td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
-.team-table th{font-size:.6rem;color:var(--text3);font-weight:700;background:var(--bg3)}
-.name-col{text-align:left;padding-left:8px;font-size:.72rem;font-weight:700;min-width:54px;max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.day-th{font-family:'JetBrains Mono',monospace;min-width:28px}
-.day-th.sun{color:#f87171}.day-th.sat{color:#60a5fa}
-.team-cell{width:28px;height:26px;border-radius:4px;font-size:.55rem;font-weight:700;vertical-align:middle}
-.tc-dr{background:var(--day-r-bg);color:var(--day-r)}.tc-ds{background:var(--day-s-bg);color:var(--day-s)}
-.tc-nr{background:var(--ngt-r-bg);color:var(--ngt-r)}.tc-ns{background:var(--ngt-s-bg);color:var(--ngt-s)}
-.tc-of{background:rgba(239,68,68,.12);color:#f87171}.tc-vc{background:var(--vac-bg);color:var(--vac)}
-.tc-none{color:var(--text3);font-size:.5rem}
+/* ── TEAM TABLE ── */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ttable{border-collapse:collapse;min-width:100%}
+.ttable th,.ttable td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
+.ttable th{font-size:.58rem;color:var(--tx3);font-weight:700;background:var(--bg3)}
+.ncol{text-align:left;padding-left:8px;font-size:.7rem;font-weight:700;
+  min-width:52px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dth{font-family:'JetBrains Mono',monospace;min-width:26px}
+.dth.sun{color:#f87171}.dth.sat{color:#60a5fa}
+.tc{width:26px;height:24px;border-radius:4px;font-size:.53rem;font-weight:700;vertical-align:middle}
+.tc-dr{background:var(--a-bg);color:var(--a)}.tc-ds{background:var(--as-bg);color:var(--as)}
+.tc-nr{background:var(--n-bg);color:var(--n)}.tc-ns{background:var(--ns-bg);color:var(--ns)}
+.tc-of{background:var(--off-bg);color:#f87171}.tc-vc{background:var(--vac-bg);color:var(--vac)}
+.tc-x{color:var(--tx3);font-size:.48rem}
 
-/* CHAT */
-.chat-messages{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 0;height:220px}
-.chat-msg{display:flex;flex-direction:column;max-width:82%}
-.chat-msg.me{align-self:flex-end;align-items:flex-end}
-.chat-msg.other{align-self:flex-start;align-items:flex-start}
-.chat-bubble{padding:9px 13px;border-radius:14px;font-size:.85rem;line-height:1.4;word-break:break-word}
-.chat-msg.me .chat-bubble{background:var(--day-r);color:#000;border-bottom-right-radius:4px}
-.chat-msg.other .chat-bubble{background:var(--bg3);color:var(--text);border-bottom-left-radius:4px}
-.chat-name{font-size:.6rem;color:var(--text3);margin-bottom:3px;font-weight:700}
-.chat-time{font-size:.55rem;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
-.chat-input-row{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
-.chat-input-row textarea{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--r-sm);font-family:inherit;font-size:.88rem;outline:none;resize:none;min-height:42px;max-height:100px}
-.chat-input-row textarea:focus{border-color:var(--day-r)}
-.chat-send-btn{width:42px;height:42px;background:var(--day-r);border:none;border-radius:var(--r-sm);color:#000;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-family:inherit;display:flex;align-items:center;justify-content:center}
+/* ── DIVISION TABS ── */
+.div-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.div-tab{padding:6px 14px;border-radius:var(--rs);font-size:.78rem;font-weight:700;
+  border:1.5px solid var(--bd);background:var(--bg3);color:var(--tx2);
+  cursor:pointer;font-family:inherit;transition:all .15s}
+.div-tab.on{background:var(--a);color:#000;border-color:var(--a)}
 
-/* SECTION */
-.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.section-title{font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+/* ── TEAM CARDS ── */
+.team-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.team-card:active{background:var(--bg3)}
+.team-card.joined{border-color:var(--a)}
+.team-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:1rem;font-weight:800;color:#000;flex-shrink:0}
+.div-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);
+  padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
 
-/* BUTTONS */
-button{font-family:inherit;cursor:pointer;border:none;transition:all .18s}
-.btn{background:var(--bg2);color:var(--text);border:1.5px solid var(--border);padding:11px 16px;border-radius:var(--r-sm);font-size:.85rem;font-weight:700}
-.btn:active{filter:brightness(.85)}
-.btn-primary{background:var(--day-r);color:#000;border-color:var(--day-r)}
-.btn-secondary{background:var(--bg3);color:var(--text2);border-color:var(--border)}
-.btn-danger{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3)}
-.btn-full{width:100%}
-.btn-sm{padding:7px 12px;font-size:.78rem}
+/* ── CHAT ── */
+.chat-box{overflow-y:auto;display:flex;flex-direction:column;gap:7px;
+  padding:6px 0;height:200px}
+.cmsg{display:flex;flex-direction:column;max-width:82%}
+.cmsg.me{align-self:flex-end;align-items:flex-end}
+.cmsg.other{align-self:flex-start;align-items:flex-start}
+.cbub{padding:8px 12px;border-radius:14px;font-size:.83rem;line-height:1.4;word-break:break-word}
+.cmsg.me .cbub{background:var(--a);color:#000;border-bottom-right-radius:4px}
+.cmsg.other .cbub{background:var(--bg3);color:var(--tx);border-bottom-left-radius:4px}
+.cname{font-size:.58rem;color:var(--tx3);margin-bottom:3px;font-weight:700}
+.ctime{font-size:.53rem;color:var(--tx3);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.cinput-row{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
+.cinput-row textarea{flex:1;background:var(--bg3);border:1px solid var(--bd);
+  color:var(--tx);padding:9px 12px;border-radius:var(--rs);font-family:inherit;
+  font-size:.86rem;outline:none;resize:none;min-height:40px;max-height:90px}
+.cinput-row textarea:focus{border-color:var(--a)}
+.csend{width:40px;height:40px;background:var(--a);border:none;border-radius:var(--rs);
+  color:#000;font-size:1rem;cursor:pointer;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center}
 
-/* FORMS */
-.form-group{margin-bottom:14px}
-.form-label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px}
-input[type="text"],input[type="password"],input[type="number"],input[type="date"],select,textarea{font-family:inherit;width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:var(--r-sm);font-size:.9rem;outline:none;transition:border-color .15s;-webkit-appearance:none}
-input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
+/* ── SHIFT PICKER ── */
+.spicker{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.sopt{display:none}
+.slbl{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;
+  border-radius:var(--rs);border:2px solid var(--bd);cursor:pointer;
+  font-size:.66rem;font-weight:700;color:var(--tx2);text-align:center;transition:all .15s}
+.slbl .si{font-size:1.1rem}
+.sopt:checked+.slbl{border-color:currentColor;background:rgba(255,255,255,.06)}
+.sl-dr{color:var(--a)}.sl-ds{color:var(--as)}.sl-nr{color:var(--n)}
+.sl-ns{color:var(--ns)}.sl-of{color:var(--tx2)}.sl-vc{color:var(--vac)}
 
-/* SHIFT PICKER */
-.shift-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.shift-opt{display:none}
-.shift-lbl{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 6px;border-radius:var(--r-sm);border:2px solid var(--border);cursor:pointer;font-size:.68rem;font-weight:700;color:var(--text2);text-align:center;transition:all .15s;line-height:1.3}
-.shift-lbl .s-ico{font-size:1.2rem}
-.shift-opt:checked+.shift-lbl{border-color:currentColor;background:rgba(255,255,255,.06)}
-.sl-dr{color:var(--day-r)}.sl-ds{color:var(--day-s)}.sl-nr{color:var(--ngt-r)}.sl-ns{color:var(--ngt-s)}.sl-of{color:var(--text2)}.sl-vc{color:var(--vac)}
+/* ── SHEET ── */
+.sov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  z-index:200;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.sov.op{opacity:1;pointer-events:all}
+.sheet{width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--bd2);
+  border-radius:18px 18px 0 0;padding:0 16px calc(18px + env(safe-area-inset-bottom,0));
+  transform:translateY(110%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  max-height:92vh;overflow-y:auto}
+.sov.op .sheet{transform:translateY(0)}
+.shandle{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:10px auto 14px}
+.stitle-s{font-size:.95rem;font-weight:800;margin-bottom:16px}
 
-/* SHEET */
-.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
-.sheet-overlay.open{opacity:1;pointer-events:all}
-.sheet{width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border2);border-radius:20px 20px 0 0;padding:0 16px calc(20px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .28s cubic-bezier(.32,.72,0,1);max-height:92vh;overflow-y:auto}
-.sheet-overlay.open .sheet{transform:translateY(0)}
-.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px}
-.sheet-title{font-size:1rem;font-weight:800;margin-bottom:18px}
+/* ── PATTERN EDITOR ── */
+.pstrip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.pbtn{padding:7px 10px;border-radius:var(--rs);border:2px solid var(--bd);
+  background:var(--bg3);font-size:.66rem;font-weight:700;cursor:pointer;
+  font-family:inherit;color:var(--tx2);transition:all .12s}
+.pbtn.p-dr.on{border-color:var(--a);color:var(--a);background:var(--a-bg)}
+.pbtn.p-nr.on{border-color:var(--n);color:var(--n);background:var(--n-bg)}
+.pbtn.p-of.on{border-color:var(--tx2);color:var(--tx2);background:var(--off-bg)}
+.plen-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.plen-row button{width:30px;height:30px;border-radius:8px;background:var(--bg3);
+  border:1px solid var(--bd);color:var(--tx);font-size:1rem;font-family:inherit;
+  cursor:pointer;display:flex;align-items:center;justify-content:center}
+.plen-row span{font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  min-width:54px;text-align:center;color:var(--tx2)}
+.pcells{display:flex;flex-wrap:wrap;gap:5px}
+.pcell{width:40px;height:46px;border-radius:8px;border:2px solid var(--bd);
+  background:var(--bg3);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;cursor:pointer;font-size:.58rem;font-weight:700;
+  color:var(--tx3);transition:transform .1s}
+.pcell:active{transform:scale(.9)}
+.pc-dr{background:var(--a-bg);border-color:var(--a);color:var(--a)}
+.pc-nr{background:var(--n-bg);border-color:var(--n);color:var(--n)}
+.pc-of{background:var(--off-bg);border-color:var(--tx3);color:var(--tx2)}
+.pcell .pi{font-size:.9rem;line-height:1}
+.pcell .pn{font-size:.48rem;opacity:.7}
 
-/* PATTERN EDITOR */
-.pick-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.pick-shift-btn{padding:7px 11px;border-radius:var(--r-sm);border:2px solid var(--border);background:var(--bg3);font-size:.68rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text2);transition:all .12s}
-.psb-dr.sel{border-color:var(--day-r);color:var(--day-r);background:var(--day-r-bg)}
-.psb-nr.sel{border-color:var(--ngt-r);color:var(--ngt-r);background:var(--ngt-r-bg)}
-.psb-of.sel{border-color:var(--text2);color:var(--text2);background:var(--off-bg)}
-.patt-len-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.patt-len-row button{width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:1rem;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.patt-len-row span{font-family:'JetBrains Mono',monospace;font-size:.82rem;min-width:56px;text-align:center;color:var(--text2)}
-.patt-cells{display:flex;flex-wrap:wrap;gap:6px}
-.patt-cell{width:42px;height:48px;border-radius:8px;border:2px solid var(--border);background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:.6rem;font-weight:700;color:var(--text3);transition:transform .1s}
-.patt-cell:active{transform:scale(.92)}
-.pc-dr{background:var(--day-r-bg);border-color:var(--day-r);color:var(--day-r)}
-.pc-nr{background:var(--ngt-r-bg);border-color:var(--ngt-r);color:var(--ngt-r)}
-.pc-of{background:var(--off-bg);border-color:var(--text3);color:var(--text2)}
-.patt-cell .pc-ico{font-size:1rem;line-height:1}
-.patt-cell .pc-n{font-size:.5rem;opacity:.7}
+/* ── LEGEND ── */
+.leg{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.li{display:flex;align-items:center;gap:3px;font-size:.65rem;color:var(--tx2)}
+.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
 
-/* TEAM CARDS */
-.team-list-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
-.team-list-card.joined{border-color:var(--day-r)}
-.team-list-card:active{background:var(--bg3)}
-.team-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#000;flex-shrink:0}
-.team-tab-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.team-tab-btn{padding:7px 16px;border-radius:var(--r-sm);font-size:.8rem;font-weight:700;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit}
-.team-tab-btn.active{background:var(--day-r);color:#000;border-color:var(--day-r)}
-
-/* TOAST & SPINNER */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:24px;font-size:.82rem;font-weight:700;opacity:0;pointer-events:none;transition:all .2s;white-space:nowrap;z-index:300}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--day-r);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+/* ── TOAST SPINNER ── */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:22px;
+  font-size:.8rem;font-weight:700;opacity:0;pointer-events:none;
+  transition:all .18s;white-space:nowrap;z-index:300}
+.toast.sh{opacity:1;transform:translateX(-50%) translateY(0)}
+.sp{width:17px;height:17px;border:2px solid var(--bd2);border-top-color:var(--a);
+  border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{display:none}
-
-/* 팀 없음 배너 */
-.no-team-banner{background:var(--bg2);border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;margin-bottom:12px}
+.no-banner{background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);
+  padding:26px 14px;text-align:center;margin-bottom:12px}
 </style>
 </head>
 <body>
 
 <!-- SPLASH -->
 <div id="splash">
-  <div style="font-size:3rem">🔄</div>
-  <div class="spinner"></div>
-  <div style="font-size:.8rem;color:var(--text3)">연결 중...</div>
+  <div style="font-size:3rem">🔄</div><div class="sp"></div>
+  <div style="font-size:.8rem;color:var(--tx3)">연결 중...</div>
 </div>
 
 <!-- LOGIN -->
-<div id="login-screen" class="hidden">
-  <div style="font-size:2.8rem">🔄</div>
+<div id="login-screen" class="h">
+  <div style="font-size:2.6rem">🔄</div>
   <div style="text-align:center">
-    <div style="font-size:1.4rem;font-weight:800;letter-spacing:-.03em">교대근무 달력</div>
-    <div style="font-size:.75rem;color:var(--text3);margin-top:4px">이름과 비밀번호로 시작하세요</div>
+    <div style="font-size:1.35rem;font-weight:800;letter-spacing:-.03em">교대근무 달력</div>
+    <div style="font-size:.73rem;color:var(--tx3);margin-top:4px">이름과 비밀번호로 시작하세요</div>
   </div>
   <div class="login-card">
-    <div class="form-group">
-      <div class="form-label">이름</div>
-      <input type="text" id="login-name" placeholder="홍길동" maxlength="10"
+    <div class="form-g">
+      <div class="lbl">이름</div>
+      <input type="text" id="ln" placeholder="홍길동" maxlength="10"
         style="text-align:center;font-size:1rem;font-weight:700"
-        onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()">
+        onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
     </div>
-    <div class="form-group" style="margin-bottom:0">
-      <div class="form-label">비밀번호</div>
-      <input type="password" id="login-pw" placeholder="비밀번호" maxlength="20"
+    <div class="form-g" style="margin-bottom:0">
+      <div class="lbl">비밀번호</div>
+      <input type="password" id="lp" placeholder="비밀번호" maxlength="20"
         style="text-align:center" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div id="login-err" style="font-size:.72rem;color:#f87171;text-align:center;display:none;margin-top:2px"></div>
-    <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" style="margin-top:6px">로그인 / 가입</button>
-    <div style="font-size:.68rem;color:var(--text3);text-align:center;line-height:1.6">처음이면 자동 가입 · 기존 계정은 로그인</div>
+    <div id="lerr" style="font-size:.7rem;color:#f87171;text-align:center;display:none;margin-top:2px"></div>
+    <button class="btn pri fw" id="lbtn" onclick="doLogin()" style="margin-top:5px">로그인 / 가입</button>
+    <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">처음이면 자동 가입</div>
   </div>
-  <div id="saved-accounts" style="width:100%;max-width:340px;margin-top:4px"></div>
+  <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
 
-<!-- PAGE: 달력 -->
-<div class="page active" id="page-cal">
-  <div class="cal-nav">
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <div class="cal-nav-title" id="cal-month-label"></div>
-      <!-- 팀 이름 배지 -->
-      <div id="cal-team-badge" style="display:none;align-items:center;gap:5px">
-        <div id="cal-team-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
-        <span id="cal-team-name" style="font-size:.7rem;font-weight:700;color:var(--text2)"></span>
+<!-- PAGE: 내 달력 -->
+<div class="page on" id="page-cal">
+  <div class="cnav">
+    <div class="cnav-l">
+      <div class="cnav-title" id="cal-month"></div>
+      <div class="team-badge" id="cal-badge">
+        <div class="team-badge-dot" id="cal-badge-dot"></div>
+        <span class="team-badge-name" id="cal-badge-name"></span>
       </div>
     </div>
-    <div class="cal-nav-btns">
-      <button class="icon-btn" onclick="gotoToday()" style="font-size:.7rem;font-weight:800">오늘</button>
-      <button class="icon-btn" onclick="changeMonth(-1)">◀</button>
-      <button class="icon-btn" onclick="changeMonth(1)">▶</button>
+    <div class="cnav-btns">
+      <button class="ibtn" onclick="gotoToday()" style="font-size:.68rem;font-weight:800">오늘</button>
+      <button class="ibtn" onclick="changeMonth(-1)">◀</button>
+      <button class="ibtn" onclick="changeMonth(1)">▶</button>
     </div>
   </div>
 
-  <!-- 팀 없을 때 배너 -->
-  <div id="no-team-cal-banner" class="no-team-banner" style="display:none">
-    <div style="font-size:1.5rem;margin-bottom:8px">👥</div>
+  <div id="no-team-banner" class="no-banner" style="display:none">
+    <div style="font-size:1.4rem;margin-bottom:8px">👥</div>
     <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
-    <div style="font-size:.75rem;color:var(--text3);margin-bottom:14px">팀에 참여하면 팀 패턴이 달력에 적용됩니다</div>
-    <button class="btn btn-primary btn-sm" onclick="goTab('team')">팀 관리로 →</button>
+    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 팀 패턴이 적용됩니다</div>
+    <button class="btn pri sm" onclick="goTab('team')">팀 관리로 →</button>
   </div>
 
-  <div id="cal-main" style="display:none">
-    <div class="stats-strip">
-      <div class="stat-chip">
-        <div class="sc-title" style="color:var(--day-r)">☀️ 주간</div>
-        <div class="sc-body">
-          <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-dr" style="color:var(--day-r)">0</span></div>
-          <span class="sc-sep">/</span>
-          <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ds" style="color:var(--day-s)">0</span></div>
+  <div id="cal-body" style="display:none">
+    <div class="sstrip">
+      <div class="schip">
+        <div class="sct" style="color:var(--a)">☀️ 주간</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">정규</span><span class="scn" id="s-dr" style="color:var(--a)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="s-ds" style="color:var(--as)">0</span></div>
         </div>
       </div>
-      <div class="stat-chip">
-        <div class="sc-title" style="color:var(--ngt-r)">🌙 야간</div>
-        <div class="sc-body">
-          <div class="sc-col"><span class="sc-sub">정규</span><span class="sc-num" id="st-nr" style="color:var(--ngt-r)">0</span></div>
-          <span class="sc-sep">/</span>
-          <div class="sc-col"><span class="sc-sub">대근</span><span class="sc-num" id="st-ns" style="color:var(--ngt-s)">0</span></div>
+      <div class="schip">
+        <div class="sct" style="color:var(--n)">🌙 야간</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">정규</span><span class="scn" id="s-nr" style="color:var(--n)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="s-ns" style="color:var(--ns)">0</span></div>
         </div>
       </div>
-      <div class="stat-chip">
-        <div class="sc-title" style="color:var(--vac)">🌴 연차</div>
-        <div class="sc-body">
-          <div class="sc-col"><span class="sc-sub">사용</span><span class="sc-num" id="st-vc" style="color:var(--vac)">0</span></div>
-          <span class="sc-sep">/</span>
-          <div class="sc-col"><span class="sc-sub">연차</span><span id="st-vc-total" class="sc-num" style="color:var(--text3)">-</span></div>
+      <div class="schip">
+        <div class="sct" style="color:var(--vac)">🌴 연차</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">사용</span><span class="scn" id="s-vc" style="color:var(--vac)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">연차</span><span class="scn" id="s-vt" style="color:var(--tx3)">-</span></div>
         </div>
       </div>
     </div>
-
     <div class="cal-grid">
       <div class="dow-row">
         <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
@@ -327,48 +395,68 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
       </div>
       <div class="days-grid" id="days-grid"></div>
     </div>
-    <div class="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--day-r)"></div>주간정규</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--day-s)"></div>주간대근</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--ngt-r)"></div>야간정규</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--ngt-s)"></div>야간대근</div>
-      <div class="leg"><div class="leg-dot" style="background:#f87171"></div>휴무</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--vac)"></div>연차</div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
+      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
+      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
+      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
+      <div class="li"><div class="ld" style="background:#f87171"></div>휴무</div>
+      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
   </div>
 </div>
 
 <!-- PAGE: 팀 달력 -->
-<div class="page" id="page-team-cal">
+<div class="page" id="page-tcal">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px">
     <div>
-      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">📋 팀 달력</div>
-      <div id="team-month-label" style="font-size:.72rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px"></div>
+      <div class="ph" style="margin-bottom:4px">📋 팀 달력</div>
+      <div id="tcal-sub" style="font-size:.7rem;color:var(--tx3);font-family:'JetBrains Mono',monospace"></div>
     </div>
-    <div class="cal-nav-btns">
-      <button class="icon-btn" onclick="changeTeamMonth(-1)">◀</button>
-      <button class="icon-btn" onclick="changeTeamMonth(1)">▶</button>
+    <div class="cnav-btns" style="flex-shrink:0">
+      <button class="ibtn" onclick="changeTeamMonth(-1)">◀</button>
+      <button class="ibtn" onclick="changeTeamMonth(1)">▶</button>
     </div>
   </div>
-  <div class="team-tab-strip" id="team-tab-strip"></div>
-  <div id="no-team-msg" class="no-team-banner">
-    <div style="font-size:2rem;margin-bottom:8px">👥</div>
-    <div style="font-weight:800;margin-bottom:6px">참여 중인 팀 없음</div>
-    <div style="font-size:.78rem;color:var(--text3);margin-bottom:14px">팀 관리 탭에서 팀에 참여하세요</div>
-    <button class="btn btn-primary btn-sm" onclick="goTab('team')">팀 관리로 →</button>
+
+  <!-- 상위팀 탭 -->
+  <div class="div-tabs" id="top-team-tabs"></div>
+
+  <div id="no-team-tcal" class="no-banner">
+    <div style="font-size:1.8rem;margin-bottom:8px">👥</div>
+    <div style="font-weight:800;margin-bottom:4px">참여 중인 팀 없음</div>
+    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀 관리에서 팀에 참여하세요</div>
+    <button class="btn pri sm" onclick="goTab('team')">팀 관리로 →</button>
   </div>
-  <div id="team-cal-wrap" style="display:none">
-    <div class="section-card" style="padding:12px">
-      <div class="section-title">근무표</div>
-      <div class="team-scroll"><table class="team-table" id="team-table"></table></div>
+
+  <div id="tcal-body" style="display:none">
+    <!-- 오늘의 근무자 -->
+    <div class="card" id="today-workers-card">
+      <div class="stitle" id="today-date-label">오늘의 근무자</div>
+      <!-- 하위 과 탭 -->
+      <div class="div-tabs" id="div-tabs" style="margin-bottom:10px"></div>
+      <div id="today-workers"></div>
     </div>
-    <div class="section-card" style="padding:12px">
-      <div class="section-title">💬 팀 채팅</div>
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-input-row">
-        <textarea id="chat-input" placeholder="메시지 입력..." rows="1"
+
+    <!-- 월별 근무표 (토글) -->
+    <div class="card" style="padding:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="stitle" style="margin-bottom:0">월별 근무표</div>
+        <button class="btn sec sm" onclick="toggleMonthTable()" id="month-toggle-btn">펼치기 ▼</button>
+      </div>
+      <div id="month-table-wrap" style="display:none">
+        <div class="tscroll"><table class="ttable" id="team-table"></table></div>
+      </div>
+    </div>
+
+    <!-- 채팅 -->
+    <div class="card" style="padding:12px">
+      <div class="stitle">💬 팀 채팅</div>
+      <div class="chat-box" id="chat-box"></div>
+      <div class="cinput-row">
+        <textarea id="chat-in" placeholder="메시지..." rows="1"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
-        <button class="chat-send-btn" onclick="sendChat()">➤</button>
+        <button class="csend" onclick="sendChat()">➤</button>
       </div>
     </div>
   </div>
@@ -377,235 +465,235 @@ input:focus,select:focus,textarea:focus{border-color:var(--day-r)}
 <!-- PAGE: 팀 관리 -->
 <div class="page" id="page-team">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">👥 팀 관리</div>
-    <button class="btn btn-sm btn-primary" onclick="openNewTeamSheet()">+ 새 팀</button>
+    <div class="ph" style="margin-bottom:0">👥 팀 관리</div>
+    <button class="btn pri sm" onclick="openNewTopTeamSheet()">+ 새 팀</button>
   </div>
-  <div style="font-size:.72rem;color:var(--text3);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">전체 팀 목록</div>
+  <div class="stitle">전체 팀 목록</div>
   <div id="all-teams-list">
-    <div style="text-align:center;padding:24px;color:var(--text3)"><div class="spinner"></div></div>
+    <div style="text-align:center;padding:20px;color:var(--tx3)"><div class="sp"></div></div>
   </div>
 </div>
 
-<!-- BOTTOM NAV (4탭) -->
-<nav class="bottom-nav" style="grid-template-columns:repeat(4,1fr)">
-  <button class="nav-item active" id="nav-cal"      onclick="goTab('cal')">      <span class="nav-icon">📅</span>내 달력</button>
-  <button class="nav-item"        id="nav-team-cal" onclick="goTab('team-cal')"> <span class="nav-icon">📋</span>팀 달력</button>
-  <button class="nav-item"        id="nav-team"     onclick="goTab('team')">     <span class="nav-icon">👥</span>팀 관리</button>
-  <button class="nav-item"        id="nav-settings" onclick="goTab('settings')"> <span class="nav-icon">⚙️</span>설정</button>
+<!-- PAGE: 설정 -->
+<div class="page" id="page-settings">
+  <div class="ph">⚙️ 설정</div>
+
+  <div class="card">
+    <div class="stitle">계정</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="av" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#000;flex-shrink:0"></div>
+      <span id="av-name" style="font-size:.95rem;font-weight:700"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">화면 모드</div>
+    <div class="fl">
+      <button id="btn-dark"  class="btn fg" onclick="setTheme('dark')">🌙 다크</button>
+      <button id="btn-light" class="btn fg" onclick="setTheme('light')">☀️ 라이트</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">연차 설정</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div class="lbl">연간 총 연차 일수</div>
+        <input type="number" id="vac-inp" min="0" max="365" placeholder="예: 15"
+          style="font-size:1rem;font-weight:700;text-align:center" oninput="saveVac()">
+      </div>
+      <div style="text-align:center;min-width:76px">
+        <div style="font-size:.63rem;color:var(--tx3);margin-bottom:3px">사용 / 총</div>
+        <div id="vac-sum" style="font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--vac)">0/0</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn dan fw" onclick="doLogout()">로그아웃</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="ni on" id="ni-cal"      onclick="goTab('cal')">      <span class="ni-ico">📅</span>내 달력</button>
+  <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">     <span class="ni-ico">📋</span>팀 달력</button>
+  <button class="ni"    id="ni-team"     onclick="goTab('team')">     <span class="ni-ico">👥</span>팀 관리</button>
+  <button class="ni"    id="ni-settings" onclick="goTab('settings')"> <span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
 <!-- SHEETS -->
 
-<!-- 날짜 클릭 시트 -->
-<div class="sheet-overlay" id="day-sheet-overlay">
+<!-- 날짜 클릭 -->
+<div class="sov" id="day-sov">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="day-sheet-title">날짜 상세</div>
-    <div style="font-size:.75rem;color:var(--text3);margin-bottom:12px;padding:8px;background:var(--bg3);border-radius:var(--r-sm)">
-      팀 패턴: <span id="day-base-shift" style="color:var(--day-r);font-weight:700"></span> →
-      아래에서 변경하면 개인 수정으로 저장됩니다
+    <div class="shandle"></div>
+    <div class="stitle-s" id="day-st"></div>
+    <div style="font-size:.73rem;color:var(--tx3);margin-bottom:11px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
+      팀 패턴: <span id="day-base" style="color:var(--a);font-weight:700"></span>
+      → 변경 시 개인 수정으로 저장
     </div>
-    <div class="form-group">
-      <div class="form-label">근무 유형</div>
-      <div class="shift-picker">
-        <input type="radio" name="sh" id="sh-dr" value="dr" class="shift-opt">
-        <label for="sh-dr" class="shift-lbl sl-dr"><span class="s-ico">☀️</span>주간<br>정규</label>
-        <input type="radio" name="sh" id="sh-ds" value="ds" class="shift-opt">
-        <label for="sh-ds" class="shift-lbl sl-ds"><span class="s-ico">🌤</span>주간<br>대근</label>
-        <input type="radio" name="sh" id="sh-nr" value="nr" class="shift-opt">
-        <label for="sh-nr" class="shift-lbl sl-nr"><span class="s-ico">🌙</span>야간<br>정규</label>
-        <input type="radio" name="sh" id="sh-ns" value="ns" class="shift-opt">
-        <label for="sh-ns" class="shift-lbl sl-ns"><span class="s-ico">🌛</span>야간<br>대근</label>
-        <input type="radio" name="sh" id="sh-of" value="of" class="shift-opt">
-        <label for="sh-of" class="shift-lbl sl-of"><span class="s-ico">🏠</span>휴무</label>
-        <input type="radio" name="sh" id="sh-vc" value="vc" class="shift-opt">
-        <label for="sh-vc" class="shift-lbl sl-vc"><span class="s-ico">🌴</span>연차</label>
+    <div class="form-g">
+      <div class="lbl">근무 유형</div>
+      <div class="spicker">
+        <input type="radio" name="sh" id="sh-dr" value="dr" class="sopt">
+        <label for="sh-dr" class="slbl sl-dr"><span class="si">☀️</span>주간<br>정규</label>
+        <input type="radio" name="sh" id="sh-ds" value="ds" class="sopt">
+        <label for="sh-ds" class="slbl sl-ds"><span class="si">🌤</span>주간<br>대근</label>
+        <input type="radio" name="sh" id="sh-nr" value="nr" class="sopt">
+        <label for="sh-nr" class="slbl sl-nr"><span class="si">🌙</span>야간<br>정규</label>
+        <input type="radio" name="sh" id="sh-ns" value="ns" class="sopt">
+        <label for="sh-ns" class="slbl sl-ns"><span class="si">🌛</span>야간<br>대근</label>
+        <input type="radio" name="sh" id="sh-of" value="of" class="sopt">
+        <label for="sh-of" class="slbl sl-of"><span class="si">🏠</span>휴무</label>
+        <input type="radio" name="sh" id="sh-vc" value="vc" class="sopt">
+        <label for="sh-vc" class="slbl sl-vc"><span class="si">🌴</span>연차</label>
       </div>
     </div>
-    <div class="form-group">
-      <div class="form-label">메모</div>
+    <div class="form-g">
+      <div class="lbl">메모</div>
       <textarea id="day-memo" placeholder="메모..."></textarea>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn btn-secondary" onclick="closeDaySheet()">취소</button>
-      <button class="btn btn-primary" onclick="saveDaySheet()">저장</button>
+    <div class="fl">
+      <button class="btn sec fg" onclick="cs('day-sov')">취소</button>
+      <button class="btn pri fg" onclick="saveDaySheet()">저장</button>
     </div>
   </div>
 </div>
 
-<!-- 새 팀 만들기 시트 (이름 + 패턴 설정) -->
-<div class="sheet-overlay" id="new-team-sheet-overlay">
+<!-- 새 상위팀 -->
+<div class="sov" id="new-top-sov">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">새 팀 만들기</div>
-    <div class="form-group">
-      <div class="form-label">팀 이름</div>
-      <input type="text" id="new-team-name" placeholder="예: A조, 주간팀" maxlength="15">
+    <div class="shandle"></div>
+    <div class="stitle-s">새 팀 만들기</div>
+    <div class="form-g">
+      <div class="lbl">팀 이름</div>
+      <input type="text" id="nt-name" placeholder="예: 환경팀, 생산팀" maxlength="15">
     </div>
-    <!-- 팀 패턴 설정 -->
-    <div class="section-title">교대 패턴 설정</div>
-    <div class="form-group">
-      <div class="form-label">패턴 시작 날짜</div>
-      <input type="date" id="new-team-start">
+    <div style="font-size:.75rem;color:var(--tx3);padding:9px;background:var(--bg3);border-radius:var(--rs);margin-bottom:14px;line-height:1.6">
+      팀을 만들면 팀장이 됩니다.<br>팀장만 하위 과를 만들고 패턴을 설정할 수 있어요.
     </div>
-    <div class="form-group">
-      <div class="form-label">패턴 길이</div>
-      <div class="patt-len-row">
-        <button onclick="ntPatLenChange(-1)">−</button>
-        <span id="nt-patt-len-lbl">4일 반복</span>
-        <button onclick="ntPatLenChange(1)">+</button>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="form-label">근무 선택 후 셀 클릭으로 편집</div>
-      <div class="pick-strip">
-        <button class="pick-shift-btn psb-dr" id="nt-pb-dr" onclick="ntSetPick('dr')">☀️ 주간</button>
-        <button class="pick-shift-btn psb-nr" id="nt-pb-nr" onclick="ntSetPick('nr')">🌙 야간</button>
-        <button class="pick-shift-btn psb-of" id="nt-pb-of" onclick="ntSetPick('of')">🏠 휴무</button>
-      </div>
-      <div class="patt-cells" id="nt-patt-cells"></div>
-    </div>
-    <!-- 14일 미리보기 -->
-    <div class="form-group">
-      <div class="form-label">14일 미리보기</div>
-      <div id="nt-preview" style="display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn btn-secondary" onclick="closeSheet('new-team-sheet-overlay')">취소</button>
-      <button class="btn btn-primary" onclick="createTeam()">팀 만들기</button>
+    <div class="fl">
+      <button class="btn sec fg" onclick="cs('new-top-sov')">취소</button>
+      <button class="btn pri fg" onclick="createTopTeam()">만들기</button>
     </div>
   </div>
 </div>
 
-<!-- 팀 정보 시트 -->
-<div class="sheet-overlay" id="team-info-sheet-overlay">
+<!-- 새 하위 과 (팀장만) -->
+<div class="sov" id="new-div-sov">
   <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="team-info-title">팀 정보</div>
-    <div id="team-info-pattern" style="margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:var(--r-sm);font-size:.78rem;color:var(--text2)"></div>
-    <div id="team-info-members" style="margin-bottom:16px"></div>
-    <button id="team-join-btn" class="btn btn-primary btn-full" onclick="toggleJoinTeam()">이 팀에 참여하기</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-secondary btn-full" onclick="closeSheet('team-info-sheet-overlay')">닫기</button>
+    <div class="shandle"></div>
+    <div class="stitle-s" id="new-div-title">새 과 만들기</div>
+    <div class="form-g">
+      <div class="lbl">과 이름</div>
+      <input type="text" id="nd-name" placeholder="예: 1과, 통상근무" maxlength="15">
+    </div>
+    <div class="stitle">교대 패턴 설정</div>
+    <div class="form-g">
+      <div class="lbl">패턴 시작 날짜</div>
+      <input type="date" id="nd-start">
+    </div>
+    <div class="form-g">
+      <div class="lbl">패턴 길이</div>
+      <div class="plen-row">
+        <button onclick="ndLen(-1)">−</button>
+        <span id="nd-len-lbl">4일 반복</span>
+        <button onclick="ndLen(1)">+</button>
+      </div>
+    </div>
+    <div class="form-g">
+      <div class="lbl">근무 선택 후 셀 클릭 편집</div>
+      <div class="pstrip">
+        <button class="pbtn p-dr on" id="nd-pb-dr" onclick="ndPick('dr')">☀️ 주간</button>
+        <button class="pbtn p-nr"    id="nd-pb-nr" onclick="ndPick('nr')">🌙 야간</button>
+        <button class="pbtn p-of"    id="nd-pb-of" onclick="ndPick('of')">🏠 휴무</button>
+      </div>
+      <div class="pcells" id="nd-cells"></div>
+    </div>
+    <div class="form-g">
+      <div class="lbl">14일 미리보기</div>
+      <div id="nd-preview" style="display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto"></div>
+    </div>
+    <div class="fl">
+      <button class="btn sec fg" onclick="cs('new-div-sov')">취소</button>
+      <button class="btn pri fg" onclick="createDivision()">과 만들기</button>
+    </div>
   </div>
 </div>
 
-<!-- 설정 시트 (연차 설정) -->
-<!-- PAGE: 설정 -->
-<div class="page" id="page-settings">
-  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;margin-bottom:20px">⚙️ 설정</div>
-
-  <!-- 계정 -->
-  <div class="section-card">
-    <div class="section-title">계정</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-      <div id="settings-avatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#000;flex-shrink:0"></div>
-      <span id="settings-name" style="font-size:.95rem;font-weight:700"></span>
-    </div>
+<!-- 팀/과 정보 -->
+<div class="sov" id="team-info-sov">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div class="stitle-s" id="ti-title"></div>
+    <div id="ti-pattern" style="margin-bottom:12px;padding:9px;background:var(--bg3);border-radius:var(--rs);font-size:.76rem;color:var(--tx2)"></div>
+    <div id="ti-members" style="margin-bottom:14px"></div>
+    <button id="ti-join-btn" class="btn pri fw" onclick="toggleJoin()"></button>
+    <div style="height:7px"></div>
+    <button class="btn sec fw" onclick="cs('team-info-sov')">닫기</button>
   </div>
-
-  <!-- 화면 모드 -->
-  <div class="section-card">
-    <div class="section-title">화면 모드</div>
-    <div style="display:flex;gap:10px">
-      <button id="btn-dark" class="btn btn-full" onclick="setTheme('dark')"
-        style="display:flex;align-items:center;justify-content:center;gap:6px">🌙 다크 모드</button>
-      <button id="btn-light" class="btn btn-full" onclick="setTheme('light')"
-        style="display:flex;align-items:center;justify-content:center;gap:6px">☀️ 라이트 모드</button>
-    </div>
-  </div>
-
-  <!-- 연차 -->
-  <div class="section-card">
-    <div class="section-title">연차 설정</div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="flex:1">
-        <div class="form-label">연간 총 연차 일수</div>
-        <input type="number" id="total-vacation-input" min="0" max="365" placeholder="예: 15"
-          style="font-size:1.1rem;font-weight:700;text-align:center" oninput="saveTotalVacation()">
-      </div>
-      <div style="text-align:center;min-width:80px">
-        <div style="font-size:.65rem;color:var(--text3);margin-bottom:4px">올해 사용 / 총</div>
-        <div id="vac-summary" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--vac)">0 / 0</div>
-      </div>
-    </div>
-  </div>
-
-  <button class="btn btn-danger btn-full" onclick="doLogout()">로그아웃</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  CONSTANTS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ CONSTANTS ━━
 const SM={
-  dr:{label:'주간정규',icon:'☀️',cls:'cb-dr',tcls:'tc-dr',short:'주'},
-  ds:{label:'주간대근',icon:'🌤',cls:'cb-ds',tcls:'tc-ds',short:'주대'},
-  nr:{label:'야간정규',icon:'🌙',cls:'cb-nr',tcls:'tc-nr',short:'야'},
-  ns:{label:'야간대근',icon:'🌛',cls:'cb-ns',tcls:'tc-ns',short:'야대'},
-  of:{label:'휴무',icon:'🏠',cls:'cb-of',tcls:'tc-of',short:'휴'},
-  vc:{label:'연차',icon:'🌴',cls:'cb-vc',tcls:'tc-vc',short:'연'},
+  dr:{l:'주간정규',i:'☀️',c:'cb-dr',tc:'tc-dr',s:'주'},
+  ds:{l:'주간대근',i:'🌤',c:'cb-ds',tc:'tc-ds',s:'주대'},
+  nr:{l:'야간정규',i:'🌙',c:'cb-nr',tc:'tc-nr',s:'야'},
+  ns:{l:'야간대근',i:'🌛',c:'cb-ns',tc:'tc-ns',s:'야대'},
+  of:{l:'휴무',   i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
+  vc:{l:'연차',   i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
 };
-const CELL_LBL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
-const TEAM_LBL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
+const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
+const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
-const PCLS={dr:'pc-dr',nr:'pc-nr',of:'pc-of'};
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  STATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ STATE ━━
 let S={
   myName:'',myColor:'',myId:'',
-  year:0,month:0,teamYear:0,teamMonth:0,
-  // 내 개인 수정 데이터 (팀 패턴 위에 덮어씌우기)
-  overrides:{},          // {'YYYY-MM-DD':{shift,memo}}
-  totalVacation:0,
-  joinedTeamIds:[],      // 참여 중인 팀 ID 목록
-  activeTeamId:'',       // 현재 보고 있는 팀
-  viewingTeamId:'',
-  viewingTeamData:null,
-  // 팀 패턴 (Firebase에서 로드, 로컬 캐시)
-  teamPatternCache:{},   // teamId -> {pattern, patternStart}
+  yr:0,mo:0,tyr:0,tmo:0,
+  ov:{},          // personal overrides: {YYYY-MM-DD:{shift,memo}}
+  vacTotal:0,
+  // 내가 참여한 팀/과
+  // joined: [{topId, topName, topColor, divId, divName}]
+  joined:[],
+  activeTopId:'', activeDivId:'',
+  // 팀 달력에서 선택된 과
+  tcalDivId:'',
+  // 패턴 캐시: {topId_divId: {pattern,patternStart}}
+  patCache:{},
 };
 
-// 새 팀 패턴 편집기 상태
-let NT={pattern:['dr','nr','of','of'],pick:'dr'};
+// 하위과 패턴 편집 상태
+let ND={pat:['dr','nr','of','of'],pick:'dr',topId:''};
+
+// 팀달력 실시간 언섭
+let tcalUnsub=null, chatUnsub=null, teamsUnsub=null;
+let viewTopId='', viewDivId='', viewData=null;
+let monthTableOpen=false;
 
 let FB=null;
-function dkey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function uid(){return Math.random().toString(36).slice(2,10).toUpperCase()}
+const dkey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const uid=()=>Math.random().toString(36).slice(2,9).toUpperCase();
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  FIREBASE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const dbGet=p=>FB.get(p);
-const dbSet=(p,v)=>FB.set(p,v);
-const dbListen=(p,cb)=>FB.listen(p,cb);
-const dbPush=(p,v)=>FB.push(p,v);
+// ━━ FIREBASE ━━
+const dbG=p=>FB.get(p);
+const dbS=(p,v)=>FB.set(p,v);
+const dbP=(p,v)=>FB.push(p,v);
+const dbL=(p,cb)=>FB.listen(p,cb);
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  LOCAL STORAGE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const ls={
-  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},
-  get:(k)=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},
-  del:(k)=>{try{localStorage.removeItem(k)}catch{}},
-};
+// ━━ LOCAL STORAGE ━━
+const ls={s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},
+          g:k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},
+          d:k=>{try{localStorage.removeItem(k)}catch{}}};
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SHIFT CALC
-//  팀 패턴 기반 + 개인 오버라이드
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function getTeamPattern(){
-  if(!S.activeTeamId) return null;
-  return S.teamPatternCache[S.activeTeamId]||null;
-}
+// ━━ SHIFT CALC ━━
+function getCacheKey(){return S.activeTopId&&S.activeDivId?`${S.activeTopId}_${S.activeDivId}`:'';}
+function getDivPattern(topId,divId){return S.patCache[`${topId}_${divId}`]||null;}
 
-function getBaseShift(date){
-  // 팀 패턴으로 계산한 기본 근무
-  const tp=getTeamPattern();
+function getBaseShift(date,topId,divId){
+  const tp=getDivPattern(topId||S.activeTopId, divId||S.activeDivId);
   if(!tp||!tp.pattern||!tp.patternStart) return null;
   const base=new Date(tp.patternStart);
   const diff=Math.floor((date-base)/86400000);
@@ -614,676 +702,665 @@ function getBaseShift(date){
 }
 
 function getShift(date){
-  // 개인 오버라이드 우선, 없으면 팀 패턴
   const k=dkey(date);
-  if(S.overrides[k]) return S.overrides[k].shift;
+  if(S.ov[k]) return S.ov[k].shift;
   return getBaseShift(date);
 }
 
-// 팀원의 근무 계산 (팀 패턴 + 개인 오버라이드)
-function getMemberShift(date, memberOverrides){
+function getMemberShift(date, memberOv, topId, divId){
   const k=dkey(date);
-  if(memberOverrides&&memberOverrides[k]) return memberOverrides[k].shift;
-  return getBaseShift(date); // 팀 패턴은 동일
+  if(memberOv&&memberOv[k]) return memberOv[k].shift;
+  return getBaseShift(date, topId, divId);
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SAVE / LOAD
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function saveProfile(){
-  if(!S.myId) return;
-  const data={
-    myName:S.myName,myColor:S.myColor,
-    overrides:S.overrides,totalVacation:S.totalVacation,
-    joinedTeamIds:S.joinedTeamIds,activeTeamId:S.activeTeamId,
-    updatedAt:Date.now(),
-  };
-  await dbSet('profiles/'+S.myId, data);
-  ls.set('profile_'+S.myId, data);
-  // 현재 참여 팀에 내 오버라이드 업데이트
-  if(S.activeTeamId){
-    await dbSet('teams/'+S.activeTeamId+'/members/'+S.myId+'/overrides', S.overrides||{});
-  }
-}
-
-async function loadProfile(){
-  if(!S.myId) return;
-  let data=await dbGet('profiles/'+S.myId);
-  if(!data) data=ls.get('profile_'+S.myId);
-  if(!data) return;
-  if(data.myColor)       S.myColor=data.myColor;
-  if(data.overrides)     S.overrides=data.overrides;
-  if(data.totalVacation!=null) S.totalVacation=data.totalVacation;
-  if(data.joinedTeamIds) S.joinedTeamIds=data.joinedTeamIds;
-  if(data.activeTeamId)  S.activeTeamId=data.activeTeamId;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PASSWORD
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ PASSWORD ━━
 async function hashPw(pw){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('sc2025'+pw));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,20);
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  LOGIN
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ SAVE / LOAD ━━
+async function saveProfile(){
+  if(!S.myId)return;
+  const d={myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,
+    joined:S.joined,activeTopId:S.activeTopId,activeDivId:S.activeDivId,updatedAt:Date.now()};
+  await dbS('profiles/'+S.myId,d);
+  ls.s('prof_'+S.myId,d);
+  // 현재 과에 내 오버라이드 동기화
+  if(S.activeTopId&&S.activeDivId){
+    await dbS(`teams/${S.activeTopId}/divs/${S.activeDivId}/members/${S.myId}/ov`, S.ov||{});
+  }
+}
+async function loadProfile(){
+  let d=await dbG('profiles/'+S.myId)||ls.g('prof_'+S.myId);
+  if(!d)return;
+  if(d.myColor)      S.myColor=d.myColor;
+  if(d.ov)           S.ov=d.ov;
+  if(d.vacTotal!=null) S.vacTotal=d.vacTotal;
+  if(d.joined)       S.joined=d.joined;
+  if(d.activeTopId)  S.activeTopId=d.activeTopId;
+  if(d.activeDivId)  S.activeDivId=d.activeDivId;
+}
+
+// ━━ LOGIN ━━
 async function doLogin(){
-  const name=document.getElementById('login-name').value.trim();
-  const pw=document.getElementById('login-pw').value;
-  if(!name){showLoginErr('이름을 입력해주세요');return;}
-  if(!pw){showLoginErr('비밀번호를 입력해주세요');return;}
-  const btn=document.getElementById('login-btn');
-  btn.innerHTML='<div class="spinner"></div>';
+  const name=document.getElementById('ln').value.trim();
+  const pw=document.getElementById('lp').value;
+  if(!name){showErr('이름을 입력해주세요');return;}
+  if(!pw){showErr('비밀번호를 입력해주세요');return;}
+  const btn=document.getElementById('lbtn');
+  btn.innerHTML='<div class="sp"></div>';
   try{
     const hash=await hashPw(pw);
-    const acct=await dbGet('accounts/'+name);
+    const acct=await dbG('accounts/'+name);
     if(acct){
-      if(acct.pwHash!==hash){showLoginErr('비밀번호가 틀렸습니다');btn.textContent='로그인 / 가입';return;}
+      if(acct.pwHash!==hash){showErr('비밀번호가 틀렸습니다');btn.textContent='로그인 / 가입';return;}
       S.myId=acct.myId; S.myColor=acct.color;
     } else {
       const myId=uid(), color=COLORS[Math.floor(Math.random()*COLORS.length)];
-      await dbSet('accounts/'+name,{pwHash:hash,myId,color,createdAt:Date.now()});
+      await dbS('accounts/'+name,{pwHash:hash,myId,color,createdAt:Date.now()});
       S.myId=myId; S.myColor=color;
-      S.overrides={}; S.joinedTeamIds=[]; S.activeTeamId=''; S.totalVacation=0;
+      S.ov={}; S.joined=[]; S.activeTopId=''; S.activeDivId=''; S.vacTotal=0;
     }
     S.myName=name;
-    await loadProfile();
-    S.myName=name;
-    ls.set('session',{name,id:S.myId,color:S.myColor});
+    await loadProfile(); S.myName=name;
+    ls.s('sess',{name,id:S.myId,color:S.myColor});
     btn.textContent='로그인 / 가입';
-    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.add('h');
     await boot();
   }catch(e){
-    console.error(e);
-    showLoginErr('오류: Firebase 설정을 확인해주세요');
+    console.error(e); showErr('오류: Firebase 설정을 확인해주세요');
     btn.textContent='로그인 / 가입';
   }
 }
-function showLoginErr(msg){
-  const e=document.getElementById('login-err');e.textContent=msg;e.style.display='';
-  document.getElementById('login-btn').textContent='로그인 / 가입';
+function showErr(msg){
+  const e=document.getElementById('lerr'); e.textContent=msg; e.style.display='';
+  document.getElementById('lbtn').textContent='로그인 / 가입';
 }
 function doLogout(){
   if(!confirm('로그아웃 할까요?'))return;
-  ls.del('session'); location.reload();
+  ls.d('sess'); location.reload();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  TABS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TABS=['cal','team-cal','team','settings'];
-function goTab(name){
-  TABS.forEach(t=>{
-    document.getElementById('page-'+t).classList.toggle('active',t===name);
-    document.getElementById('nav-'+t).classList.toggle('active',t===name);
+// ━━ TABS ━━
+const TABS=['cal','tcal','team','settings'];
+function goTab(t){
+  TABS.forEach(x=>{
+    document.getElementById('page-'+x).classList.toggle('on',x===t);
+    document.getElementById('ni-'+x).classList.toggle('on',x===t);
   });
-  if(name==='team-cal') renderTeamCal();
-  if(name==='team')     renderTeamListPage();
-  if(name==='cal')      refreshCalFromTeam();
-  if(name==='settings') renderSettingsPage();
+  if(t==='tcal')     { renderTeamCal(); }
+  else               { stopChat(); if(tcalUnsub){tcalUnsub();tcalUnsub=null;} }
+  if(t==='team')     renderAllTeams();
+  if(t==='settings') renderSettings();
+  if(t==='cal')      refreshCal();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  CALENDAR (내 달력)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function refreshCalFromTeam(){
-  // 팀 패턴 최신화 후 렌더
-  if(S.activeTeamId){
-    const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
-    if(tp) S.teamPatternCache[S.activeTeamId]=tp;
+// ━━ MY CALENDAR ━━
+async function refreshCal(){
+  if(S.activeTopId&&S.activeDivId){
+    const tp=await dbG(`teams/${S.activeTopId}/divs/${S.activeDivId}/pattern`);
+    if(tp) S.patCache[`${S.activeTopId}_${S.activeDivId}`]=tp;
+    const info=await dbG('teamIndex/'+S.activeTopId);
+    if(info){
+      const b=document.getElementById('cal-badge');
+      document.getElementById('cal-badge-dot').style.background=info.color||'#f59e0b';
+      document.getElementById('cal-badge-name').textContent=
+        `${info.name} · ${S.activeDivId?((await dbG(`teams/${S.activeTopId}/divs/${S.activeDivId}/name`))||''):''}`;
+      b.style.display='flex';
+    }
   }
   renderCal();
 }
 
 function renderCal(){
-  const hasTeam=S.joinedTeamIds.length>0&&S.activeTeamId;
-  document.getElementById('no-team-cal-banner').style.display=hasTeam?'none':'';
-  document.getElementById('cal-main').style.display=hasTeam?'block':'none';
-  if(!hasTeam) return;
-
-  // 팀 이름 표시
-  const tp=getTeamPattern();
-  const{year:yr,month:mo}=S;
-  const today=new Date();today.setHours(0,0,0,0);
-  const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
-  document.getElementById('cal-month-label').textContent=`${yr}년 ${mo+1}월`;
-
+  const has=S.joined.length>0&&S.activeTopId&&S.activeDivId;
+  document.getElementById('no-team-banner').style.display=has?'none':'';
+  document.getElementById('cal-body').style.display=has?'block':'none';
+  if(!has)return;
+  const{yr,mo}=S;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const first=new Date(yr,mo,1), last=new Date(yr,mo+1,0);
+  document.getElementById('cal-month').textContent=`${yr}년 ${mo+1}월`;
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
-  const grid=document.getElementById('days-grid');
-  grid.innerHTML='';
-  for(let i=0;i<first.getDay();i++) grid.appendChild(buildCell(new Date(yr,mo,i-first.getDay()+1),true));
+  const grid=document.getElementById('days-grid'); grid.innerHTML='';
+  for(let i=0;i<first.getDay();i++) grid.appendChild(mkCell(new Date(yr,mo,i-first.getDay()+1),true));
   for(let d=1;d<=last.getDate();d++){
-    const date=new Date(yr,mo,d);
-    const sh=getShift(date); if(sh) stats[sh]=(stats[sh]||0)+1;
-    grid.appendChild(buildCell(date,false));
+    const dt=new Date(yr,mo,d); const sh=getShift(dt); if(sh)stats[sh]=(stats[sh]||0)+1;
+    grid.appendChild(mkCell(dt,false));
   }
   const trail=(7-(first.getDay()+last.getDate())%7)%7;
-  for(let i=1;i<=trail;i++) grid.appendChild(buildCell(new Date(yr,mo+1,i),true));
-  const cells=grid.querySelectorAll('.day-cell'),tot=cells.length;
-  for(let i=tot-7;i<tot;i++) cells[i].classList.add('last-row');
-
-  document.getElementById('st-dr').textContent=stats.dr;
-  document.getElementById('st-ds').textContent=stats.ds;
-  document.getElementById('st-nr').textContent=stats.nr;
-  document.getElementById('st-ns').textContent=stats.ns;
-
-  let usedVac=0;
+  for(let i=1;i<=trail;i++) grid.appendChild(mkCell(new Date(yr,mo+1,i),true));
+  const cells=grid.querySelectorAll('.dc'),tot=cells.length;
+  for(let i=tot-7;i<tot;i++) cells[i].classList.add('lr');
+  ['dr','ds','nr','ns'].forEach(k=>document.getElementById('s-'+k).textContent=stats[k]);
+  let uv=0;
   for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))
-    if(getShift(new Date(d))==='vc') usedVac++;
-  document.getElementById('st-vc').textContent=usedVac;
-  const te=document.getElementById('st-vc-total');
-  te.textContent=S.totalVacation>0?S.totalVacation:'-';
-  te.style.color=S.totalVacation>0?'var(--vac)':'var(--text3)';
+    if(getShift(new Date(d))==='vc')uv++;
+  document.getElementById('s-vc').textContent=uv;
+  const vt=document.getElementById('s-vt');
+  vt.textContent=S.vacTotal>0?S.vacTotal:'-';
+  vt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
 }
 
-function buildCell(date,other){
-  const cell=document.createElement('div'); cell.className='day-cell';
-  if(other){cell.classList.add('other-month');return cell;}
+function mkCell(date,other){
+  const c=document.createElement('div'); c.className='dc';
+  if(other){c.classList.add('om');return c;}
   const dow=date.getDay();
-  if(dow===0)cell.classList.add('sunday');
-  if(dow===6)cell.classList.add('saturday');
-  if(date.toDateString()===new Date().toDateString()) cell.classList.add('is-today');
-  const sh=getShift(date);
-  const isOverride=!!S.overrides[dkey(date)];
-  const row=document.createElement('div'); row.className='day-row';
-  const num=document.createElement('div'); num.className='day-num'; num.textContent=date.getDate();
-  row.appendChild(num);
+  if(dow===0)c.classList.add('sun'); if(dow===6)c.classList.add('sat');
+  if(date.toDateString()===new Date().toDateString())c.classList.add('td');
+  const sh=getShift(date), isOv=!!S.ov[dkey(date)];
+  const row=document.createElement('div'); row.className='dr';
+  const dn=document.createElement('div'); dn.className='dn'; dn.textContent=date.getDate();
+  row.appendChild(dn);
   if(sh){
     const b=document.createElement('div');
-    b.className=`cell-badge ${sh==='of'?'cb-of':SM[sh].cls}`;
-    b.textContent=CELL_LBL[sh];
-    // 개인 수정된 날은 테두리 표시
-    if(isOverride) b.style.outline='1.5px solid currentColor';
+    b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
+    b.textContent=CL[sh];
+    if(isOv)b.style.outline='1.5px solid currentColor';
     row.appendChild(b);
   }
-  cell.appendChild(row);
-  const memo=S.overrides[dkey(date)]?.memo;
-  if(memo){const m=document.createElement('div');m.className='cell-memo';m.textContent='📝 '+memo;cell.appendChild(m);}
-  cell.addEventListener('click',()=>openDaySheet(date));
-  return cell;
+  c.appendChild(row);
+  const memo=S.ov[dkey(date)]?.memo;
+  if(memo){const m=document.createElement('div');m.className='cm';m.textContent='📝'+memo;c.appendChild(m);}
+  c.addEventListener('click',()=>openDaySheet(date));
+  return c;
 }
+function changeMonth(d){S.mo+=d;if(S.mo>11){S.mo=0;S.yr++;}if(S.mo<0){S.mo=11;S.yr--;}renderCal();}
+function gotoToday(){const t=new Date();S.yr=t.getFullYear();S.mo=t.getMonth();renderCal();}
 
-function changeMonth(d){S.month+=d;if(S.month>11){S.month=0;S.year++;}if(S.month<0){S.month=11;S.year--;}renderCal();}
-function gotoToday(){const t=new Date();S.year=t.getFullYear();S.month=t.getMonth();renderCal();}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DAY SHEET
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ DAY SHEET ━━
 let editDate=null;
 function openDaySheet(date){
   editDate=date;
-  const k=dkey(date);
-  const baseSh=getBaseShift(date);
-  const currentSh=getShift(date)||'of';
-  const memo=S.overrides[k]?.memo||'';
-
-  document.getElementById('day-sheet-title').textContent=
-    `${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
-  document.getElementById('day-base-shift').textContent=
-    baseSh?`${SM[baseSh].icon} ${SM[baseSh].label}`:'미설정';
-  document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===currentSh);
+  const k=dkey(date), bSh=getBaseShift(date), sh=getShift(date)||'of', memo=S.ov[k]?.memo||'';
+  document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
+  document.getElementById('day-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
+  document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
   document.getElementById('day-memo').value=memo;
-  document.getElementById('day-sheet-overlay').classList.add('open');
+  os('day-sov');
 }
-function closeDaySheet(){document.getElementById('day-sheet-overlay').classList.remove('open');}
+function cs(id){document.getElementById(id).classList.remove('op');}
+function os(id){document.getElementById(id).classList.add('op');}
 async function saveDaySheet(){
-  if(!editDate) return;
-  const k=dkey(editDate);
-  const sh=document.querySelector('input[name="sh"]:checked')?.value;
+  if(!editDate)return;
+  const k=dkey(editDate), sh=document.querySelector('input[name="sh"]:checked')?.value;
   const memo=document.getElementById('day-memo').value.trim();
-  const baseSh=getBaseShift(editDate);
-  // 팀 패턴과 동일하고 메모도 없으면 오버라이드 삭제 (원래대로)
-  if(sh===baseSh&&!memo){
-    delete S.overrides[k];
-  } else {
-    if(!S.overrides[k]) S.overrides[k]={};
-    if(sh) S.overrides[k].shift=sh;
-    if(memo) S.overrides[k].memo=memo; else delete S.overrides[k].memo;
+  const bSh=getBaseShift(editDate);
+  if(sh===bSh&&!memo){ delete S.ov[k]; }
+  else {
+    if(!S.ov[k])S.ov[k]={};
+    if(sh)S.ov[k].shift=sh;
+    if(memo)S.ov[k].memo=memo; else delete S.ov[k].memo;
   }
-  closeDaySheet(); renderCal();
-  await saveProfile();
-  showToast('저장됨 ✓');
+  cs('day-sov'); renderCal();
+  await saveProfile(); showToast('저장됨 ✓');
 }
-document.getElementById('day-sheet-overlay').addEventListener('click',function(e){if(e.target===this)closeDaySheet();});
+document.getElementById('day-sov').addEventListener('click',function(e){if(e.target===this)cs('day-sov');});
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  NEW TEAM PATTERN EDITOR
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function openNewTeamSheet(){
-  // 초기화
-  NT.pattern=['dr','nr','of','of']; NT.pick='dr';
-  const today=new Date();
-  document.getElementById('new-team-name').value='';
-  document.getElementById('new-team-start').value=dkey(today);
-  ntRenderPattCells();
-  ntUpdatePickBtns();
-  ntRenderPreview();
-  document.getElementById('new-team-sheet-overlay').classList.add('open');
+// ━━ TEAM HIERARCHY ━━
+// DB 구조:
+// teams/{topId}: {name,color,createdBy,divs:{divId:{name,pattern,members:{uid:{name,color,ov}}}}}
+// teamIndex/{topId}: {name,color,createdBy,divNames:[...]}
+
+async function createTopTeam(){
+  const name=document.getElementById('nt-name').value.trim();
+  if(!name){showToast('팀 이름을 입력해주세요');return;}
+  const id='T'+uid(), color=COLORS[Math.floor(Math.random()*COLORS.length)];
+  await dbS('teams/'+id,{id,name,color,createdBy:S.myId,createdAt:Date.now(),divs:{}});
+  await dbS('teamIndex/'+id,{name,color,createdBy:S.myId,divCount:0,createdAt:Date.now()});
+  cs('new-top-sov');
+  showToast(`"${name}" 팀 생성됨 🎉`);
 }
-function ntSetPick(sh){NT.pick=sh;ntUpdatePickBtns();}
-function ntUpdatePickBtns(){
+
+function openNewTopTeamSheet(){
+  document.getElementById('nt-name').value='';
+  os('new-top-sov');
+}
+
+// 하위 과 만들기 (팀장만)
+function openNewDivSheet(topId){
+  ND.topId=topId; ND.pat=['dr','nr','of','of']; ND.pick='dr';
+  document.getElementById('nd-name').value='';
+  document.getElementById('nd-start').value=dkey(new Date());
+  ndRender(); ndPickUpdate(); ndPreview();
+  document.getElementById('new-div-title').textContent='새 과 만들기';
+  os('new-div-sov');
+}
+function ndPick(sh){ND.pick=sh;ndPickUpdate();}
+function ndPickUpdate(){
   ['dr','nr','of'].forEach(k=>{
-    const b=document.getElementById('nt-pb-'+k);
-    b.className='pick-shift-btn psb-'+k+(NT.pick===k?' sel':'');
+    const b=document.getElementById('nd-pb-'+k);
+    b.className=`pbtn p-${k}`+(ND.pick===k?' on':'');
   });
 }
-function ntPatLenChange(d){
-  const nl=NT.pattern.length+d;
-  if(nl<1||nl>28) return;
-  if(d>0) NT.pattern.push(NT.pick); else NT.pattern.pop();
-  ntRenderPattCells(); ntRenderPreview();
-}
-function ntRenderPattCells(){
-  document.getElementById('nt-patt-len-lbl').textContent=`${NT.pattern.length}일 반복`;
-  const grid=document.getElementById('nt-patt-cells'); grid.innerHTML='';
-  NT.pattern.forEach((sh,i)=>{
-    const m=SM[sh]||SM.of;
-    const cell=document.createElement('div');
-    cell.className=`patt-cell ${PCLS[sh]||'pc-of'}`;
-    cell.innerHTML=`<span class="pc-ico">${m.icon}</span><span>${m.short}</span><span class="pc-n">${i+1}일</span>`;
-    cell.onclick=()=>{NT.pattern[i]=NT.pick;ntRenderPattCells();ntRenderPreview();};
-    grid.appendChild(cell);
+function ndLen(d){const nl=ND.pat.length+d;if(nl<1||nl>28)return;if(d>0)ND.pat.push(ND.pick);else ND.pat.pop();ndRender();ndPreview();}
+function ndRender(){
+  document.getElementById('nd-len-lbl').textContent=`${ND.pat.length}일 반복`;
+  const g=document.getElementById('nd-cells'); g.innerHTML='';
+  ND.pat.forEach((sh,i)=>{
+    const m=SM[sh]||SM.of, c=document.createElement('div');
+    c.className=`pcell pc-${sh==='dr'?'dr':sh==='nr'?'nr':'of'}`;
+    c.innerHTML=`<span class="pi">${m.i}</span><span>${m.s}</span><span class="pn">${i+1}일</span>`;
+    c.onclick=()=>{ND.pat[i]=ND.pick;ndRender();ndPreview();};
+    g.appendChild(c);
   });
 }
-function ntRenderPreview(){
-  const startVal=document.getElementById('new-team-start').value;
-  if(!startVal) return;
-  const p=startVal.split('-');
-  const start=new Date(+p[0],+p[1]-1,+p[2]);
-  const today=new Date();
-  const list=document.getElementById('nt-preview'); list.innerHTML='';
+function ndPreview(){
+  const sv=document.getElementById('nd-start').value;
+  if(!sv)return;
+  const p=sv.split('-'), start=new Date(+p[0],+p[1]-1,+p[2]);
+  const today=new Date(), list=document.getElementById('nd-preview'); list.innerHTML='';
   for(let i=0;i<14;i++){
-    const date=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);
-    const diff=Math.floor((date-start)/86400000);
-    const sh=diff>=0?NT.pattern[diff%NT.pattern.length]:null;
-    const isToday=i===0; const m=sh?SM[sh]:null;
+    const dt=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);
+    const diff=Math.floor((dt-start)/86400000);
+    const sh=diff>=0?ND.pat[diff%ND.pat.length]:null;
+    const isT=i===0, m=sh?SM[sh]:null;
     const row=document.createElement('div');
-    row.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--bg3);border:1px solid ${isToday?'var(--day-r)':'var(--border)'}`;
-    const dow=['일','월','화','수','목','금','토'][date.getDay()];
-    row.innerHTML=`<span style="font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text2)">${date.getMonth()+1}/${date.getDate()} (${dow})${isToday?' <b style="color:var(--day-r)">오늘</b>':''}</span>
-      ${m?`<span class="cell-badge ${m.cls}" style="font-size:.7rem;padding:3px 8px">${m.icon} ${m.label}</span>`:''}`;
+    row.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:5px 9px;border-radius:7px;background:var(--bg3);border:1px solid ${isT?'var(--a)':'var(--bd)'}`;
+    const dow=['일','월','화','수','목','금','토'][dt.getDay()];
+    row.innerHTML=`<span style="font-size:.73rem;font-family:'JetBrains Mono',monospace;color:var(--tx2)">${dt.getMonth()+1}/${dt.getDate()} (${dow})${isT?' <b style="color:var(--a)">오늘</b>':''}</span>
+      ${m?`<span class="cb ${m.c}" style="font-size:.68rem;padding:2px 7px">${m.i} ${m.l}</span>`:''}`;
     list.appendChild(row);
   }
 }
-// start date 변경 시 미리보기 갱신
-document.getElementById('new-team-start').addEventListener('change', ntRenderPreview);
+document.getElementById('nd-start').addEventListener('change',ndPreview);
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  TEAM CRUD
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function createTeam(){
-  const name=document.getElementById('new-team-name').value.trim();
-  const startVal=document.getElementById('new-team-start').value;
-  if(!name){showToast('팀 이름을 입력해주세요');return;}
-  if(!startVal){showToast('시작 날짜를 입력해주세요');return;}
-  if(!NT.pattern.length){showToast('패턴을 설정해주세요');return;}
-
-  const p=startVal.split('-');
-  const patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
-
-  const id='T'+uid();
-  const color=COLORS[Math.floor(Math.random()*COLORS.length)];
-
-  // 팀 패턴 (모두 공유)
-  const teamPattern={pattern:NT.pattern,patternStart};
-
-  // Firebase 팀 생성
-  await dbSet('teams/'+id,{
-    id, name, color, createdBy:S.myId, createdAt:Date.now(),
-    pattern:teamPattern,
-    members:{[S.myId]:{name:S.myName,color:S.myColor,overrides:{},updatedAt:Date.now()}},
+async function createDivision(){
+  const name=document.getElementById('nd-name').value.trim();
+  const sv=document.getElementById('nd-start').value;
+  if(!name){showToast('과 이름을 입력해주세요');return;}
+  if(!sv){showToast('시작 날짜를 입력해주세요');return;}
+  const p=sv.split('-'), patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
+  const divId='D'+uid();
+  const me={name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()};
+  await dbS(`teams/${ND.topId}/divs/${divId}`,{
+    id:divId,name,pattern:{pattern:ND.pat,patternStart},
+    members:{[S.myId]:me}, createdBy:S.myId,createdAt:Date.now(),
   });
-  await dbSet('teamIndex/'+id,{name,color,memberCount:1,createdAt:Date.now()});
-
-  // 팀 패턴 캐시
-  S.teamPatternCache[id]=teamPattern;
-  S.joinedTeamIds.push(id);
-  S.activeTeamId=id;
-
+  // 팀 인덱스에 과 이름 추가
+  const idx=await dbG('teamIndex/'+ND.topId)||{};
+  const divNames=idx.divNames||[];
+  divNames.push({id:divId,name});
+  await dbS('teamIndex/'+ND.topId,{...idx,divNames,divCount:(idx.divCount||0)+1});
+  // 내 joined에 추가
+  const topInfo=await dbG('teamIndex/'+ND.topId);
+  S.joined=S.joined.filter(j=>!(j.topId===ND.topId&&j.divId===divId));
+  S.joined.push({topId:ND.topId,topName:topInfo?.name||'',topColor:topInfo?.color||'#f59e0b',divId,divName:name});
+  S.activeTopId=ND.topId; S.activeDivId=divId;
+  S.patCache[`${ND.topId}_${divId}`]={pattern:ND.pat,patternStart};
   await saveProfile();
-  closeSheet('new-team-sheet-overlay');
-  renderCal();
-  showToast(`"${name}" 팀 만들어짐 🎉`);
+  cs('new-div-sov');
+  refreshCal(); showToast(`"${name}" 과 만들어짐 ✓`);
 }
 
-// 팀 목록 (실시간)
-let teamsUnsub=null;
-function renderTeamListPage(){
+// ━━ ALL TEAMS LIST ━━
+function renderAllTeams(){
   const box=document.getElementById('all-teams-list');
-  box.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div class="spinner"></div></div>';
+  box.innerHTML='<div style="text-align:center;padding:18px;color:var(--tx3)"><div class="sp"></div></div>';
   if(teamsUnsub){teamsUnsub();teamsUnsub=null;}
-  teamsUnsub=dbListen('teamIndex',teams=>{
+  teamsUnsub=dbL('teamIndex',teams=>{
     box.innerHTML='';
     if(!teams||!Object.keys(teams).length){
-      box.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:.82rem">아직 만들어진 팀이 없어요.<br>위의 버튼으로 팀을 만들어보세요!</div>';
+      box.innerHTML='<div style="text-align:center;padding:22px;color:var(--tx3);font-size:.8rem">아직 만들어진 팀이 없어요.<br>위의 버튼으로 팀을 만들어보세요!</div>';
       return;
     }
-    Object.entries(teams).forEach(([id,info])=>{
-      const joined=S.joinedTeamIds.includes(id);
-      const card=document.createElement('div');
-      card.className='team-list-card'+(joined?' joined':'');
-      card.innerHTML=`
-        <div class="team-icon" style="background:${info.color||'#f59e0b'}">${(info.name||'?')[0]}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.9rem;font-weight:800">${info.name||'팀'}</div>
-          <div style="font-size:.65rem;color:var(--text3);margin-top:2px">팀원 ${info.memberCount||0}명${joined?' · <span style="color:var(--day-r);font-weight:700">참여 중</span>':''}</div>
+    Object.entries(teams).forEach(([topId,info])=>{
+      const isLeader=info.createdBy===S.myId;
+      const myDivIds=S.joined.filter(j=>j.topId===topId).map(j=>j.divId);
+      const card=document.createElement('div'); card.className='card';
+      card.style.marginBottom='10px';
+      // 팀 헤더
+      const hdr=document.createElement('div');
+      hdr.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px';
+      hdr.innerHTML=`<div class="team-icon" style="background:${info.color||'#f59e0b'}">${(info.name||'?')[0]}</div>
+        <div style="flex:1">
+          <div style="font-size:.9rem;font-weight:800">${info.name||'팀'}${isLeader?' <span style="font-size:.62rem;color:var(--a);font-weight:700">팀장</span>':''}</div>
+          <div style="font-size:.63rem;color:var(--tx3);margin-top:2px">과 ${(info.divNames||[]).length}개</div>
         </div>
-        <button class="btn btn-sm ${joined?'btn-danger':'btn-primary'}" onclick="event.stopPropagation();openTeamInfo('${id}')">${joined?'상세':'참여'}</button>`;
-      card.onclick=()=>openTeamInfo(id);
+        ${isLeader?`<button class="btn sec sm" onclick="openNewDivSheet('${topId}')">+ 과 추가</button>`:''}`;
+      card.appendChild(hdr);
+      // 하위 과 목록
+      const divs=info.divNames||[];
+      if(!divs.length){
+        const em=document.createElement('div');
+        em.style.cssText='font-size:.75rem;color:var(--tx3);padding:8px 0';
+        em.textContent=isLeader?'아직 과가 없어요. 위의 버튼으로 과를 추가하세요.':'과가 아직 없어요.';
+        card.appendChild(em);
+      } else {
+        divs.forEach(({id:divId,name:divName})=>{
+          const joined=myDivIds.includes(divId);
+          const dc=document.createElement('div'); dc.className='div-card';
+          dc.innerHTML=`<div>
+              <span style="font-size:.82rem;font-weight:700">${divName}</span>
+              ${joined?'<span style="font-size:.6rem;color:var(--a);font-weight:700;margin-left:6px">✓ 참여중</span>':''}
+            </div>
+            <button class="btn sm ${joined?'dan':'pri'}" onclick="openDivInfo('${topId}','${divId}','${divName}')">
+              ${joined?'상세':'참여'}
+            </button>`;
+          card.appendChild(dc);
+        });
+      }
       box.appendChild(card);
     });
   });
 }
 
-async function openTeamInfo(teamId){
-  S.viewingTeamId=teamId;
-  const team=await dbGet('teams/'+teamId);
-  S.viewingTeamData=team;
-  const joined=S.joinedTeamIds.includes(teamId);
-  document.getElementById('team-info-title').textContent=(team?.name||'팀')+' 정보';
-
+async function openDivInfo(topId,divId,divName){
+  viewTopId=topId; viewDivId=divId;
+  const div=await dbG(`teams/${topId}/divs/${divId}`);
+  viewData=div;
+  const joined=S.joined.some(j=>j.topId===topId&&j.divId===divId);
+  const topInfo=await dbG('teamIndex/'+topId);
+  document.getElementById('ti-title').textContent=`${topInfo?.name||'팀'} · ${divName}`;
   // 패턴 표시
-  const tp=team?.pattern;
-  const patEl=document.getElementById('team-info-pattern');
+  const tp=div?.pattern;
+  const patEl=document.getElementById('ti-pattern');
   if(tp){
-    const start=new Date(tp.patternStart);
-    patEl.innerHTML=`📅 시작일: <b>${start.getFullYear()}년 ${start.getMonth()+1}월 ${start.getDate()}일</b><br>
-      🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.icon+SM[s]?.short||s).join(' → ')} 반복`;
-  } else { patEl.textContent='패턴 정보 없음'; }
-
+    const st=new Date(tp.patternStart);
+    patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b>　🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;
+  } else patEl.textContent='패턴 정보 없음';
   // 팀원
-  const membersEl=document.getElementById('team-info-members');
-  membersEl.innerHTML='<div class="section-title">팀원</div>';
-  Object.entries(team?.members||{}).forEach(([id,m])=>{
-    const isMe=id===S.myId;
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';
-    row.innerHTML=`<div style="width:28px;height:28px;border-radius:50%;background:${m.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#000;flex-shrink:0">${(m.name||'?')[0]}</div>
-      <span style="font-size:.85rem;font-weight:700">${m.name||'?'}${isMe?' <span style="color:var(--day-r);font-size:.65rem">나</span>':''}</span>`;
-    membersEl.appendChild(row);
+  const mEl=document.getElementById('ti-members'); mEl.innerHTML='<div class="stitle">팀원</div>';
+  Object.entries(div?.members||{}).forEach(([id,m])=>{
+    const r=document.createElement('div');
+    r.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)';
+    r.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${m.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:#000;flex-shrink:0">${(m.name||'?')[0]}</div>
+      <span style="font-size:.82rem;font-weight:700">${m.name||'?'}${id===S.myId?' <span style="color:var(--a);font-size:.62rem">나</span>':''}</span>`;
+    mEl.appendChild(r);
   });
-
-  const joinBtn=document.getElementById('team-join-btn');
-  joinBtn.textContent=joined?'팀 나가기':'이 팀에 참여하기 (팀 패턴 적용)';
-  joinBtn.className='btn btn-full '+(joined?'btn-danger':'btn-primary');
-  document.getElementById('team-info-sheet-overlay').classList.add('open');
+  const jb=document.getElementById('ti-join-btn');
+  jb.textContent=joined?'이 과 나가기':'이 과에 참여하기';
+  jb.className='btn fw '+(joined?'dan':'pri');
+  os('team-info-sov');
 }
 
-async function toggleJoinTeam(){
-  const id=S.viewingTeamId;
-  const joined=S.joinedTeamIds.includes(id);
+async function toggleJoin(){
+  const topId=viewTopId, divId=viewDivId;
+  const joined=S.joined.some(j=>j.topId===topId&&j.divId===divId);
   if(joined){
-    if(!confirm('팀을 나가면 해당 팀의 달력이 사라져요. 나가시겠어요?'))return;
-    S.joinedTeamIds=S.joinedTeamIds.filter(x=>x!==id);
-    if(S.activeTeamId===id) S.activeTeamId=S.joinedTeamIds[0]||'';
-    await dbSet('teams/'+id+'/members/'+S.myId, null);
-    showToast('팀을 나갔어요');
+    if(!confirm('이 과를 나가시겠어요?'))return;
+    S.joined=S.joined.filter(j=>!(j.topId===topId&&j.divId===divId));
+    if(S.activeTopId===topId&&S.activeDivId===divId){
+      S.activeTopId=S.joined[0]?.topId||''; S.activeDivId=S.joined[0]?.divId||'';
+    }
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
+    showToast('과를 나갔어요');
   } else {
-    // 팀 패턴 가져와서 캐시
-    const team=S.viewingTeamData||await dbGet('teams/'+id);
-    if(team?.pattern) S.teamPatternCache[id]=team.pattern;
-    S.joinedTeamIds.push(id);
-    if(!S.activeTeamId) S.activeTeamId=id;
-    // 팀에 나를 추가
-    await dbSet('teams/'+id+'/members/'+S.myId,{name:S.myName,color:S.myColor,overrides:{},updatedAt:Date.now()});
-    showToast('팀에 참여했어요! 팀 패턴이 달력에 적용됩니다 👋');
+    const div=viewData||await dbG(`teams/${topId}/divs/${divId}`);
+    if(div?.pattern) S.patCache[`${topId}_${divId}`]=div.pattern;
+    const topInfo=await dbG('teamIndex/'+topId);
+    S.joined.push({topId,topName:topInfo?.name||'',topColor:topInfo?.color||'#f59e0b',
+      divId,divName:viewDivId});
+    if(!S.activeTopId){S.activeTopId=topId; S.activeDivId=divId;}
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,
+      {name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
+    showToast('과에 참여했어요 👋');
   }
-  // memberCount 업데이트
-  const members=await dbGet('teams/'+id+'/members');
-  const cnt=Object.keys(members||{}).length;
-  const info=await dbGet('teamIndex/'+id);
-  if(info) await dbSet('teamIndex/'+id,{...info,memberCount:cnt});
-
   await saveProfile();
-  closeSheet('team-info-sheet-overlay');
-  renderCal();
-  renderTeamListPage();
+  cs('team-info-sov');
+  renderAllTeams(); renderCal();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  TEAM CALENDAR (실시간)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let teamCalUnsub=null, chatUnsub=null, currentChatTeam='';
+// ━━ TEAM CALENDAR ━━
+function renderTeamCal(){
+  const{tyr,tmo}=S;
+  document.getElementById('tcal-sub').textContent=`${tyr}년 ${tmo+1}월`;
 
-async function renderTeamCal(){
-  document.getElementById('team-month-label').textContent=`${S.teamYear}년 ${S.teamMonth+1}월`;
-  const strip=document.getElementById('team-tab-strip'); strip.innerHTML='';
-  const noMsg=document.getElementById('no-team-msg'), wrap=document.getElementById('team-cal-wrap');
+  // 내가 속한 상위팀 목록
+  const topIds=[...new Set(S.joined.map(j=>j.topId))];
+  const noMsg=document.getElementById('no-team-tcal'), body=document.getElementById('tcal-body');
+  if(!topIds.length){noMsg.style.display='';body.style.display='none';return;}
+  noMsg.style.display='none'; body.style.display='';
 
-  if(!S.joinedTeamIds.length){noMsg.style.display='';wrap.style.display='none';return;}
-  noMsg.style.display='none'; wrap.style.display='';
-  if(!S.activeTeamId||!S.joinedTeamIds.includes(S.activeTeamId)) S.activeTeamId=S.joinedTeamIds[0];
+  if(!S.activeTopId||!topIds.includes(S.activeTopId)) S.activeTopId=topIds[0];
 
-  // 탭 버튼 (팀 이름)
-  const idx=await dbGet('teamIndex')||{};
-  S.joinedTeamIds.forEach(id=>{
+  // 상위팀 탭
+  const topTabs=document.getElementById('top-team-tabs'); topTabs.innerHTML='';
+  topIds.forEach(tid=>{
+    const info=S.joined.find(j=>j.topId===tid);
     const btn=document.createElement('button');
-    btn.className='team-tab-btn'+(id===S.activeTeamId?' active':'');
-    btn.textContent=idx[id]?.name||id;
-    btn.onclick=async()=>{S.activeTeamId=id;await saveProfile();renderTeamCal();};
-    strip.appendChild(btn);
+    btn.className='div-tab'+(tid===S.activeTopId?' on':'');
+    btn.textContent=info?.topName||tid;
+    btn.onclick=async()=>{S.activeTopId=tid;S.activeDivId=S.joined.find(j=>j.topId===tid)?.divId||'';await saveProfile();renderTeamCal();};
+    topTabs.appendChild(btn);
   });
 
-  // 팀 패턴 캐시 업데이트
-  const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
-  if(tp) S.teamPatternCache[S.activeTeamId]=tp;
+  // 현재 상위팀에 속한 과 목록
+  const myDivs=S.joined.filter(j=>j.topId===S.activeTopId);
+  if(!S.tcalDivId||!myDivs.find(d=>d.divId===S.tcalDivId)) S.tcalDivId=myDivs[0]?.divId||'';
 
-  // 실시간으로 팀원 데이터 리스닝
-  if(teamCalUnsub){teamCalUnsub();teamCalUnsub=null;}
-  teamCalUnsub=dbListen('teams/'+S.activeTeamId+'/members', members=>{
-    buildTeamTable(members||{});
+  // 하위 과 탭 (오늘 근무자 카드 내부)
+  const divTabs=document.getElementById('div-tabs'); divTabs.innerHTML='';
+  myDivs.forEach(({divId,divName})=>{
+    const btn=document.createElement('button');
+    btn.className='div-tab'+(divId===S.tcalDivId?' on':'');
+    btn.textContent=divName;
+    btn.onclick=()=>{S.tcalDivId=divId;renderTodayWorkers();renderMonthTable();};
+    divTabs.appendChild(btn);
   });
 
-  // 채팅 시작
-  startChat(S.activeTeamId);
+  // 오늘 날짜 라벨
+  const today=new Date();
+  document.getElementById('today-date-label').textContent=
+    `${today.getMonth()+1}월 ${today.getDate()}일 (${['일','월','화','수','목','금','토'][today.getDay()]}) 근무자`;
+
+  // 실시간 리스닝
+  if(tcalUnsub){tcalUnsub();tcalUnsub=null;}
+  tcalUnsub=dbL(`teams/${S.activeTopId}/divs/${S.tcalDivId}/members`, members=>{
+    renderTodayWorkers(members);
+    renderMonthTable(members);
+  });
+
+  startChat(S.activeTopId);
 }
 
-function buildTeamTable(members){
-  const yr=S.teamYear, mo=S.teamMonth, last=new Date(yr,mo+1,0);
-  const list=Object.entries(members).map(([id,m])=>({
-    id, name:m.name||'?', color:m.color||'#999',
-    overrides:m.overrides||{}, isMe:id===S.myId,
-  }));
-  list.sort((a,b)=>a.isMe?-1:b.isMe?1:0);
-
-  const tbl=document.getElementById('team-table'); tbl.innerHTML='';
-  const htr=document.createElement('tr');
-  htr.innerHTML='<th class="name-col">이름</th>';
-  for(let d=1;d<=last.getDate();d++){
-    const date=new Date(yr,mo,d), dow=date.getDay();
-    const th=document.createElement('th');
-    th.className=`day-th ${dow===0?'sun':dow===6?'sat':''}`;
-    th.textContent=d; htr.appendChild(th);
+function renderTodayWorkers(members){
+  if(!members){
+    dbG(`teams/${S.activeTopId}/divs/${S.tcalDivId}/members`).then(m=>renderTodayWorkers(m));
+    return;
   }
-  tbl.appendChild(htr);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const topId=S.activeTopId, divId=S.tcalDivId;
+  const workers={dr:[],ds:[],nr:[],ns:[],of:[],vc:[]};
+  Object.entries(members||{}).forEach(([uid,m])=>{
+    const sh=getMemberShift(today,m.ov||{},topId,divId);
+    if(sh) workers[sh].push({name:m.name||'?',color:m.color||'#999',isMe:uid===S.myId});
+  });
+  const box=document.getElementById('today-workers'); box.innerHTML='';
+  const groups=[
+    {key:'dr',label:'☀️ 주간 정규',cls:'tw-day'},
+    {key:'ds',label:'🌤 주간 대근',cls:'tw-day'},
+    {key:'nr',label:'🌙 야간 정규',cls:'tw-night'},
+    {key:'ns',label:'🌛 야간 대근',cls:'tw-night'},
+    {key:'of',label:'🏠 휴무',cls:'tw-off'},
+    {key:'vc',label:'🌴 연차',cls:'tw-vac'},
+  ];
+  let any=false;
+  groups.forEach(({key,label,cls})=>{
+    const list=workers[key]; if(!list.length)return; any=true;
+    const sec=document.createElement('div'); sec.className='tw-section';
+    sec.innerHTML=`<div class="tw-title">${label} <span class="tw-badge ${cls}">${list.length}명</span></div>`;
+    list.forEach(w=>{
+      const r=document.createElement('div'); r.className='worker-row';
+      r.innerHTML=`<div class="worker-dot" style="background:${w.color}"></div>
+        <span class="worker-name">${w.name}${w.isMe?' ★':''}</span>`;
+      sec.appendChild(r);
+    });
+    box.appendChild(sec);
+  });
+  if(!any){
+    const e=document.createElement('div'); e.className='empty-workers';
+    e.textContent='등록된 팀원이 없어요'; box.appendChild(e);
+  }
+}
 
+function renderMonthTable(members){
+  if(!monthTableOpen)return;
+  if(!members){dbG(`teams/${S.activeTopId}/divs/${S.tcalDivId}/members`).then(m=>renderMonthTable(m));return;}
+  const yr=S.tyr,mo=S.tmo,last=new Date(yr,mo+1,0);
+  const topId=S.activeTopId,divId=S.tcalDivId;
+  const list=Object.entries(members||{}).map(([id,m])=>({id,name:m.name||'?',color:m.color||'#999',ov:m.ov||{},isMe:id===S.myId}));
+  list.sort((a,b)=>a.isMe?-1:b.isMe?1:0);
+  const tbl=document.getElementById('team-table'); tbl.innerHTML='';
+  const htr=document.createElement('tr'); htr.innerHTML='<th class="ncol">이름</th>';
+  for(let d=1;d<=last.getDate();d++){const dt=new Date(yr,mo,d),dow=dt.getDay();const th=document.createElement('th');th.className=`dth ${dow===0?'sun':dow===6?'sat':''}`;th.textContent=d;htr.appendChild(th);}
+  tbl.appendChild(htr);
   list.forEach(m=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="name-col"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:4px;vertical-align:middle"></span>${m.name}${m.isMe?' ★':''}</td>`;
+    tr.innerHTML=`<td class="ncol"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:3px;vertical-align:middle"></span>${m.name}${m.isMe?' ★':''}</td>`;
     for(let d=1;d<=last.getDate();d++){
-      const date=new Date(yr,mo,d);
-      const sh=getMemberShift(date, m.overrides);
+      const dt=new Date(yr,mo,d),sh=getMemberShift(dt,m.ov,topId,divId);
       const td=document.createElement('td');
-      td.innerHTML=sh?`<span class="team-cell ${SM[sh].tcls}">${TEAM_LBL[sh]}</span>`:`<span class="team-cell tc-none">-</span>`;
+      td.innerHTML=sh?`<span class="tc ${SM[sh].tc}">${TL[sh]}</span>`:`<span class="tc tc-x">-</span>`;
       tr.appendChild(td);
     }
     tbl.appendChild(tr);
   });
 }
 
-function changeTeamMonth(d){S.teamMonth+=d;if(S.teamMonth>11){S.teamMonth=0;S.teamYear++;}if(S.teamMonth<0){S.teamMonth=11;S.teamYear--;}renderTeamCal();}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  CHAT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function startChat(teamId){
-  if(chatUnsub){chatUnsub();chatUnsub=null;}
-  currentChatTeam=teamId;
-  chatUnsub=dbListen('chats/'+teamId, msgs=>{
-    renderChatMsgs(msgs);
-  });
+function toggleMonthTable(){
+  monthTableOpen=!monthTableOpen;
+  document.getElementById('month-table-wrap').style.display=monthTableOpen?'':'none';
+  document.getElementById('month-toggle-btn').textContent=monthTableOpen?'접기 ▲':'펼치기 ▼';
+  if(monthTableOpen)renderMonthTable();
 }
-function renderChatMsgs(msgs){
-  const box=document.getElementById('chat-messages');
-  const wasBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+
+function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}renderTeamCal();}
+
+// ━━ CHAT ━━
+let chatTopId='';
+function startChat(topId){
+  stopChat(); chatTopId=topId;
+  chatUnsub=dbL('chats/'+topId, msgs=>renderChat(msgs));
+}
+function stopChat(){if(chatUnsub){chatUnsub();chatUnsub=null;}}
+function renderChat(msgs){
+  const box=document.getElementById('chat-box');
+  const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
   box.innerHTML='';
   if(!msgs||!Object.keys(msgs).length){
-    box.innerHTML='<div style="text-align:center;color:var(--text3);font-size:.75rem;padding:16px">첫 메시지를 남겨보세요 💬</div>';
+    box.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:.73rem;padding:14px">첫 메시지를 남겨보세요 💬</div>';
     return;
   }
   Object.values(msgs).sort((a,b)=>a.ts-b.ts).forEach(msg=>{
     const isMe=msg.uid===S.myId;
-    const div=document.createElement('div'); div.className=`chat-msg ${isMe?'me':'other'}`;
+    const div=document.createElement('div'); div.className=`cmsg ${isMe?'me':'other'}`;
     const t=new Date(msg.ts);
     const ts=`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
-    const escaped=String(msg.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
-    div.innerHTML=`${!isMe?`<div class="chat-name">${msg.name||'?'}</div>`:''}
-      <div class="chat-bubble">${escaped}</div>
-      <div class="chat-time">${ts}</div>`;
+    const txt=String(msg.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    div.innerHTML=`${!isMe?`<div class="cname">${msg.name||'?'}</div>`:''}
+      <div class="cbub">${txt}</div><div class="ctime">${ts}</div>`;
     box.appendChild(div);
   });
-  if(wasBottom) box.scrollTop=box.scrollHeight;
+  if(atBottom)box.scrollTop=box.scrollHeight;
 }
 async function sendChat(){
-  const inp=document.getElementById('chat-input');
-  const text=inp.value.trim();
-  if(!text||!currentChatTeam) return;
+  const inp=document.getElementById('chat-in'), text=inp.value.trim();
+  if(!text||!chatTopId)return;
   inp.value='';
-  await dbPush('chats/'+currentChatTeam,{uid:S.myId,name:S.myName,text,ts:Date.now()});
+  await dbP('chats/'+chatTopId,{uid:S.myId,name:S.myName,text,ts:Date.now()});
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SETTINGS (연차)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  SETTINGS PAGE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function renderSettingsPage(){
-  const av=document.getElementById('settings-avatar');
-  if(av){ av.textContent=S.myName?S.myName[0]:'?'; av.style.background=S.myColor||'#f59e0b'; }
-  const nm=document.getElementById('settings-name');
-  if(nm) nm.textContent=S.myName||'';
-  document.getElementById('total-vacation-input').value=S.totalVacation||'';
-  updateVacSummary();
-  // 현재 테마 버튼 강조
-  const isDark=!document.body.classList.contains('light');
-  document.getElementById('btn-dark').className='btn btn-full'+(isDark?' btn-primary':'');
-  document.getElementById('btn-light').className='btn btn-full'+(!isDark?' btn-primary':'');
+// ━━ SETTINGS ━━
+function renderSettings(){
+  const av=document.getElementById('av');
+  av.textContent=S.myName?S.myName[0]:'?'; av.style.background=S.myColor||'#f59e0b';
+  document.getElementById('av-name').textContent=S.myName||'';
+  document.getElementById('vac-inp').value=S.vacTotal||'';
+  updateVacSum();
+  const dark=!document.body.classList.contains('light');
+  document.getElementById('btn-dark').className='btn fg'+(dark?' pri':'');
+  document.getElementById('btn-light').className='btn fg'+(!dark?' pri':'');
 }
-
-function setTheme(mode){
-  if(mode==='light'){
-    document.body.classList.add('light');
-    document.querySelector('meta[name="theme-color"]').setAttribute('content','#f5f5f5');
-  } else {
-    document.body.classList.remove('light');
-    document.querySelector('meta[name="theme-color"]').setAttribute('content','#0f1117');
-  }
-  ls.set('theme',mode);
-  renderSettingsPage();
+function setTheme(m){
+  document.body.classList.toggle('light',m==='light');
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');
+  ls.s('theme',m); renderSettings();
 }
-
-function applyTheme(){
-  const saved=ls.get('theme');
-  if(saved==='light') setTheme('light');
+function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
+async function saveVac(){
+  S.vacTotal=parseInt(document.getElementById('vac-inp').value)||0;
+  renderCal(); updateVacSum(); await saveProfile();
 }
-async function saveTotalVacation(){
-  S.totalVacation=parseInt(document.getElementById('total-vacation-input').value)||0;
-  renderCal(); updateVacSummary();
-  await saveProfile();
-}
-function updateVacSummary(){
+function updateVacSum(){
   const today=new Date(); today.setHours(0,0,0,0);
-  let used=0;
+  let u=0;
   for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))
-    if(getShift(new Date(d))==='vc') used++;
-  const el=document.getElementById('vac-summary');
-  if(el) el.textContent=`${used} / ${S.totalVacation||0}`;
+    if(getShift(new Date(d))==='vc')u++;
+  const el=document.getElementById('vac-sum');
+  if(el)el.textContent=`${u}/${S.vacTotal||0}`;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  UTILS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function closeSheet(id){document.getElementById(id).classList.remove('open');}
-['day-sheet-overlay','new-team-sheet-overlay','team-info-sheet-overlay'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeSheet(id);});
+// ━━ UTILS ━━
+['day-sov','new-top-sov','new-div-sov','team-info-sov'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
-let toastTimer;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500);}
-
-function renderSavedAccounts(){
-  const box=document.getElementById('saved-accounts'); box.innerHTML='';
-  const sess=ls.get('session');
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('sh');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('sh'),2300);
+}
+function renderSavedAccts(){
+  const box=document.getElementById('saved-accts'); box.innerHTML='';
+  const sess=ls.g('sess');
   if(sess?.name){
-    const lbl=document.createElement('div');lbl.style.cssText='font-size:.68rem;color:var(--text3);text-align:center;margin-bottom:6px';lbl.textContent='최근 계정';box.appendChild(lbl);
-    const btn=document.createElement('button');btn.className='quick-acct';
+    const lbl=document.createElement('div');lbl.style.cssText='font-size:.66rem;color:var(--tx3);text-align:center;margin-bottom:5px';lbl.textContent='최근 계정';box.appendChild(lbl);
+    const btn=document.createElement('button');btn.className='quick-btn';
     btn.innerHTML=`<span>👤</span>${sess.name}으로 빠른 로그인`;
-    btn.onclick=()=>{document.getElementById('login-name').value=sess.name;document.getElementById('login-pw').focus();};
+    btn.onclick=()=>{document.getElementById('ln').value=sess.name;document.getElementById('lp').focus();};
     box.appendChild(btn);
   }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  BOOT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ BOOT ━━
 async function boot(){
   const t=new Date();
-  S.year=t.getFullYear(); S.month=t.getMonth();
-  S.teamYear=t.getFullYear(); S.teamMonth=t.getMonth();
-
+  S.yr=t.getFullYear();S.mo=t.getMonth();S.tyr=t.getFullYear();S.tmo=t.getMonth();
   applyTheme();
-
-  // 팀 배지 (cal-nav 안)
-  if(S.activeTeamId){
-    const info=await dbGet('teamIndex/'+S.activeTeamId);
+  // 패턴 캐시 로드
+  for(const{topId,divId}of S.joined){
+    const tp=await dbG(`teams/${topId}/divs/${divId}/pattern`);
+    if(tp) S.patCache[`${topId}_${divId}`]=tp;
+  }
+  // 팀 배지
+  if(S.activeTopId&&S.activeDivId){
+    const info=await dbG('teamIndex/'+S.activeTopId);
+    const divName=await dbG(`teams/${S.activeTopId}/divs/${S.activeDivId}/name`);
     if(info){
-      const badge=document.getElementById('cal-team-badge');
-      const dot=document.getElementById('cal-team-dot');
-      const nm=document.getElementById('cal-team-name');
-      if(badge){ badge.style.display='flex'; }
-      if(dot)  { dot.style.background=info.color||'#f59e0b'; }
-      if(nm)   { nm.textContent=info.name; }
+      document.getElementById('cal-badge-dot').style.background=info.color||'#f59e0b';
+      document.getElementById('cal-badge-name').textContent=`${info.name}${divName?' · '+divName:''}`;
+      document.getElementById('cal-badge').style.display='flex';
     }
-    // 팀 패턴 로드
-    const tp=await dbGet('teams/'+S.activeTeamId+'/pattern');
-    if(tp) S.teamPatternCache[S.activeTeamId]=tp;
   }
   renderCal();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  INIT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━ INIT ━━
 async function onFbReady(){
   FB=window._fb;
-  renderSavedAccounts();
-  const sess=ls.get('session');
+  renderSavedAccts();
+  const sess=ls.g('sess');
   if(sess?.name&&sess?.id){
     S.myId=sess.id; S.myName=sess.name; S.myColor=sess.color||COLORS[0];
     try{
       await loadProfile(); S.myName=sess.name;
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('splash').classList.add('h');
+      document.getElementById('login-screen').classList.add('h');
       await boot(); return;
     }catch(e){console.error(e);}
   }
-  document.getElementById('splash').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('splash').classList.add('h');
+  document.getElementById('login-screen').classList.remove('h');
 }
-
 if(window._fbReady){onFbReady();}
 else{
   window.addEventListener('fbReady',onFbReady,{once:true});
-  setTimeout(()=>{
-    if(!window._fbReady){
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-err').textContent='⚠️ Firebase 연결 실패. 설정을 확인해주세요.';
-      document.getElementById('login-err').style.display='';
-    }
-  },5000);
+  setTimeout(()=>{if(!window._fbReady){
+    document.getElementById('splash').classList.add('h');
+    document.getElementById('login-screen').classList.remove('h');
+    const e=document.getElementById('lerr'); e.textContent='⚠️ Firebase 연결 실패'; e.style.display='';
+  }},5000);
 }
 </script>
 </body>
