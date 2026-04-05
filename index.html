@@ -147,9 +147,12 @@ textarea{resize:vertical;min-height:65px}
 .ttable{border-collapse:collapse;min-width:100%}
 .ttable th,.ttable td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
 .ttable th{font-size:.58rem;color:var(--tx3);font-weight:700;background:var(--bg3)}
-.ncol{text-align:left;padding-left:8px;font-size:.7rem;font-weight:700;min-width:52px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncol{text-align:left;padding-left:8px;font-size:.7rem;font-weight:700;min-width:52px;max-width:68px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  position:sticky;left:0;z-index:2;background:var(--bg3)}
+.ttable td.ncol{background:var(--bg2)}
 .dth{font-family:'JetBrains Mono',monospace;min-width:26px}
 .dth.sun{color:var(--red)}.dth.sat{color:#60a5fa}
+.dth.today-col{background:var(--a)!important;color:#000!important;border-radius:4px}
 .tc{width:26px;height:24px;border-radius:4px;font-size:.53rem;font-weight:700;vertical-align:middle}
 .tc-dr{background:var(--a-bg);color:var(--a)}.tc-ds{background:rgba(252,211,77,.14);color:var(--as)}
 .tc-nr{background:var(--n-bg);color:var(--n)}.tc-ns{background:rgba(165,180,252,.14);color:var(--ns)}
@@ -320,14 +323,83 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
+  </div>
+</div>
 
-    <!-- 팀 이벤트 -->
-    <div class="card" style="margin-top:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
-        <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
+<!-- PAGE: 대근 -->
+<div class="page" id="page-dg">
+  <div class="cnav">
+    <div class="cnav-l">
+      <div class="ctitle" id="dg-month"></div>
+      <div class="tbadge" id="dg-badge" style="display:none">
+        <div class="tbadge-dot" id="dg-badge-dot"></div>
+        <span class="tbadge-name" id="dg-badge-name"></span>
       </div>
-      <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
+    </div>
+    <div class="cnav-btns">
+      <button class="ibtn" onclick="dgGotoToday()" style="font-size:.68rem;font-weight:800">오늘</button>
+      <button class="ibtn" onclick="changeDgMonth(-1)">◀</button>
+      <button class="ibtn" onclick="changeDgMonth(1)">▶</button>
+    </div>
+  </div>
+
+  <div id="no-dg-banner" class="no-banner" style="display:none">
+    <div style="font-size:1.4rem;margin-bottom:8px">👥</div>
+    <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
+    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 대근 달력을 사용할 수 있습니다</div>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
+  </div>
+
+  <div id="dg-body" style="display:none">
+    <!-- 안내 -->
+    <div style="font-size:.75rem;color:var(--tx3);margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);line-height:1.6">
+      📌 날짜를 클릭해 <b style="color:var(--a)">연차 등록</b> 및 <b style="color:var(--n)">대근 지원자 모집</b>을 공고할 수 있어요
+    </div>
+    <div class="sstrip">
+      <div class="schip">
+        <div class="sct" style="color:var(--a)">☀️ 주간</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">정규</span><span class="scn" id="dg-dr" style="color:var(--a)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="dg-ds" style="color:var(--as)">0</span></div>
+        </div>
+      </div>
+      <div class="schip">
+        <div class="sct" style="color:var(--n)">🌙 야간</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">정규</span><span class="scn" id="dg-nr" style="color:var(--n)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="dg-ns" style="color:var(--ns)">0</span></div>
+        </div>
+      </div>
+      <div class="schip">
+        <div class="sct" style="color:var(--vac)">🌴 연차</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">사용</span><span class="scn" id="dg-vc" style="color:var(--vac)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">연차</span><span class="scn" id="dg-vt" style="color:var(--tx3)">-</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="dow-row">
+        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
+        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+      </div>
+      <div class="days-grid" id="dg-grid"></div>
+    </div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
+      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
+      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
+      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
+      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
+    </div>
+    <!-- 대근 모집 공고 목록 -->
+    <div class="card" style="margin-top:12px">
+      <div class="stitle">📢 대근 모집 공고</div>
+      <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">공고가 없어요</div></div>
     </div>
   </div>
 </div>
@@ -436,8 +508,9 @@ textarea{resize:vertical;min-height:65px}
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="bnav" style="grid-template-columns:repeat(3,1fr)">
+<nav class="bnav" style="grid-template-columns:repeat(4,1fr)">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
+  <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico">🔄</span>대근</button>
   <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
@@ -573,7 +646,63 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- 대근 날짜 클릭 시트 -->
+<div class="sov" id="dg-sov">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div class="stitle-s" id="dg-st"></div>
+    <div style="font-size:.72rem;color:var(--tx3);margin-bottom:12px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
+      팀 패턴: <span id="dg-base" style="color:var(--a);font-weight:700"></span>
+    </div>
+
+    <!-- 탭: 개인근무 / 대근공고 -->
+    <div style="display:flex;gap:0;margin-bottom:14px;border-radius:var(--rs);overflow:hidden;border:1px solid var(--bd)">
+      <button id="dg-tab-my" onclick="switchDgTab('my')"
+        style="flex:1;padding:9px;font-size:.8rem;font-weight:700;border:none;background:var(--a);color:#000;font-family:inherit;cursor:pointer">📅 내 근무</button>
+      <button id="dg-tab-rc" onclick="switchDgTab('rc')"
+        style="flex:1;padding:9px;font-size:.8rem;font-weight:700;border:none;background:var(--bg3);color:var(--tx2);font-family:inherit;cursor:pointer">📢 대근 공고</button>
+    </div>
+
+    <!-- 내 근무 탭 -->
+    <div id="dg-panel-my">
+      <div class="form-g">
+        <div class="lbl">근무 유형 (연차 등록 가능)</div>
+        <div class="spicker">
+          <input type="radio" name="dg-sh" id="dg-sh-dr" value="dr" class="sopt"><label for="dg-sh-dr" class="slbl sl-dr"><span class="si">☀️</span>주간<br>정규</label>
+          <input type="radio" name="dg-sh" id="dg-sh-ds" value="ds" class="sopt"><label for="dg-sh-ds" class="slbl sl-ds"><span class="si">🌤</span>주간<br>대근</label>
+          <input type="radio" name="dg-sh" id="dg-sh-nr" value="nr" class="sopt"><label for="dg-sh-nr" class="slbl sl-nr"><span class="si">🌙</span>야간<br>정규</label>
+          <input type="radio" name="dg-sh" id="dg-sh-ns" value="ns" class="sopt"><label for="dg-sh-ns" class="slbl sl-ns"><span class="si">🌛</span>야간<br>대근</label>
+          <input type="radio" name="dg-sh" id="dg-sh-of" value="of" class="sopt"><label for="dg-sh-of" class="slbl sl-of"><span class="si">🏠</span>휴무</label>
+          <input type="radio" name="dg-sh" id="dg-sh-vc" value="vc" class="sopt"><label for="dg-sh-vc" class="slbl sl-vc"><span class="si">🌴</span>연차</label>
+        </div>
+      </div>
+      <div class="fl">
+        <button class="btn sec fg" onclick="cs('dg-sov')">취소</button>
+        <button class="btn pri fg" onclick="saveDgMyShift()">저장</button>
+      </div>
+    </div>
+
+    <!-- 대근 공고 탭 -->
+    <div id="dg-panel-rc" style="display:none">
+      <!-- 공고 등록 (본인이 연차인 날만) -->
+      <div id="dg-post-area" style="display:none">
+        <div style="font-size:.78rem;color:var(--a);font-weight:700;margin-bottom:8px">📢 대근 지원자 모집 공고 등록</div>
+        <div class="form-g">
+          <div class="lbl">메모 (선택)</div>
+          <input type="text" id="dg-post-memo" placeholder="예: 주간 대근자 구합니다" maxlength="30">
+        </div>
+        <button class="btn pri fw" onclick="postDgRecruit()" style="margin-bottom:12px">공고 등록하기</button>
+      </div>
+      <!-- 기존 공고 -->
+      <div class="stitle" style="margin-bottom:8px">지원 현황</div>
+      <div id="dg-recruit-detail">
+        <div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">공고가 없어요</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <script>
 // ━━ CONSTANTS ━━
@@ -703,12 +832,15 @@ function showErr(msg){const e=document.getElementById('lerr');e.textContent=msg;
 function doLogout(){if(!confirm('로그아웃 할까요?'))return;ls.d('sess');location.reload();}
 
 // ━━ TABS ━━
-const TABS=['cal','tcal','settings'];
+const TABS=['cal','dg','tcal','settings'];
 function goTab(t){
   TABS.forEach(x=>{document.getElementById('page-'+x).classList.toggle('on',x===t);document.getElementById('ni-'+x).classList.toggle('on',x===t);});
   if(t==='tcal'){renderTeamCal();}else{stopChat();if(tcalUnsub){tcalUnsub();tcalUnsub=null;}}
   if(t==='settings')renderSettings();
-  if(t==='cal'){refreshCal();startEventListen();}else{if(eventUnsub){eventUnsub();eventUnsub=null;}}
+  if(t==='cal')refreshCal();
+  if(t==='dg')renderDgCal();
+  if(eventUnsub){eventUnsub();eventUnsub=null;}
+  if(t==='dg')startDgRecruitListen();
 }
 function openTeamMgr(){
   renderAllTeams();
@@ -994,7 +1126,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov','dg-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -1117,16 +1249,31 @@ function renderMonthTable(members){
   if(!members)return;
   const yr=S.tyr,mo=S.tmo,last=new Date(yr,mo+1,0);
   const topId=S.topId,divId=S.divId;
+  const todayStr=dkey(new Date());
   const list=Object.entries(members||{}).map(([id,m])=>({id,name:m.name||'?',color:m.color||'#999',ov:m.ov||{},isMe:id===S.myId}));
   list.sort((a,b)=>a.isMe?-1:b.isMe?1:0);
   const tbl=document.getElementById('team-table');tbl.innerHTML='';
-  const htr=document.createElement('tr');htr.innerHTML='<th class="ncol">이름</th>';
-  for(let d=1;d<=last.getDate();d++){const dt=new Date(yr,mo,d),dow=dt.getDay();const th=document.createElement('th');th.className=`dth ${dow===0?'sun':dow===6?'sat':''}`;th.textContent=d;htr.appendChild(th);}
+  const htr=document.createElement('tr');
+  const nameTh=document.createElement('th');nameTh.className='ncol';nameTh.textContent='이름';htr.appendChild(nameTh);
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(yr,mo,d),dow=dt.getDay();
+    const isToday=dkey(dt)===todayStr;
+    const th=document.createElement('th');
+    th.className=`dth ${dow===0?'sun':dow===6?'sat':''}${isToday?' today-col':''}`;
+    th.textContent=d;htr.appendChild(th);
+  }
   tbl.appendChild(htr);
   list.forEach(m=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="ncol"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:3px;vertical-align:middle"></span>${m.name}${m.isMe?' ★':''}</td>`;
-    for(let d=1;d<=last.getDate();d++){const dt=new Date(yr,mo,d),sh=getMemberShift(dt,m.ov,topId,divId);const td=document.createElement('td');td.innerHTML=sh?`<span class="tc ${SM[sh].tc}">${TL[sh]}</span>`:`<span class="tc tc-x">-</span>`;tr.appendChild(td);}
+    const nameTd=document.createElement('td');nameTd.className='ncol';
+    nameTd.innerHTML=`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:3px;vertical-align:middle"></span>${m.name}${m.isMe?' ★':''}`;
+    tr.appendChild(nameTd);
+    for(let d=1;d<=last.getDate();d++){
+      const dt=new Date(yr,mo,d),sh=getMemberShift(dt,m.ov,topId,divId);
+      const td=document.createElement('td');
+      td.innerHTML=sh?`<span class="tc ${SM[sh].tc}">${TL[sh]}</span>`:`<span class="tc tc-x">-</span>`;
+      tr.appendChild(td);
+    }
     tbl.appendChild(tr);
   });
 }
@@ -1138,7 +1285,228 @@ function toggleTable(){
 }
 function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 
-// ━━ CHAT ━━
+// ━━ DAEGEUN CALENDAR ━━
+let dgYr=0,dgMo=0,dgEditDate=null,dgCurTab='my',dgRecruitUnsub=null;
+
+function renderDgCal(){
+  const has=!!(S.topId&&S.divId);
+  document.getElementById('no-dg-banner').style.display=has?'none':'';
+  document.getElementById('dg-body').style.display=has?'block':'none';
+  if(!has)return;
+  // 배지
+  document.getElementById('dg-badge-dot').style.background=S.topColor||'#f59e0b';
+  document.getElementById('dg-badge-name').textContent=`${S.topName||''}${S.divName?' · '+S.divName:''}`;
+  document.getElementById('dg-badge').style.display='flex';
+
+  const yr=dgYr,mo=dgMo;
+  const today=new Date();today.setHours(0,0,0,0);
+  const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
+  document.getElementById('dg-month').textContent=`${yr}년 ${mo+1}월`;
+  const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
+  const grid=document.getElementById('dg-grid');grid.innerHTML='';
+  for(let i=0;i<first.getDay();i++)grid.appendChild(mkDgCell(new Date(yr,mo,i-first.getDay()+1),true));
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(yr,mo,d);const sh=getShift(dt);if(sh)stats[sh]=(stats[sh]||0)+1;
+    grid.appendChild(mkDgCell(dt,false));
+  }
+  const trail=(7-(first.getDay()+last.getDate())%7)%7;
+  for(let i=1;i<=trail;i++)grid.appendChild(mkDgCell(new Date(yr,mo+1,i),true));
+  const cells=grid.querySelectorAll('.dc'),tot=cells.length;
+  for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
+  ['dr','ds','nr','ns'].forEach(k=>document.getElementById('dg-'+k).textContent=stats[k]);
+  let uv=0;
+  for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))if(getShift(new Date(d))==='vc')uv++;
+  document.getElementById('dg-vc').textContent=uv;
+  document.getElementById('dg-vt').textContent=S.vacTotal>0?S.vacTotal:'-';
+}
+
+function mkDgCell(date,other){
+  const c=document.createElement('div');c.className='dc';
+  if(other){c.classList.add('om');return c;}
+  const dow=date.getDay();
+  if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
+  if(date.toDateString()===new Date().toDateString())c.classList.add('td');
+  const sh=getShift(date),isOv=!!S.ov[dkey(date)];
+  const row=document.createElement('div');row.className='dr';
+  const dn=document.createElement('div');dn.className='dn';dn.textContent=date.getDate();row.appendChild(dn);
+  if(sh){const b=document.createElement('div');b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;b.textContent=CL[sh];if(isOv)b.style.outline='1.5px solid currentColor';row.appendChild(b);}
+  c.appendChild(row);
+  // 대근 공고 있는 날 표시
+  const k=dkey(date);
+  c.addEventListener('click',()=>openDgSheet(date));
+  return c;
+}
+
+function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;dgYr--;}renderDgCal();}
+function dgGotoToday(){const t=new Date();dgYr=t.getFullYear();dgMo=t.getMonth();renderDgCal();}
+
+function switchDgTab(tab){
+  dgCurTab=tab;
+  document.getElementById('dg-panel-my').style.display=tab==='my'?'':'none';
+  document.getElementById('dg-panel-rc').style.display=tab==='rc'?'':'none';
+  document.getElementById('dg-tab-my').style.background=tab==='my'?'var(--a)':'var(--bg3)';
+  document.getElementById('dg-tab-my').style.color=tab==='my'?'#000':'var(--tx2)';
+  document.getElementById('dg-tab-rc').style.background=tab==='rc'?'var(--a)':'var(--bg3)';
+  document.getElementById('dg-tab-rc').style.color=tab==='rc'?'#000':'var(--tx2)';
+  if(tab==='rc')loadDgRecruitDetail();
+}
+
+async function openDgSheet(date){
+  dgEditDate=date;
+  const k=dkey(date),bSh=getBaseShift(date),sh=getShift(date)||'of';
+  document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
+  document.getElementById('dg-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
+  document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
+  switchDgTab('my');
+  os('dg-sov');
+}
+document.getElementById('dg-sov').addEventListener('click',function(e){if(e.target===this)cs('dg-sov');});
+
+async function saveDgMyShift(){
+  if(!dgEditDate)return;
+  const k=dkey(dgEditDate),sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
+  const bSh=getBaseShift(dgEditDate);
+  if(sh===bSh){delete S.ov[k];}
+  else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;}
+  cs('dg-sov');renderDgCal();renderCal();
+  await saveProfile();showToast('저장됨 ✓');
+}
+
+// 대근 공고 Firebase: recruits/{topId}/{dateKey}/{postId}
+async function postDgRecruit(){
+  if(!dgEditDate||!S.topId)return;
+  const k=dkey(dgEditDate);
+  const sh=getShift(dgEditDate);
+  if(sh!=='vc'){showToast('연차 등록 후 공고할 수 있어요');return;}
+  const memo=document.getElementById('dg-post-memo').value.trim();
+  await dbP(`recruits/${S.topId}/${k}`,{
+    uid:S.myId,name:S.myName,color:S.myColor,
+    baseShift:getBaseShift(dgEditDate)||'',
+    memo,applicants:{},createdAt:Date.now(),
+  });
+  document.getElementById('dg-post-memo').value='';
+  showToast('공고 등록됨 📢');
+  loadDgRecruitDetail();
+}
+
+async function loadDgRecruitDetail(){
+  if(!dgEditDate||!S.topId)return;
+  const k=dkey(dgEditDate);
+  const posts=await dbG(`recruits/${S.topId}/${k}`);
+  const box=document.getElementById('dg-recruit-detail');box.innerHTML='';
+  const sh=getShift(dgEditDate);
+  const isVc=sh==='vc';
+  // 본인이 연차인 날 → 공고 등록 버튼 표시
+  document.getElementById('dg-post-area').style.display=isVc?'':'none';
+  if(!posts||!Object.keys(posts).length){
+    box.innerHTML='<div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">공고가 없어요</div>';return;
+  }
+  Object.entries(posts).forEach(([postId,post])=>{
+    const isOwner=post.uid===S.myId;
+    const bShMeta=SM[post.baseShift]||null;
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--bg3);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px';
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:24px;height:24px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#000">${(post.name||'?')[0]}</div>
+        <div style="flex:1">
+          <span style="font-size:.82rem;font-weight:700">${post.name||'?'}</span>
+          ${bShMeta?`<span class="cb ${bShMeta.c}" style="margin-left:5px;font-size:.6rem">${bShMeta.i} ${bShMeta.l}</span>`:''}
+          ${isOwner?'<span style="font-size:.6rem;color:var(--a);font-weight:700;margin-left:4px">내 공고</span>':''}
+        </div>
+        ${isOwner?`<button class="btn dan sm" style="padding:4px 8px;font-size:.68rem" onclick="deleteDgPost('${postId}')">삭제</button>`:''}
+      </div>
+      ${post.memo?`<div style="font-size:.74rem;color:var(--tx2);margin-bottom:6px">💬 ${escHtml(post.memo)}</div>`:''}
+      <div style="font-size:.68rem;color:var(--tx3);margin-bottom:6px">지원자 ${Object.keys(post.applicants||{}).length}명</div>
+      <div id="applicants-${postId}" style="margin-bottom:6px"></div>
+      ${!isOwner?`<button class="btn pri fw" style="font-size:.78rem;padding:7px" onclick="applyDg('${postId}')">✋ 대근 지원하기</button>`:''}`;
+    // 지원자 목록
+    const applBox=card.querySelector(`#applicants-${postId}`);
+    Object.entries(post.applicants||{}).forEach(([uid,ap])=>{
+      const apRow=document.createElement('div');
+      apRow.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg2);border-radius:6px;margin-bottom:4px';
+      apRow.innerHTML=`<div style="width:20px;height:20px;border-radius:50%;background:${ap.color||'#999'};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#000;flex-shrink:0">${(ap.name||'?')[0]}</div>
+        <span style="font-size:.78rem;font-weight:700;flex:1">${ap.name||'?'}</span>
+        ${ap.status==='accepted'?'<span style="font-size:.62rem;color:var(--vac);font-weight:700">✓ 수락</span>':
+          ap.status==='rejected'?'<span style="font-size:.62rem;color:var(--red);font-weight:700">✗ 거절</span>':
+          isOwner?`<div style="display:flex;gap:4px"><button class="btn pri sm" style="padding:3px 8px;font-size:.65rem" onclick="respondDg('${postId}','${uid}','accepted')">수락</button><button class="btn dan sm" style="padding:3px 8px;font-size:.65rem" onclick="respondDg('${postId}','${uid}','rejected')">거절</button></div>`:
+          uid===S.myId?'<span style="font-size:.62rem;color:var(--tx3)">지원중</span>':''}`;
+      applBox.appendChild(apRow);
+    });
+    box.appendChild(card);
+  });
+}
+
+async function applyDg(postId){
+  if(!dgEditDate||!S.topId)return;
+  const k=dkey(dgEditDate);
+  await dbS(`recruits/${S.topId}/${k}/${postId}/applicants/${S.myId}`,{name:S.myName,color:S.myColor,status:'pending',appliedAt:Date.now()});
+  showToast('지원 완료! ✋');loadDgRecruitDetail();
+}
+async function respondDg(postId,uid,status){
+  if(!dgEditDate||!S.topId)return;
+  const k=dkey(dgEditDate);
+  await dbS(`recruits/${S.topId}/${k}/${postId}/applicants/${uid}/status`,status);
+  showToast(status==='accepted'?'수락했어요 ✓':'거절했어요');loadDgRecruitDetail();
+}
+async function deleteDgPost(postId){
+  if(!confirm('공고를 삭제하시겠어요?'))return;
+  const k=dkey(dgEditDate);
+  await dbS(`recruits/${S.topId}/${k}/${postId}`,null);
+  showToast('공고 삭제됨');loadDgRecruitDetail();
+}
+
+// 대근 탭 - 공고 목록 (이번 달 전체)
+let dgRecruitListUnsub=null;
+function startDgRecruitListen(){
+  if(dgRecruitListUnsub){dgRecruitListUnsub();dgRecruitListUnsub=null;}
+  if(!S.topId)return;
+  dgRecruitListUnsub=dbL(`recruits/${S.topId}`,allPosts=>{renderDgRecruitList(allPosts);});
+}
+function renderDgRecruitList(allPosts){
+  const box=document.getElementById('dg-recruit-list');box.innerHTML='';
+  if(!allPosts||!Object.keys(allPosts).length){
+    box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">공고가 없어요</div>';return;
+  }
+  // 날짜별 정렬, 오늘 이후만
+  const today=dkey(new Date());
+  const entries=[];
+  Object.entries(allPosts).forEach(([dateKey,posts])=>{
+    if(dateKey<today)return;
+    Object.entries(posts||{}).forEach(([postId,post])=>{
+      entries.push({dateKey,postId,post});
+    });
+  });
+  entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
+  if(!entries.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">예정된 공고가 없어요</div>';return;}
+  entries.forEach(({dateKey,postId,post})=>{
+    const dt=new Date(dateKey+'T00:00:00');
+    const bShMeta=SM[post.baseShift]||null;
+    const applCount=Object.keys(post.applicants||{}).length;
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;cursor:pointer';
+    row.innerHTML=`
+      <div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--tx3)">${dt.getMonth()+1}월 ${dt.getDate()}일 (${['일','월','화','수','목','금','토'][dt.getDay()]})</div>
+        <div style="font-size:.82rem;font-weight:700;margin-top:2px">${post.name||'?'}
+          ${bShMeta?`<span class="cb ${bShMeta.c}" style="font-size:.6rem;margin-left:4px">${bShMeta.i} ${bShMeta.l}</span>`:''}
+        </div>
+        ${post.memo?`<div style="font-size:.68rem;color:var(--tx2);margin-top:1px">💬 ${escHtml(post.memo)}</div>`:''}
+      </div>
+      <div style="margin-left:auto;text-align:center;flex-shrink:0">
+        <div style="font-size:.65rem;color:var(--tx3)">지원자</div>
+        <div style="font-size:1rem;font-weight:800;color:var(--a)">${applCount}</div>
+      </div>`;
+    row.onclick=()=>{
+      // 해당 날짜 시트 열기
+      openDgSheet(new Date(dateKey+'T00:00:00'));
+      setTimeout(()=>switchDgTab('rc'),100);
+    };
+    box.appendChild(row);
+  });
+}
+
+
 let chatTopId='';
 function startChat(topId){stopChat();chatTopId=topId;chatUnsub=dbL('chats/'+topId,msgs=>renderChat(msgs));}
 function stopChat(){if(chatUnsub){chatUnsub();chatUnsub=null;}}
@@ -1223,10 +1591,10 @@ function renderSavedAccts(){
 // ━━ BOOT ━━
 async function boot(){
   const t=new Date();S.yr=t.getFullYear();S.mo=t.getMonth();S.tyr=t.getFullYear();S.tmo=t.getMonth();
+  dgYr=t.getFullYear();dgMo=t.getMonth();
   applyTheme();
   if(S.topId&&S.divId){const tp=await dbG(`teams/${S.topId}/divs/${S.divId}/pattern`);if(tp)S.patCache[`${S.topId}_${S.divId}`]=tp;}
   await refreshCal();
-  startEventListen();
 }
 
 // ━━ INIT ━━
