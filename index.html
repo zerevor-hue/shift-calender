@@ -323,6 +323,14 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
+    <!-- 팀 이벤트 -->
+    <div class="card" style="margin-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
+        <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
+      </div>
+      <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
+    </div>
   </div>
 </div>
 
@@ -513,8 +521,8 @@ textarea{resize:vertical;min-height:65px}
 <!-- BOTTOM NAV -->
 <nav class="bnav" style="grid-template-columns:repeat(4,1fr)">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
-  <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico">🔄</span>대근</button>
   <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
+  <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico">🔄</span>대근</button>
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
@@ -689,7 +697,8 @@ textarea{resize:vertical;min-height:65px}
     <div id="dg-panel-rc" style="display:none">
       <!-- 요청 등록 (본인이 연차인 날만) -->
       <div id="dg-post-area" style="display:none">
-        <div style="font-size:.78rem;color:var(--a);font-weight:700;margin-bottom:8px">🔄 대근 요청 등록</div>
+        <div style="font-size:.78rem;color:var(--a);font-weight:700;margin-bottom:6px">🔄 대근 요청 등록</div>
+        <div id="dg-sh-info" style="font-size:.75rem;margin-bottom:8px;padding:6px 10px;background:var(--bg2);border-radius:var(--rs);color:var(--tx2)"></div>
         <div class="form-g">
           <div class="lbl">메모 (선택)</div>
           <input type="text" id="dg-post-memo" placeholder="예: 주간 대근자 구합니다" maxlength="30">
@@ -835,12 +844,12 @@ function showErr(msg){const e=document.getElementById('lerr');e.textContent=msg;
 function doLogout(){if(!confirm('로그아웃 할까요?'))return;ls.d('sess');location.reload();}
 
 // ━━ TABS ━━
-const TABS=['cal','dg','tcal','settings'];
+const TABS=['cal','tcal','dg','settings'];
 function goTab(t){
   TABS.forEach(x=>{document.getElementById('page-'+x).classList.toggle('on',x===t);document.getElementById('ni-'+x).classList.toggle('on',x===t);});
   if(t==='tcal'){renderTeamCal();}else{stopChat();if(tcalUnsub){tcalUnsub();tcalUnsub=null;}}
   if(t==='settings')renderSettings();
-  if(t==='cal')refreshCal();
+  if(t==='cal'){renderCal();startEventListen();}
   if(t==='dg'){renderDgCal();startDgRecruitListen();}
 }
 function openTeamMgr(){
@@ -856,6 +865,8 @@ async function refreshCal(){
     document.getElementById('cal-badge-dot').style.background=S.topColor||'#f59e0b';
     document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
     document.getElementById('cal-badge').style.display='flex';
+    const evTitle=document.getElementById('event-section-title');
+    if(evTitle)evTitle.textContent=`📌 ${S.topName} 이벤트`;
   }
   renderCal();
 }
@@ -1382,11 +1393,13 @@ async function postDgRecruit(){
   if(!dgEditDate||!S.topId)return;
   const k=dkey(dgEditDate);
   const sh=getShift(dgEditDate);
-  if(sh!=='vc'){showToast('연차 등록 후 공고할 수 있어요');return;}
+  if(sh!=='vc'){showToast('연차 등록 후 요청할 수 있어요');return;}
+  // 당사자 기본 근무 (팀 패턴 기준)
+  const baseSh=getBaseShift(dgEditDate)||'';
   const memo=document.getElementById('dg-post-memo').value.trim();
   await dbP(`recruits/${S.topId}/${k}`,{
     uid:S.myId,name:S.myName,color:S.myColor,
-    baseShift:getBaseShift(dgEditDate)||'',
+    baseShift:baseSh,
     memo,applicants:{},createdAt:Date.now(),
   });
   document.getElementById('dg-post-memo').value='';
@@ -1401,8 +1414,16 @@ async function loadDgRecruitDetail(){
   const box=document.getElementById('dg-recruit-detail');box.innerHTML='';
   const sh=getShift(dgEditDate);
   const isVc=sh==='vc';
-  // 본인이 연차인 날 → 공고 등록 버튼 표시
-  document.getElementById('dg-post-area').style.display=isVc?'':'none';
+  // 연차인 날 → 요청 등록 가능, 기본 근무 자동 표시
+  const postArea=document.getElementById('dg-post-area');
+  postArea.style.display=isVc?'':'none';
+  if(isVc){
+    const bSh=getBaseShift(dgEditDate);
+    const bMeta=bSh?SM[bSh]:null;
+    // 자동 근무 표시 (이미 등록 버튼 위에 안내)
+    const shInfo=document.getElementById('dg-sh-info');
+    if(shInfo&&bMeta) shInfo.innerHTML=`대근 필요 근무: <span class="cb ${bMeta.c}" style="font-size:.72rem;padding:2px 8px">${bMeta.i} ${bMeta.l}</span>`;
+  }
   if(!posts||!Object.keys(posts).length){
     box.innerHTML='<div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">공고가 없어요</div>';return;
   }
@@ -1595,11 +1616,21 @@ function renderSavedAccts(){
 
 // ━━ BOOT ━━
 async function boot(){
-  const t=new Date();S.yr=t.getFullYear();S.mo=t.getMonth();S.tyr=t.getFullYear();S.tmo=t.getMonth();
+  const t=new Date();
+  S.yr=t.getFullYear();S.mo=t.getMonth();
+  S.tyr=t.getFullYear();S.tmo=t.getMonth();
   dgYr=t.getFullYear();dgMo=t.getMonth();
   applyTheme();
-  if(S.topId&&S.divId){const tp=await dbG(`teams/${S.topId}/divs/${S.divId}/pattern`);if(tp)S.patCache[`${S.topId}_${S.divId}`]=tp;}
-  await refreshCal();
+  if(S.topId&&S.divId){
+    const tp=await dbG(`teams/${S.topId}/divs/${S.divId}/pattern`);
+    if(tp)S.patCache[`${S.topId}_${S.divId}`]=tp;
+    // 배지
+    document.getElementById('cal-badge-dot').style.background=S.topColor||'#f59e0b';
+    document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
+    document.getElementById('cal-badge').style.display='flex';
+  }
+  renderCal();
+  startEventListen();
 }
 
 // ━━ INIT ━━
