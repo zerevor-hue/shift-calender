@@ -500,6 +500,17 @@ textarea{resize:vertical;min-height:65px}
     </div>
   </div>
   <button class="btn dan fw" onclick="doLogout()">로그아웃</button>
+
+  <!-- 관리자 전용: 가입된 아이디 관리 -->
+  <div id="admin-accounts-card" class="card" style="display:none;margin-top:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="stitle" style="margin-bottom:0">👑 가입된 계정 관리</div>
+      <button class="btn sec sm" onclick="loadAccountList()">새로고침</button>
+    </div>
+    <div id="account-list">
+      <div style="text-align:center;padding:12px;color:var(--tx3)"><div class="sp"></div></div>
+    </div>
+  </div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -1167,31 +1178,84 @@ function renderTodayWorkers(members){
   if(!members){dbG(`teams/${S.activeTopId}/divs/${S.tcalDivId}/members`).then(m=>renderTodayWorkers(m));return;}
   const today=new Date(); today.setHours(0,0,0,0);
   const topId=S.activeTopId, divId=S.tcalDivId;
-  const workers={dr:[],ds:[],nr:[],ns:[],of:[],vc:[]};
+  // 주간(정규+대근) / 야간(정규+대근) / 기타
+  const day=[], night=[], other=[];
   Object.entries(members||{}).forEach(([uid,m])=>{
     const sh=getMemberShift(today,m.ov||{},topId,divId);
-    if(sh)workers[sh].push({name:m.name||'?',color:m.color||'#999',isMe:uid===S.myId});
+    const w={name:m.name||'?',color:m.color||'#999',isMe:uid===S.myId,sh};
+    if(sh==='dr'||sh==='ds') day.push(w);
+    else if(sh==='nr'||sh==='ns') night.push(w);
+    else if(sh) other.push(w);
   });
+
   const box=document.getElementById('today-workers'); box.innerHTML='';
-  const groups=[
-    {k:'dr',l:'☀️ 주간 정규',cls:'tw-d'},{k:'ds',l:'🌤 주간 대근',cls:'tw-d'},
-    {k:'nr',l:'🌙 야간 정규',cls:'tw-n'},{k:'ns',l:'🌛 야간 대근',cls:'tw-n'},
-    {k:'of',l:'🏠 휴무',cls:'tw-o'},{k:'vc',l:'🌴 연차',cls:'tw-v'},
-  ];
-  let any=false;
-  groups.forEach(({k,l,cls})=>{
-    const list=workers[k]; if(!list.length)return; any=true;
-    const sec=document.createElement('div'); sec.className='tw-sec';
-    sec.innerHTML=`<div class="tw-hdr">${l}<span class="tw-cnt ${cls}">${list.length}명</span></div>`;
-    list.forEach(w=>{
-      const r=document.createElement('div'); r.className='wrow';
-      r.innerHTML=`<div class="wdot" style="background:${w.color}"></div>
-        <span class="wname">${w.name}${w.isMe?' ★':''}</span>`;
-      sec.appendChild(r);
+
+  if(!day.length&&!night.length&&!other.length){
+    const e=document.createElement('div');e.className='empty-w';e.textContent='팀원이 없어요';box.appendChild(e);
+    return;
+  }
+
+  // 2컬럼 레이아웃
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px';
+
+  // 주간 컬럼
+  const dayCol=document.createElement('div');
+  dayCol.innerHTML=`<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px">
+    <span style="font-size:.75rem;font-weight:800;color:var(--a)">☀️ 주간</span>
+    <span style="font-size:.6rem;padding:2px 6px;border-radius:10px;background:var(--a-bg);color:var(--a);font-weight:700">${day.length}명</span>
+  </div>`;
+  if(day.length){
+    day.forEach(w=>{
+      const r=document.createElement('div');
+      r.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border-radius:var(--rs);margin-bottom:4px';
+      r.innerHTML=`<div style="width:7px;height:7px;border-radius:50%;background:${w.color};flex-shrink:0"></div>
+        <span style="font-size:.8rem;font-weight:700">${w.name}${w.isMe?' ★':''}</span>
+        ${w.sh==='ds'?'<span style="font-size:.55rem;color:var(--as);font-weight:700;margin-left:auto">대근</span>':''}`;
+      dayCol.appendChild(r);
     });
-    box.appendChild(sec);
-  });
-  if(!any){const e=document.createElement('div');e.className='empty-w';e.textContent='팀원이 없어요';box.appendChild(e);}
+  } else {
+    dayCol.innerHTML+='<div style="font-size:.72rem;color:var(--tx3);padding:6px 0">없음</div>';
+  }
+
+  // 야간 컬럼
+  const nightCol=document.createElement('div');
+  nightCol.innerHTML=`<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px">
+    <span style="font-size:.75rem;font-weight:800;color:var(--n)">🌙 야간</span>
+    <span style="font-size:.6rem;padding:2px 6px;border-radius:10px;background:var(--n-bg);color:var(--n);font-weight:700">${night.length}명</span>
+  </div>`;
+  if(night.length){
+    night.forEach(w=>{
+      const r=document.createElement('div');
+      r.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border-radius:var(--rs);margin-bottom:4px';
+      r.innerHTML=`<div style="width:7px;height:7px;border-radius:50%;background:${w.color};flex-shrink:0"></div>
+        <span style="font-size:.8rem;font-weight:700">${w.name}${w.isMe?' ★':''}</span>
+        ${w.sh==='ns'?'<span style="font-size:.55rem;color:var(--ns);font-weight:700;margin-left:auto">대근</span>':''}`;
+      nightCol.appendChild(r);
+    });
+  } else {
+    nightCol.innerHTML+='<div style="font-size:.72rem;color:var(--tx3);padding:6px 0">없음</div>';
+  }
+
+  grid.appendChild(dayCol); grid.appendChild(nightCol);
+  box.appendChild(grid);
+
+  // 휴무/연차는 아래 한 줄로
+  if(other.length){
+    const otherRow=document.createElement('div');
+    otherRow.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid var(--bd)';
+    const lbl=document.createElement('div');
+    lbl.style.cssText='width:100%;font-size:.65rem;color:var(--tx3);font-weight:700;margin-bottom:3px';
+    lbl.textContent='휴무/연차';
+    otherRow.appendChild(lbl);
+    other.forEach(w=>{
+      const chip=document.createElement('div');
+      chip.style.cssText=`display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:${w.sh==='vc'?'var(--vac-bg)':'var(--off-bg)'};color:${w.sh==='vc'?'var(--vac)':'var(--red)'}`;
+      chip.textContent=`${w.sh==='vc'?'🌴':'🏠'} ${w.name}${w.isMe?' ★':''}`;
+      otherRow.appendChild(chip);
+    });
+    box.appendChild(otherRow);
+  }
 }
 
 function renderMonthTable(members){
@@ -1274,6 +1338,76 @@ function renderSettings(){
   const dark=!document.body.classList.contains('light');
   document.getElementById('btn-dark').className='btn fg'+(dark?' pri':'');
   document.getElementById('btn-light').className='btn fg'+(!dark?' pri':'');
+  // 관리자 전용 섹션
+  const adminCard=document.getElementById('admin-accounts-card');
+  adminCard.style.display=isAdmin()?'':'none';
+  if(isAdmin()) loadAccountList();
+}
+
+async function loadAccountList(){
+  const box=document.getElementById('account-list');
+  box.innerHTML='<div style="text-align:center;padding:12px;color:var(--tx3)"><div class="sp"></div></div>';
+  const accounts=await dbG('accounts');
+  if(!accounts||!Object.keys(accounts).length){
+    box.innerHTML='<div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">가입된 계정이 없어요</div>';
+    return;
+  }
+  box.innerHTML='';
+  // 관리자 계정 제외하지 않고 모두 표시 (자신 표시는 구분)
+  Object.entries(accounts).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name,acct])=>{
+    const isMe=name===S.myName;
+    const isAdminAcct=name===ADMIN_NAME;
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)';
+    // 아바타
+    const av=document.createElement('div');
+    av.style.cssText=`width:30px;height:30px;border-radius:50%;background:${acct.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0`;
+    av.textContent=name[0]||'?';
+    // 이름
+    const nameEl=document.createElement('div');
+    nameEl.style.cssText='flex:1;min-width:0';
+    nameEl.innerHTML=`<span style="font-size:.85rem;font-weight:700">${name}</span>
+      ${isMe?'<span style="font-size:.6rem;color:var(--a);font-weight:700;margin-left:5px">나</span>':''}
+      ${isAdminAcct?'<span class="admin-badge" style="margin-left:4px">👑</span>':''}`;
+    // 가입일
+    const dateEl=document.createElement('div');
+    if(acct.createdAt){
+      const d=new Date(acct.createdAt);
+      dateEl.style.cssText='font-size:.6rem;color:var(--tx3);white-space:nowrap';
+      dateEl.textContent=`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
+    }
+    row.appendChild(av); row.appendChild(nameEl); row.appendChild(dateEl);
+    // 삭제 버튼 (본인·관리자 계정 제외)
+    if(!isMe&&!isAdminAcct){
+      const delBtn=document.createElement('button');
+      delBtn.className='btn dan sm';
+      delBtn.textContent='삭제';
+      delBtn.onclick=()=>deleteAccount(name, acct.myId);
+      row.appendChild(delBtn);
+    }
+    box.appendChild(row);
+  });
+}
+
+async function deleteAccount(name, myId){
+  if(!confirm(`"${name}" 계정을 삭제하시겠어요?\n해당 계정의 모든 데이터가 삭제됩니다.`))return;
+  // accounts, profiles 삭제
+  await dbS('accounts/'+name, null);
+  if(myId) await dbS('profiles/'+myId, null);
+  // 모든 팀의 과에서 해당 멤버 제거
+  const teams=await dbG('teams');
+  if(teams){
+    for(const [topId,team] of Object.entries(teams)){
+      if(!team.divs)continue;
+      for(const divId of Object.keys(team.divs)){
+        if(myId&&team.divs[divId]?.members?.[myId]){
+          await dbS(`teams/${topId}/divs/${divId}/members/${myId}`,null);
+        }
+      }
+    }
+  }
+  showToast(`"${name}" 계정 삭제됨`);
+  loadAccountList();
 }
 function setTheme(m){
   document.body.classList.toggle('light',m==='light');
