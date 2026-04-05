@@ -353,7 +353,7 @@ textarea{resize:vertical;min-height:65px}
   <div id="dg-body" style="display:none">
     <!-- 안내 -->
     <div style="font-size:.75rem;color:var(--tx3);margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);line-height:1.6">
-      📌 날짜를 클릭해 <b style="color:var(--a)">연차 등록</b> 및 <b style="color:var(--n)">대근 지원자 모집</b>을 공고할 수 있어요
+      📌 날짜를 클릭해 <b style="color:var(--a)">연차 등록</b>을 하거나, 연차 등록 후 <b style="color:var(--n)">대근 요청</b>을 올릴 수 있어요
     </div>
     <div class="sstrip">
       <div class="schip">
@@ -396,10 +396,13 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <!-- 대근 모집 공고 목록 -->
+    <!-- 대근 요청 목록 -->
     <div class="card" style="margin-top:12px">
-      <div class="stitle">📢 대근 모집 공고</div>
-      <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">공고가 없어요</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="stitle" style="margin-bottom:0">🔄 대근 요청 현황</div>
+        <button class="btn pri sm" onclick="openDgRequestGuide()">✋ 요청하기</button>
+      </div>
+      <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div></div>
     </div>
   </div>
 </div>
@@ -660,7 +663,7 @@ textarea{resize:vertical;min-height:65px}
       <button id="dg-tab-my" onclick="switchDgTab('my')"
         style="flex:1;padding:9px;font-size:.8rem;font-weight:700;border:none;background:var(--a);color:#000;font-family:inherit;cursor:pointer">📅 내 근무</button>
       <button id="dg-tab-rc" onclick="switchDgTab('rc')"
-        style="flex:1;padding:9px;font-size:.8rem;font-weight:700;border:none;background:var(--bg3);color:var(--tx2);font-family:inherit;cursor:pointer">📢 대근 공고</button>
+        style="flex:1;padding:9px;font-size:.8rem;font-weight:700;border:none;background:var(--bg3);color:var(--tx2);font-family:inherit;cursor:pointer">🔄 대근 요청</button>
     </div>
 
     <!-- 내 근무 탭 -->
@@ -682,21 +685,21 @@ textarea{resize:vertical;min-height:65px}
       </div>
     </div>
 
-    <!-- 대근 공고 탭 -->
+    <!-- 대근 요청 탭 -->
     <div id="dg-panel-rc" style="display:none">
-      <!-- 공고 등록 (본인이 연차인 날만) -->
+      <!-- 요청 등록 (본인이 연차인 날만) -->
       <div id="dg-post-area" style="display:none">
-        <div style="font-size:.78rem;color:var(--a);font-weight:700;margin-bottom:8px">📢 대근 지원자 모집 공고 등록</div>
+        <div style="font-size:.78rem;color:var(--a);font-weight:700;margin-bottom:8px">🔄 대근 요청 등록</div>
         <div class="form-g">
           <div class="lbl">메모 (선택)</div>
           <input type="text" id="dg-post-memo" placeholder="예: 주간 대근자 구합니다" maxlength="30">
         </div>
-        <button class="btn pri fw" onclick="postDgRecruit()" style="margin-bottom:12px">공고 등록하기</button>
+        <button class="btn pri fw" onclick="postDgRecruit()" style="margin-bottom:12px">대근 요청 올리기</button>
       </div>
-      <!-- 기존 공고 -->
+      <!-- 기존 요청 -->
       <div class="stitle" style="margin-bottom:8px">지원 현황</div>
       <div id="dg-recruit-detail">
-        <div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">공고가 없어요</div>
+        <div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">요청이 없어요</div>
       </div>
     </div>
   </div>
@@ -838,9 +841,7 @@ function goTab(t){
   if(t==='tcal'){renderTeamCal();}else{stopChat();if(tcalUnsub){tcalUnsub();tcalUnsub=null;}}
   if(t==='settings')renderSettings();
   if(t==='cal')refreshCal();
-  if(t==='dg')renderDgCal();
-  if(eventUnsub){eventUnsub();eventUnsub=null;}
-  if(t==='dg')startDgRecruitListen();
+  if(t==='dg'){renderDgCal();startDgRecruitListen();}
 }
 function openTeamMgr(){
   renderAllTeams();
@@ -855,7 +856,6 @@ async function refreshCal(){
     document.getElementById('cal-badge-dot').style.background=S.topColor||'#f59e0b';
     document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
     document.getElementById('cal-badge').style.display='flex';
-    document.getElementById('event-section-title').textContent=`📌 ${S.topName} 이벤트`;
   }
   renderCal();
 }
@@ -1372,7 +1372,12 @@ async function saveDgMyShift(){
   await saveProfile();showToast('저장됨 ✓');
 }
 
-// 대근 공고 Firebase: recruits/{topId}/{dateKey}/{postId}
+// 요청하기 버튼 → 안내 후 해당 날짜 선택 유도
+function openDgRequestGuide(){
+  showToast('달력에서 연차 등록할 날짜를 클릭해 대근 요청을 올려보세요');
+}
+
+// 대근 요청 Firebase: recruits/{topId}/{dateKey}/{postId}
 async function postDgRecruit(){
   if(!dgEditDate||!S.topId)return;
   const k=dkey(dgEditDate);
@@ -1385,7 +1390,7 @@ async function postDgRecruit(){
     memo,applicants:{},createdAt:Date.now(),
   });
   document.getElementById('dg-post-memo').value='';
-  showToast('공고 등록됨 📢');
+  showToast('대근 요청 등록됨 🔄');
   loadDgRecruitDetail();
 }
 
@@ -1441,7 +1446,7 @@ async function applyDg(postId){
   if(!dgEditDate||!S.topId)return;
   const k=dkey(dgEditDate);
   await dbS(`recruits/${S.topId}/${k}/${postId}/applicants/${S.myId}`,{name:S.myName,color:S.myColor,status:'pending',appliedAt:Date.now()});
-  showToast('지원 완료! ✋');loadDgRecruitDetail();
+  showToast('대근 지원 완료! ✋');loadDgRecruitDetail();
 }
 async function respondDg(postId,uid,status){
   if(!dgEditDate||!S.topId)return;
@@ -1450,7 +1455,7 @@ async function respondDg(postId,uid,status){
   showToast(status==='accepted'?'수락했어요 ✓':'거절했어요');loadDgRecruitDetail();
 }
 async function deleteDgPost(postId){
-  if(!confirm('공고를 삭제하시겠어요?'))return;
+  if(!confirm('대근 요청을 삭제하시겠어요?'))return;
   const k=dkey(dgEditDate);
   await dbS(`recruits/${S.topId}/${k}/${postId}`,null);
   showToast('공고 삭제됨');loadDgRecruitDetail();
@@ -1478,7 +1483,7 @@ function renderDgRecruitList(allPosts){
     });
   });
   entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
-  if(!entries.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">예정된 공고가 없어요</div>';return;}
+  if(!entries.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">예정된 대근 요청이 없어요</div>';return;}
   entries.forEach(({dateKey,postId,post})=>{
     const dt=new Date(dateKey+'T00:00:00');
     const bShMeta=SM[post.baseShift]||null;
