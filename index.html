@@ -1282,9 +1282,10 @@ function toggleTable(){
 function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 
 // ━━ DAEGEUN CALENDAR ━━
-let dgYr=0,dgMo=0,dgEditDate=null,dgRecruitListUnsub=null;
-// 지원 상세 시트용
+let dgYr=0,dgMo=0,dgEditDate=null;
+let dgRecruitListUnsub=null;
 let dgDetailKey='',dgDetailPostId='',dgDetailPost=null;
+let dgPostCache={}; // dateKey -> {postId:post}
 
 function renderDgCal(){
   const has=!!(S.topId&&S.divId);
@@ -1294,87 +1295,6 @@ function renderDgCal(){
   document.getElementById('dg-badge-dot').style.background=S.topColor||'#f59e0b';
   document.getElementById('dg-badge-name').textContent=`${S.topName||''}${S.divName?' · '+S.divName:''}`;
   document.getElementById('dg-badge').style.display='flex';
-  const yr=dgYr,mo=dgMo;
-  const today=new Date();today.setHours(0,0,0,0);
-  const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
-  document.getElementById('dg-month').textContent=`${yr}년 ${mo+1}월`;
-  const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
-  const grid=document.getElementById('dg-grid');grid.innerHTML='';
-  for(let i=0;i<first.getDay();i++)grid.appendChild(mkDgCell(new Date(yr,mo,i-first.getDay()+1),true,{}));
-  for(let d=1;d<=last.getDate();d++){
-    const dt=new Date(yr,mo,d);const sh=getShift(dt);if(sh)stats[sh]=(stats[sh]||0)+1;
-    grid.appendChild(mkDgCell(dt,false,S._dgPosts||{}));
-  }
-  const trail=(7-(first.getDay()+last.getDate())%7)%7;
-  for(let i=1;i<=trail;i++)grid.appendChild(mkDgCell(new Date(yr,mo+1,i),true,{}));
-  const cells=grid.querySelectorAll('.dc'),tot=cells.length;
-  for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
-  ['dr','ds','nr','ns'].forEach(k=>document.getElementById('dg-'+k).textContent=stats[k]);
-  let uv=0;
-  for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))if(getShift(new Date(d))==='vc')uv++;
-  document.getElementById('dg-vc').textContent=uv;
-  document.getElementById('dg-vt').textContent=S.vacTotal>0?S.vacTotal:'-';
-}
-
-function mkDgCell(date,other,allPosts){
-  const c=document.createElement('div');c.className='dc';
-  if(other){c.classList.add('om');return c;}
-  const dow=date.getDay();
-  if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
-  if(date.toDateString()===new Date().toDateString())c.classList.add('td');
-  const sh=getShift(date),isOv=!!S.ov[dkey(date)];
-  const row=document.createElement('div');row.className='dr';
-  const dn=document.createElement('div');dn.className='dn';dn.textContent=date.getDate();row.appendChild(dn);
-  if(sh){const b=document.createElement('div');b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;b.textContent=CL[sh];if(isOv)b.style.outline='1.5px solid currentColor';row.appendChild(b);}
-  c.appendChild(row);
-  // 대근요청 있는 날 → 🔄 표시
-  const k=dkey(date);
-  if(allPosts[k]&&Object.keys(allPosts[k]).length>0){
-    const tag=document.createElement('div');
-    tag.style.cssText='font-size:.48rem;color:var(--n);font-weight:800;margin-top:1px';
-    tag.textContent='🔄';c.appendChild(tag);
-  }
-  c.addEventListener('click',()=>openDgSheet(date));
-  return c;
-}
-
-function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;dgYr--;}renderDgCal();}
-function dgGotoToday(){const t=new Date();dgYr=t.getFullYear();dgMo=t.getMonth();renderDgCal();}
-
-// 날짜 클릭 → 시트 열기
-async function openDgSheet(date){
-  dgEditDate=date;
-  const bSh=getBaseShift(date),sh=getShift(date)||'of';
-  document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
-  document.getElementById('dg-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
-  document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
-  os('dg-sov');
-}
-document.getElementById('dg-sov').addEventListener('click',function(e){if(e.target===this)cs('dg-sov');});
-
-// 근무 유형 저장
-async function saveDgMyShift(){
-  if(!dgEditDate)return;
-  const k=dkey(dgEditDate),sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
-  const bSh=getBaseShift(dgEditDate);
-  if(sh===bSh){delete S.ov[k];}
-  else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;}
-  cs('dg-sov');renderDgCal();renderCal();
-  await saveProfile();showToast('저장됨 ✓');
-}
-
-// 대근요청 버튼 클릭 → 확인 팝업 → 공고 등록
-
-function renderDgCal(){
-  const has=!!(S.topId&&S.divId);
-  document.getElementById('no-dg-banner').style.display=has?'none':'';
-  document.getElementById('dg-body').style.display=has?'block':'none';
-  if(!has)return;
-  // 배지
-  document.getElementById('dg-badge-dot').style.background=S.topColor||'#f59e0b';
-  document.getElementById('dg-badge-name').textContent=`${S.topName||''}${S.divName?' · '+S.divName:''}`;
-  document.getElementById('dg-badge').style.display='flex';
-
   const yr=dgYr,mo=dgMo;
   const today=new Date();today.setHours(0,0,0,0);
   const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
@@ -1392,7 +1312,7 @@ function renderDgCal(){
   for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
   ['dr','ds','nr','ns'].forEach(k=>document.getElementById('dg-'+k).textContent=stats[k]);
   let uv=0;
-  for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))if(getShift(new Date(d))==='vc')uv++;
+  for(let dd=new Date(today.getFullYear(),0,1);dd<=today;dd.setDate(dd.getDate()+1))if(getShift(new Date(dd))==='vc')uv++;
   document.getElementById('dg-vc').textContent=uv;
   document.getElementById('dg-vt').textContent=S.vacTotal>0?S.vacTotal:'-';
 }
@@ -1408,8 +1328,16 @@ function mkDgCell(date,other){
   const dn=document.createElement('div');dn.className='dn';dn.textContent=date.getDate();row.appendChild(dn);
   if(sh){const b=document.createElement('div');b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;b.textContent=CL[sh];if(isOv)b.style.outline='1.5px solid currentColor';row.appendChild(b);}
   c.appendChild(row);
-  // 대근 공고 있는 날 표시
+  // 대근요청 뱃지
   const k=dkey(date);
+  const posts=dgPostCache[k];
+  if(posts&&Object.keys(posts).length){
+    const tag=document.createElement('div');
+    tag.style.cssText='font-size:.48rem;color:var(--n);font-weight:800;margin-top:1px;line-height:1.2';
+    const bMeta=SM[Object.values(posts)[0]?.baseShift];
+    tag.textContent=`🔄 ${bMeta?bMeta.s:''}대근요청`;
+    c.appendChild(tag);
+  }
   c.addEventListener('click',()=>openDgSheet(date));
   return c;
 }
@@ -1417,33 +1345,6 @@ function mkDgCell(date,other){
 function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;dgYr--;}renderDgCal();}
 function dgGotoToday(){const t=new Date();dgYr=t.getFullYear();dgMo=t.getMonth();renderDgCal();}
 
-// 대근 달력 셀 - 대근요청 있는 날 뱃지 표시
-let dgPostCache={}; // {dateKey: [{postId,post},...]}
-function mkDgCell(date,other){
-  const c=document.createElement('div');c.className='dc';
-  if(other){c.classList.add('om');return c;}
-  const dow=date.getDay();
-  if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
-  if(date.toDateString()===new Date().toDateString())c.classList.add('td');
-  const sh=getShift(date),isOv=!!S.ov[dkey(date)];
-  const row=document.createElement('div');row.className='dr';
-  const dn=document.createElement('div');dn.className='dn';dn.textContent=date.getDate();row.appendChild(dn);
-  if(sh){const b=document.createElement('div');b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;b.textContent=CL[sh];if(isOv)b.style.outline='1.5px solid currentColor';row.appendChild(b);}
-  c.appendChild(row);
-  // 대근요청 있는 날 — 두 번째 줄에 표시
-  const k=dkey(date);
-  const posts=dgPostCache[k];
-  if(posts&&posts.length){
-    const tag=document.createElement('div');
-    tag.style.cssText='font-size:.48rem;color:var(--n);font-weight:800;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%';
-    tag.textContent=`🔄 대근요청`;
-    c.appendChild(tag);
-  }
-  c.addEventListener('click',()=>openDgSheet(date));
-  return c;
-}
-
-// 날짜 클릭 시트 열기 (단순 — 탭 없음)
 async function openDgSheet(date){
   dgEditDate=date;
   const bSh=getBaseShift(date),sh=getShift(date)||bSh||'dr';
@@ -1452,7 +1353,6 @@ async function openDgSheet(date){
   document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
   os('dg-sov');
 }
-document.getElementById('dg-sov').addEventListener('click',function(e){if(e.target===this)cs('dg-sov');});
 
 async function saveDgMyShift(){
   if(!dgEditDate)return;
@@ -1464,7 +1364,7 @@ async function saveDgMyShift(){
   await saveProfile();showToast('저장됨 ✓');
 }
 
-// 대근요청 버튼 — 현재 선택된 근무로 공고 등록
+// 대근요청 버튼: 현재 선택 근무로 공고 등록 + 연차 자동 저장
 async function confirmDgRequest(){
   if(!dgEditDate||!S.topId){showToast('팀에 참여해야 합니다');return;}
   const sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
@@ -1473,65 +1373,63 @@ async function confirmDgRequest(){
   const dateStr=`${dgEditDate.getMonth()+1}월 ${dgEditDate.getDate()}일`;
   if(!confirm(`대근 공고를 올리겠습니까?\n\n📅 ${dateStr} ${m.i} ${m.l} 대근요청`))return;
   const k=dkey(dgEditDate);
-  await dbP(`recruits/${S.topId}/${k}`,{
-    uid:S.myId,name:S.myName,color:S.myColor,
-    baseShift:sh,
-    dateKey:k,applicants:{},createdAt:Date.now(),
-  });
-  // 개인 근무도 연차로 저장
+  // 연차 자동 등록
   if(!S.ov[k])S.ov[k]={};
   S.ov[k].shift='vc';
   await saveProfile();
+  // 공고 등록
+  await dbP(`recruits/${S.topId}/${k}`,{
+    uid:S.myId,name:S.myName,color:S.myColor,
+    baseShift:sh,closed:false,applicants:{},createdAt:Date.now(),
+  });
   cs('dg-sov');renderDgCal();renderCal();
   showToast(`${dateStr} ${m.l} 대근요청 등록됨 🔄`);
 }
 
-// 대근 탭 — 공고 목록 실시간 리스닝
+// 대근 탭 실시간 공고 리스닝
 function startDgRecruitListen(){
   if(dgRecruitListUnsub){dgRecruitListUnsub();dgRecruitListUnsub=null;}
   if(!S.topId)return;
   dgRecruitListUnsub=dbL(`recruits/${S.topId}`,allPosts=>{
-    // 캐시 업데이트 (달력 셀 뱃지용)
     dgPostCache={};
     if(allPosts){
       Object.entries(allPosts).forEach(([dateKey,posts])=>{
-        dgPostCache[dateKey]=Object.entries(posts||{}).map(([id,p])=>({id,post:p}));
+        if(posts)dgPostCache[dateKey]=posts;
       });
     }
     renderDgRecruitList(allPosts);
-    renderDgCal(); // 뱃지 갱신
+    renderDgCal();
   });
 }
 
 function renderDgRecruitList(allPosts){
   const box=document.getElementById('dg-recruit-list');box.innerHTML='';
-  if(!allPosts||!Object.keys(allPosts).length){
-    box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div>';return;
-  }
-  // 날짜 오름차순, 오늘 이후만
-  const today=dkey(new Date());
   const entries=[];
-  Object.entries(allPosts).forEach(([dateKey,posts])=>{
-    if(dateKey<today)return;
-    Object.entries(posts||{}).forEach(([postId,post])=>entries.push({dateKey,postId,post}));
-  });
+  if(allPosts){
+    Object.entries(allPosts).forEach(([dateKey,posts])=>{
+      if(!posts)return;
+      Object.entries(posts).forEach(([postId,post])=>{
+        if(post)entries.push({dateKey,postId,post});
+      });
+    });
+  }
   entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
   if(!entries.length){
-    box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">예정된 대근 요청이 없어요</div>';return;
+    box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div>';return;
   }
   entries.forEach(({dateKey,postId,post})=>{
     const dt=new Date(dateKey+'T00:00:00');
     const bMeta=SM[post.baseShift]||null;
     const applCount=Object.keys(post.applicants||{}).length;
-    const isClosed=!!post.closed;
     const isOwner=post.uid===S.myId;
+    const isClosed=!!post.closed;
     const row=document.createElement('div');
-    row.style.cssText=`display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:7px;cursor:pointer;border:1px solid ${isClosed?'var(--vac)':'var(--bd)'};opacity:${isClosed?.75:1}`;
+    row.style.cssText=`display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:7px;cursor:pointer;border:1px solid ${isClosed?'var(--vac)':'var(--bd)'}`;
     row.innerHTML=`
       <div style="flex:1;min-width:0">
         <div style="font-size:.68rem;color:var(--tx3);margin-bottom:2px">${dt.getMonth()+1}월 ${dt.getDate()}일 (${['일','월','화','수','목','금','토'][dt.getDay()]})</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <div style="width:22px;height:22px;border-radius:50%;background:${post.color||'#f59e0b'};display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000">${(post.name||'?')[0]}</div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <div style="width:22px;height:22px;border-radius:50%;background:${post.color||'#f59e0b'};display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
           <span style="font-size:.85rem;font-weight:700">${post.name||'?'}</span>
           ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i} ${bMeta.l}</span>`:''}
           ${isOwner?'<span style="font-size:.6rem;color:var(--a);font-weight:700">내 요청</span>':''}
@@ -1553,15 +1451,15 @@ function openDgDetailSheet(dateKey,postId,post){
   const dt=new Date(dateKey+'T00:00:00');
   const bMeta=SM[post.baseShift]||null;
   const isOwner=post.uid===S.myId;
-  document.getElementById('dgd-title').textContent=
-    `${dt.getMonth()+1}월 ${dt.getDate()}일 대근요청`;
-  const info=document.getElementById('dgd-info');
-  info.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:var(--rs)">
-      <div style="width:30px;height:30px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000">${(post.name||'?')[0]}</div>
+  const isClosed=!!post.closed;
+  document.getElementById('dgd-title').textContent=`${dt.getMonth()+1}월 ${dt.getDate()}일 대근요청`;
+  document.getElementById('dgd-info').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px">
+      <div style="width:30px;height:30px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
       <div>
         <div style="font-size:.88rem;font-weight:800">${post.name||'?'} <span style="font-size:.65rem;color:var(--tx3)">연차</span></div>
         ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i} ${bMeta.l} 대근 필요</span></div>`:''}
+        ${isClosed?`<div style="margin-top:4px;font-size:.65rem;color:var(--vac);font-weight:800">✅ 대근 확정 완료</div>`:''}
       </div>
     </div>`;
   // 지원자 목록
@@ -1573,27 +1471,26 @@ function openDgDetailSheet(dateKey,postId,post){
     Object.entries(applicants).forEach(([uid,ap])=>{
       const r=document.createElement('div');
       r.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)';
-      r.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${ap.color||'#999'};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#000">${(ap.name||'?')[0]}</div>
-        <span style="font-size:.82rem;font-weight:700;flex:1">${ap.name||'?'}</span>
+      r.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${ap.color||'#999'};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#000;flex-shrink:0">${(ap.name||'?')[0]}</div>
+        <span style="font-size:.82rem;font-weight:700;flex:1">${ap.name||'?'}${uid===S.myId?' <span style="color:var(--a);font-size:.6rem">나</span>':''}</span>
         ${ap.status==='accepted'?'<span style="font-size:.65rem;color:var(--vac);font-weight:700">✓ 수락됨</span>':
           ap.status==='rejected'?'<span style="font-size:.65rem;color:var(--red);font-weight:700">✗ 거절됨</span>':
-          isOwner?`<div class="fl" style="gap:5px"><button class="btn pri sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','accepted')">수락</button><button class="btn dan sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','rejected')">거절</button></div>`:
+          isOwner&&!isClosed?`<div class="fl" style="gap:5px"><button class="btn pri sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','accepted')">수락</button><button class="btn dan sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','rejected')">거절</button></div>`:
           uid===S.myId?'<span style="font-size:.62rem;color:var(--tx3)">지원 중</span>':''}`;
       applBox.appendChild(r);
     });
   }
   // 버튼 영역
   const btnArea=document.getElementById('dgd-btn-area');btnArea.innerHTML='';
-  const isClosed=!!post.closed;
   if(isClosed){
-    btnArea.innerHTML='<div style="text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px">✅ 대근 확정 완료 — 종결된 요청입니다</div>';
+    btnArea.innerHTML='<div style="text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px">✅ 종결된 요청입니다</div>';
   } else if(!isOwner){
     const alreadyApplied=!!applicants[S.myId];
     if(!alreadyApplied){
       const b=document.createElement('button');b.className='btn pri fw';b.style.marginBottom='8px';
       b.innerHTML='✋ 지원하기';b.onclick=dgApply;btnArea.appendChild(b);
     } else {
-      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem">이미 지원했어요</div>';
+      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem;margin-bottom:8px">이미 지원했어요</div>';
     }
   } else {
     const b=document.createElement('button');b.className='btn dan fw';b.style.marginBottom='8px';
@@ -1601,39 +1498,36 @@ function openDgDetailSheet(dateKey,postId,post){
   }
   os('dgd-sov');
 }
-document.getElementById('dgd-sov').addEventListener('click',function(e){if(e.target===this)cs('dgd-sov');});
 
 async function dgApply(){
-  if(!dgDetailKey||!S.topId)return;
+  if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
   await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}/applicants/${S.myId}`,
     {name:S.myName,color:S.myColor,status:'pending',appliedAt:Date.now()});
   showToast('지원 완료! ✋');cs('dgd-sov');
 }
+
+// 수락: 지원자 근무 변경 + 나머지 거절 + 공고 종결
 async function dgRespond(uid,status){
-  if(!dgDetailKey||!S.topId)return;
+  if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
   const postPath=`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`;
-
   if(status==='accepted'){
-    // 1. 지원자 상태 수락으로 변경
+    // 1. 수락 상태 저장
     await dbS(`${postPath}/applicants/${uid}/status`,'accepted');
-
-    // 2. 수락된 지원자의 근무 변경 (Firebase profiles + teams)
+    // 2. 수락자 근무 변경 (profiles ov)
     const baseShift=dgDetailPost?.baseShift;
-    if(baseShift&&uid){
-      // 지원자 프로필에서 ov 업데이트
-      const profile=await dbG('profiles/'+uid);
-      if(profile){
-        const ov=profile.ov||{};
+    if(baseShift){
+      const prof=await dbG('profiles/'+uid);
+      if(prof){
+        const ov=prof.ov||{};
         if(!ov[dgDetailKey])ov[dgDetailKey]={};
         ov[dgDetailKey].shift=baseShift;
         await dbS('profiles/'+uid+'/ov',ov);
       }
-      // 하위팀 members에도 반영 (팀 달력용)
-      // 지원자가 속한 하위팀 찾기
-      const teams=await dbG('teams/'+S.topId+'/divs');
-      if(teams){
-        for(const [divId,div] of Object.entries(teams)){
-          if(div.members&&div.members[uid]){
+      // teams members ov 업데이트
+      const divs=await dbG('teams/'+S.topId+'/divs');
+      if(divs){
+        for(const [divId,div] of Object.entries(divs)){
+          if(div&&div.members&&div.members[uid]){
             const memOv=div.members[uid].ov||{};
             if(!memOv[dgDetailKey])memOv[dgDetailKey]={};
             memOv[dgDetailKey].shift=baseShift;
@@ -1642,41 +1536,37 @@ async function dgRespond(uid,status){
           }
         }
       }
-      // 만약 수락된 사람이 본인이면 내 달력도 업데이트
+      // 본인이 수락됐으면 로컬도 갱신
       if(uid===S.myId){
         if(!S.ov[dgDetailKey])S.ov[dgDetailKey]={};
         S.ov[dgDetailKey].shift=baseShift;
-        await saveProfile();
         renderCal();renderDgCal();
       }
     }
-
-    // 3. 공고 종결 처리 (closed=true, 다른 지원자 거절)
-    const post=dgDetailPost;
-    if(post&&post.applicants){
-      for(const [apUid] of Object.entries(post.applicants)){
-        if(apUid!==uid){
-          await dbS(`${postPath}/applicants/${apUid}/status`,'rejected');
-        }
+    // 3. 나머지 지원자 모두 거절
+    const applicants=dgDetailPost?.applicants||{};
+    for(const [apUid] of Object.entries(applicants)){
+      if(apUid!==uid){
+        await dbS(`${postPath}/applicants/${apUid}/status`,'rejected');
       }
     }
+    // 4. 공고 종결
     await dbS(`${postPath}/closed`,true);
     showToast('수락 완료! 대근 확정됐어요 ✓');
-
   } else {
-    // 거절
     await dbS(`${postPath}/applicants/${uid}/status`,'rejected');
     showToast('거절했어요');
   }
   cs('dgd-sov');
 }
+
 async function dgDeletePost(){
   if(!confirm('대근 요청을 삭제하시겠어요?'))return;
+  if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
   await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`,null);
   showToast('삭제됨');cs('dgd-sov');
 }
 
-// 요청하기 안내 버튼 (대근 탭 메인)
 function openDgRequestGuide(){
   showToast('달력에서 날짜를 클릭 → 근무 선택 → 대근요청 버튼을 누르세요');
 }
