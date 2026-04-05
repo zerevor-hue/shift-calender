@@ -325,7 +325,7 @@ textarea{resize:vertical;min-height:65px}
     <div class="card" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
-        <button class="btn pri sm" onclick="os('new-event-sov')">+ 추가</button>
+        <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
       </div>
       <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
     </div>
@@ -823,6 +823,13 @@ function formatDateRange(s,e){
   return `${fmt(s)} ~ ${fmt(e)}`;
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openEventSheet(){
+  if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-start').value='';
+  document.getElementById('ev-end').value='';
+  os('new-event-sov');
+}
 async function addEvent(){
   const title=document.getElementById('ev-title').value.trim();
   const startDate=document.getElementById('ev-start').value;
@@ -831,7 +838,6 @@ async function addEvent(){
   if(!startDate){showToast('시작일을 입력해주세요');return;}
   if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
   await dbP('events/'+S.topId,{title,startDate,endDate:endDate||startDate,createdBy:S.myName,createdById:S.myId,createdAt:Date.now()});
-  document.getElementById('ev-title').value='';document.getElementById('ev-start').value='';document.getElementById('ev-end').value='';
   cs('new-event-sov');showToast('이벤트 추가됨 ✓');
 }
 async function deleteEvent(evId){
@@ -1003,11 +1009,11 @@ async function toggleJoin(){
     if(div?.pattern)S.patCache[`${topId}_${divId}`]=div.pattern;
     const topInfo=await dbG('teamIndex/'+topId);
     S.topId=topId;S.topName=topInfo?.name||'';S.topColor=topInfo?.color||'#f59e0b';
-    S.divId=divId;S.divName=divId; // will be overwritten
-    // get actual div name
+    S.divId=divId;
+    // 하위팀 이름: teamIndex의 divNames에서 찾기
     const divNames=topInfo?.divNames||[];
     const found=divNames.find(d=>d.id===divId);
-    S.divName=found?.name||viewDivId;
+    S.divName=found?.name||div?.name||'';
     await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
     await saveProfile();cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
   }
@@ -1056,7 +1062,7 @@ function renderTodayWorkers(divs){
       const w={name:m.name||'?',color:m.color||'#999',isMe:uid===S.myId,sh,divName:div.name||''};
       if(sh==='dr'||sh==='ds')day.push(w);
       else if(sh==='nr'||sh==='ns')night.push(w);
-      else if(sh)other.push(w);
+      else if(sh==='vc')other.push(w);  // 연차만 표시, 휴무(of) 제외
     });
   });
 
@@ -1090,11 +1096,11 @@ function renderTodayWorkers(divs){
 
   if(other.length){
     const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid var(--bd)';
-    const lbl=document.createElement('div');lbl.style.cssText='width:100%;font-size:.65rem;color:var(--tx3);font-weight:700;margin-bottom:3px';lbl.textContent='휴무/연차';row.appendChild(lbl);
+    const lbl=document.createElement('div');lbl.style.cssText='width:100%;font-size:.65rem;color:var(--tx3);font-weight:700;margin-bottom:3px';lbl.textContent='연차';row.appendChild(lbl);
     other.forEach(w=>{
       const chip=document.createElement('div');
-      chip.style.cssText=`display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:${w.sh==='vc'?'var(--vac-bg)':'var(--off-bg)'};color:${w.sh==='vc'?'var(--vac)':'var(--red)'}`;
-      chip.textContent=`${w.sh==='vc'?'🌴':'🏠'} ${w.name}`;row.appendChild(chip);
+      chip.style.cssText='display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:var(--vac-bg);color:var(--vac)';
+      chip.textContent=`🌴 ${w.name}`;row.appendChild(chip);
     });
     box.appendChild(row);
   }
