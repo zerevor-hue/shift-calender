@@ -241,7 +241,7 @@ textarea{resize:vertical;min-height:65px}
   <div class="lcard">
     <div class="form-g">
       <div class="lbl">이름</div>
-      <input type="text" id="ln" placeholder="홍길동" maxlength="10" style="text-align:center;font-size:1rem;font-weight:700" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
+      <input type="text" id="ln" placeholder="실명으로 입력해주세요." maxlength="10" style="text-align:center;font-size:1rem;font-weight:700" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
     </div>
     <div class="form-g" style="margin-bottom:0">
       <div class="lbl">비밀번호</div>
@@ -275,7 +275,7 @@ textarea{resize:vertical;min-height:65px}
     <div style="font-size:1.4rem;margin-bottom:8px">👥</div>
     <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
     <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 팀 패턴이 달력에 적용됩니다</div>
-    <button class="btn pri sm" onclick="goTab('team')">팀 관리로 →</button>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
   </div>
 
   <div id="cal-body" style="display:none">
@@ -342,7 +342,7 @@ textarea{resize:vertical;min-height:65px}
     <div style="font-size:1.8rem;margin-bottom:8px">👥</div>
     <div style="font-weight:800;margin-bottom:4px">참여 중인 팀 없음</div>
     <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀 관리에서 팀에 참여하세요</div>
-    <button class="btn pri sm" onclick="goTab('team')">팀 관리로 →</button>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
   </div>
   <div id="tcal-body" style="display:none">
     <!-- 오늘의 근무자 (상위팀 전체) -->
@@ -380,14 +380,18 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<!-- PAGE: 팀 관리 -->
-<div class="page" id="page-team">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div class="ph" style="margin-bottom:0">👥 팀 관리</div>
-    <button id="btn-new-team" class="btn pri sm" onclick="openNewTopSheet()" style="display:none">+ 새 팀</button>
+<!-- 팀 관리 시트 -->
+<div class="sov" id="team-mgr-sov">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="stitle-s" style="margin-bottom:0">👥 팀 관리</div>
+      <button id="btn-new-team" class="btn pri sm" onclick="openNewTopSheet()" style="display:none">+ 새 팀</button>
+    </div>
+    <div id="all-teams-list"><div style="text-align:center;padding:20px;color:var(--tx3)"><div class="sp"></div></div></div>
+    <div style="height:8px"></div>
+    <button class="btn sec fw" onclick="cs('team-mgr-sov')">닫기</button>
   </div>
-  <div class="stitle">전체 팀 목록</div>
-  <div id="all-teams-list"><div style="text-align:center;padding:20px;color:var(--tx3)"><div class="sp"></div></div></div>
 </div>
 
 <!-- PAGE: 설정 -->
@@ -397,7 +401,8 @@ textarea{resize:vertical;min-height:65px}
     <div class="stitle">계정</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div id="av" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#000;flex-shrink:0"></div>
-      <div><span id="av-name" style="font-size:.95rem;font-weight:700"></span><span id="av-admin" class="abadge" style="display:none">👑 관리자</span></div>
+      <div style="flex:1"><span id="av-name" style="font-size:.95rem;font-weight:700"></span><span id="av-admin" class="abadge" style="display:none">👑 관리자</span></div>
+      <button class="btn sec sm" onclick="openTeamMgr()" style="flex-shrink:0">👥 팀 관리</button>
     </div>
   </div>
   <div class="card">
@@ -431,10 +436,9 @@ textarea{resize:vertical;min-height:65px}
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="bnav">
+<nav class="bnav" style="grid-template-columns:repeat(3,1fr)">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
   <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
-  <button class="ni"    id="ni-team"     onclick="goTab('team')">    <span class="ni-ico">👥</span>팀 관리</button>
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
@@ -699,13 +703,16 @@ function showErr(msg){const e=document.getElementById('lerr');e.textContent=msg;
 function doLogout(){if(!confirm('로그아웃 할까요?'))return;ls.d('sess');location.reload();}
 
 // ━━ TABS ━━
-const TABS=['cal','tcal','team','settings'];
+const TABS=['cal','tcal','settings'];
 function goTab(t){
   TABS.forEach(x=>{document.getElementById('page-'+x).classList.toggle('on',x===t);document.getElementById('ni-'+x).classList.toggle('on',x===t);});
   if(t==='tcal'){renderTeamCal();}else{stopChat();if(tcalUnsub){tcalUnsub();tcalUnsub=null;}}
-  if(t==='team')renderAllTeams();
   if(t==='settings')renderSettings();
   if(t==='cal'){refreshCal();startEventListen();}else{if(eventUnsub){eventUnsub();eventUnsub=null;}}
+}
+function openTeamMgr(){
+  renderAllTeams();
+  os('team-mgr-sov');
 }
 
 // ━━ MY CALENDAR ━━
@@ -987,7 +994,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -1096,7 +1103,7 @@ function renderTodayWorkers(divs){
 
   if(other.length){
     const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid var(--bd)';
-    const lbl=document.createElement('div');lbl.style.cssText='width:100%;font-size:.65rem;color:var(--tx3);font-weight:700;margin-bottom:3px';lbl.textContent='연차';row.appendChild(lbl);
+    const lbl=document.createElement('div');lbl.style.cssText='width:100%;font-size:.65rem;color:var(--tx3);font-weight:700;margin-bottom:3px';lbl.textContent='연차자';row.appendChild(lbl);
     other.forEach(w=>{
       const chip=document.createElement('div');
       chip.style.cssText='display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:var(--vac-bg);color:var(--vac)';
