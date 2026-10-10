@@ -125,6 +125,12 @@ textarea{resize:vertical;min-height:65px}
 .cb-nr{background:var(--n-bg);color:var(--n)}.cb-ns{background:rgba(165,180,252,.15);color:var(--ns)}
 .cb-of{background:var(--off-bg);color:var(--red)}.cb-vc{background:var(--vac-bg);color:var(--vac)}
 .cm{font-size:.48rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+/* 공휴일 */
+.hd{font-size:.42rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.dc.hday>.dr>.dn{color:var(--red)!important}
+.dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
+.hday-sub .hd{color:var(--wa)}
+.hday-sub>.dr>.dn{color:var(--wa)!important}
 
 /* EVENT ITEMS */
 .event-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;position:relative}
@@ -475,6 +481,39 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- PAGE: 급식 -->
+<div class="page" id="page-meal">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div class="ph" style="margin-bottom:0">🍽 급식</div>
+    <a href="menu-upload.html" target="_blank"
+      style="font-size:.75rem;font-weight:700;color:var(--a);text-decoration:none;
+             background:var(--bg2);border:1px solid var(--bd);padding:6px 12px;border-radius:var(--rs)">
+      + 업로드
+    </a>
+  </div>
+
+  <!-- 날짜 네비 -->
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+    <button class="ibtn" onclick="mealMonth(-1)">◀</button>
+    <span id="meal-month-label"
+      style="flex:1;text-align:center;font-size:.88rem;font-weight:700;font-family:'JetBrains Mono',monospace"></span>
+    <button class="ibtn" onclick="mealMonth(1)">▶</button>
+    <button class="ibtn" onclick="mealGotoToday()" style="font-size:.62rem;font-weight:800">오늘</button>
+  </div>
+
+  <div id="meal-list">
+    <div style="text-align:center;padding:30px;color:var(--tx3)"><div class="sp"></div></div>
+  </div>
+</div>
+
+<!-- 이미지 확대 오버레이 -->
+<div id="img-lightbox" onclick="this.classList.remove('op')"
+  style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
+         display:flex;align-items:center;justify-content:center;
+         opacity:0;pointer-events:none;transition:opacity .2s">
+  <img id="lightbox-img" style="max-width:96%;max-height:90vh;object-fit:contain;border-radius:8px">
+</div>
+
 <!-- PAGE: 설정 -->
 <div class="page" id="page-settings">
   <div class="ph">⚙️ 설정</div>
@@ -513,14 +552,28 @@ textarea{resize:vertical;min-height:65px}
     </div>
     <div id="acct-list"><div style="text-align:center;padding:10px;color:var(--tx3)"><div class="sp"></div></div></div>
   </div>
+  <!-- 관리자: 공휴일 관리 -->
+  <div id="holiday-mgr-card" class="card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="stitle" style="margin-bottom:0">🗓 공휴일 관리</div>
+      <div class="fl" style="gap:6px">
+        <button class="btn sec sm" onclick="initDefaultHolidays()">기본 초기화</button>
+        <button class="btn pri sm" onclick="openHolidayAddSheet()">+ 추가</button>
+      </div>
+    </div>
+    <div id="holiday-year-tabs" class="dtabs" style="margin-bottom:8px"></div>
+    <div id="holiday-list"></div>
+  </div>
+
   <button class="btn dan fw" onclick="doLogout()">로그아웃</button>
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="bnav" style="grid-template-columns:repeat(4,1fr)">
+<nav class="bnav" style="grid-template-columns:repeat(5,1fr)">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
   <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
   <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico">🔄</span>대근</button>
+  <button class="ni"    id="ni-meal"     onclick="goTab('meal')">     <span class="ni-ico">🍽</span>급식</button>
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
@@ -629,6 +682,37 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 공휴일 추가/편집 -->
+<div class="sov" id="holiday-sov">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div class="stitle-s" id="holiday-sh-title">공휴일 추가</div>
+    <div class="form-g">
+      <div class="lbl">날짜</div>
+      <input type="date" id="hd-date">
+    </div>
+    <div class="form-g">
+      <div class="lbl">이름</div>
+      <input type="text" id="hd-name" placeholder="예: 신정, 설날, 대체공휴일" maxlength="20">
+    </div>
+    <div class="form-g">
+      <div class="lbl">종류</div>
+      <select id="hd-type">
+        <option value="public">공휴일</option>
+        <option value="substitute">대체공휴일</option>
+        <option value="custom">기타</option>
+      </select>
+    </div>
+    <div class="fl">
+      <button class="btn sec fg" onclick="cs('holiday-sov')">취소</button>
+      <button class="btn pri fg" onclick="saveHoliday()">저장</button>
+    </div>
+    <div id="hd-del-wrap" style="display:none;margin-top:8px">
+      <button class="btn dan fw" onclick="deleteHoliday()">이 공휴일 삭제</button>
+    </div>
+  </div>
+</div>
+
 <!-- 이벤트 추가 -->
 <div class="sov" id="new-event-sov">
   <div class="sheet">
@@ -715,6 +799,169 @@ const SM={
 const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
 const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+
+// ━━ HOLIDAYS ━━
+let holidays={}; // {dateKey: {name, type}}
+let hdViewYear=new Date().getFullYear();
+let hdEditKey=''; // 편집 중인 날짜
+
+const DEFAULT_HOLIDAYS={
+  "2025":{
+    "2025-01-01":{name:"신정",type:"public"},
+    "2025-01-28":{name:"설날 연휴",type:"public"},
+    "2025-01-29":{name:"설날",type:"public"},
+    "2025-01-30":{name:"설날 연휴",type:"public"},
+    "2025-03-01":{name:"삼일절",type:"public"},
+    "2025-05-05":{name:"어린이날·석가탄신일",type:"public"},
+    "2025-05-06":{name:"대체공휴일",type:"substitute"},
+    "2025-06-06":{name:"현충일",type:"public"},
+    "2025-08-15":{name:"광복절",type:"public"},
+    "2025-10-03":{name:"개천절",type:"public"},
+    "2025-10-05":{name:"추석 연휴",type:"public"},
+    "2025-10-06":{name:"추석",type:"public"},
+    "2025-10-07":{name:"추석 연휴",type:"public"},
+    "2025-10-08":{name:"대체공휴일",type:"substitute"},
+    "2025-10-09":{name:"한글날",type:"public"},
+    "2025-12-25":{name:"성탄절",type:"public"},
+  },
+  "2026":{
+    "2026-01-01":{name:"신정",type:"public"},
+    "2026-02-16":{name:"설날 연휴",type:"public"},
+    "2026-02-17":{name:"설날",type:"public"},
+    "2026-02-18":{name:"설날 연휴",type:"public"},
+    "2026-03-01":{name:"삼일절",type:"public"},
+    "2026-03-02":{name:"대체공휴일",type:"substitute"},
+    "2026-05-05":{name:"어린이날",type:"public"},
+    "2026-05-24":{name:"석가탄신일",type:"public"},
+    "2026-06-06":{name:"현충일",type:"public"},
+    "2026-08-15":{name:"광복절",type:"public"},
+    "2026-09-24":{name:"추석 연휴",type:"public"},
+    "2026-09-25":{name:"추석",type:"public"},
+    "2026-09-26":{name:"추석 연휴",type:"public"},
+    "2026-10-03":{name:"개천절",type:"public"},
+    "2026-10-09":{name:"한글날",type:"public"},
+    "2026-12-25":{name:"성탄절",type:"public"},
+  },
+  "2027":{
+    "2027-01-01":{name:"신정",type:"public"},
+    "2027-02-06":{name:"설날 연휴",type:"public"},
+    "2027-02-07":{name:"설날",type:"public"},
+    "2027-02-08":{name:"설날 연휴",type:"public"},
+    "2027-03-01":{name:"삼일절",type:"public"},
+    "2027-05-05":{name:"어린이날",type:"public"},
+    "2027-05-13":{name:"석가탄신일",type:"public"},
+    "2027-06-06":{name:"현충일",type:"public"},
+    "2027-08-15":{name:"광복절",type:"public"},
+    "2027-10-03":{name:"개천절",type:"public"},
+    "2027-10-09":{name:"한글날",type:"public"},
+    "2027-10-14":{name:"추석 연휴",type:"public"},
+    "2027-10-15":{name:"추석",type:"public"},
+    "2027-10-16":{name:"추석 연휴",type:"public"},
+    "2027-12-25":{name:"성탄절",type:"public"},
+  }
+};
+
+async function loadHolidays(){
+  const yr=new Date().getFullYear();
+  const years=[yr-1,yr,yr+1,yr+2];
+  for(const y of years){
+    const data=await dbG('holidays/'+y);
+    if(data)Object.assign(holidays,data);
+  }
+}
+
+async function initDefaultHolidays(){
+  if(!isAdmin())return;
+  if(!confirm('기본 공휴일 데이터를 Firebase에 초기화하시겠어요?\n기존 데이터는 덮어써집니다.'))return;
+  for(const[yr,data]of Object.entries(DEFAULT_HOLIDAYS)){
+    await dbS('holidays/'+yr,data);
+    Object.assign(holidays,data);
+  }
+  showToast('공휴일 초기화 완료 ✓');
+  renderCal();renderHolidayList();
+}
+
+// 공휴일 추가/편집 시트 열기
+function openHolidayAddSheet(dateKey){
+  hdEditKey=dateKey||'';
+  document.getElementById('holiday-sh-title').textContent=dateKey?'공휴일 편집':'공휴일 추가';
+  if(dateKey){
+    const hd=holidays[dateKey]||{};
+    document.getElementById('hd-date').value=dateKey;
+    document.getElementById('hd-name').value=hd.name||'';
+    document.getElementById('hd-type').value=hd.type||'public';
+    document.getElementById('hd-del-wrap').style.display='';
+  } else {
+    document.getElementById('hd-date').value=dkey(new Date());
+    document.getElementById('hd-name').value='';
+    document.getElementById('hd-type').value='public';
+    document.getElementById('hd-del-wrap').style.display='none';
+  }
+  os('holiday-sov');
+}
+
+async function saveHoliday(){
+  const date=document.getElementById('hd-date').value;
+  const name=document.getElementById('hd-name').value.trim();
+  const type=document.getElementById('hd-type').value;
+  if(!date){showToast('날짜를 입력해주세요');return;}
+  if(!name){showToast('이름을 입력해주세요');return;}
+  const yr=date.slice(0,4);
+  await dbS(`holidays/${yr}/${date}`,{name,type});
+  holidays[date]={name,type};
+  cs('holiday-sov');renderCal();renderHolidayList();
+  showToast('저장됨 ✓');
+}
+
+async function deleteHoliday(){
+  if(!hdEditKey)return;
+  if(!confirm(`"${holidays[hdEditKey]?.name||hdEditKey}" 삭제하시겠어요?`))return;
+  const yr=hdEditKey.slice(0,4);
+  await dbS(`holidays/${yr}/${hdEditKey}`,null);
+  delete holidays[hdEditKey];
+  cs('holiday-sov');renderCal();renderHolidayList();
+  showToast('삭제됨');
+}
+
+// 공휴일 목록 렌더 (설정 탭)
+function renderHolidayList(){
+  const tabs=document.getElementById('holiday-year-tabs');
+  const list=document.getElementById('holiday-list');
+  if(!tabs||!list)return;
+  const yr=hdViewYear;
+  // 연도 탭
+  tabs.innerHTML='';
+  const now=new Date().getFullYear();
+  [now-1,now,now+1,now+2].forEach(y=>{
+    const btn=document.createElement('button');
+    btn.className='dtab'+(y===yr?' on':'');
+    btn.textContent=y+'년';
+    btn.onclick=()=>{hdViewYear=y;renderHolidayList();};
+    tabs.appendChild(btn);
+  });
+  // 해당 연도 공휴일 목록
+  list.innerHTML='';
+  const entries=Object.entries(holidays)
+    .filter(([k])=>k.startsWith(yr+''))
+    .sort((a,b)=>a[0]>b[0]?1:-1);
+  if(!entries.length){
+    list.innerHTML='<div style="font-size:.78rem;color:var(--tx3);padding:8px 0">등록된 공휴일이 없어요<br><span style="color:var(--a)">기본 초기화 버튼</span>으로 불러오세요</div>';
+    return;
+  }
+  entries.forEach(([k,hd])=>{
+    const dt=new Date(k+'T00:00:00');
+    const dow=['일','월','화','수','목','금','토'][dt.getDay()];
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)';
+    row.innerHTML=`<div>
+      <span style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--tx3)">${k.slice(5)} (${dow})</span>
+      <span style="font-size:.82rem;font-weight:700;margin-left:8px">${hd.name}</span>
+      <span class="abadge" style="margin-left:4px;background:${hd.type==='substitute'?'rgba(210,153,34,.15)':'rgba(248,81,73,.12)'};color:${hd.type==='substitute'?'var(--wa)':'var(--red)'};border-color:${hd.type==='substitute'?'rgba(210,153,34,.3)':'rgba(248,81,73,.25)'}">${hd.type==='substitute'?'대체':'공휴일'}</span>
+    </div>
+    <button class="btn sec sm" onclick="openHolidayAddSheet('${k}')">편집</button>`;
+    list.appendChild(row);
+  });
+}
 
 // ━━ STATE ━━
 let S={
@@ -829,13 +1076,14 @@ function showErr(msg){const e=document.getElementById('lerr');e.textContent=msg;
 function doLogout(){if(!confirm('로그아웃 할까요?'))return;ls.d('sess');location.reload();}
 
 // ━━ TABS ━━
-const TABS=['cal','tcal','dg','settings'];
+const TABS=['cal','tcal','dg','meal','settings'];
 function goTab(t){
   TABS.forEach(x=>{document.getElementById('page-'+x).classList.toggle('on',x===t);document.getElementById('ni-'+x).classList.toggle('on',x===t);});
   if(t==='tcal'){renderTeamCal();}else{stopChat();if(tcalUnsub){tcalUnsub();tcalUnsub=null;}}
   if(t==='settings')renderSettings();
   if(t==='cal'){renderCal();startEventListen();}
   if(t==='dg'){renderDgCal();startDgRecruitListen();}
+  if(t==='meal')renderMealTab();
 }
 function openTeamMgr(){
   renderAllTeams();
@@ -852,6 +1100,27 @@ async function refreshCal(){
     document.getElementById('cal-badge').style.display='flex';
     const evTitle=document.getElementById('event-section-title');
     if(evTitle)evTitle.textContent=`📌 ${S.topName} 이벤트`;
+    // ── Android 위젯 독립계산용 패턴 저장 ──
+    if(window.Android&&tp&&tp.pattern&&tp.patternStart){
+      try{
+        const ps=new Date(tp.patternStart);
+        const psKey=dkey(ps);
+        // 오늘 기준 ±60일 내 개인 오버라이드만 전달
+        const today=new Date(),filteredOv={};
+        for(let i=-7;i<61;i++){
+          const d=new Date(today);d.setDate(d.getDate()+i);
+          const k=dkey(d);if(S.ov[k])filteredOv[k]=S.ov[k];
+        }
+        window.Android.savePattern(JSON.stringify({
+          patternStartKey:psKey,
+          pattern:tp.pattern,
+          ov:filteredOv,
+          name:S.myName||'',
+          topName:S.topName||'',
+          divName:S.divName||''
+        }));
+      }catch(e){}
+    }
   }
   renderCal();
 }
@@ -880,6 +1149,20 @@ function renderCal(){
   const vt=document.getElementById('s-vt');
   vt.textContent=S.vacTotal>0?S.vacTotal:'-';
   vt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
+  // ── Android 위젯 데이터 전달 ──
+  if(window.Android&&S.myId){
+    try{
+      const todaySh=getShift(new Date());
+      window.Android.updateShift(JSON.stringify({
+        shift:todaySh||'none',
+        shiftLabel:todaySh?SM[todaySh].l:'없음',
+        name:S.myName||'',
+        topName:S.topName||'',
+        divName:S.divName||'',
+        date:dkey(new Date())  // 오늘 날짜 — 위젯이 캐시 신선도 판단에 사용
+      }));
+    }catch(e){}
+  }
 }
 
 function mkCell(date,other){
@@ -895,6 +1178,15 @@ function mkCell(date,other){
   c.appendChild(row);
   const memo=S.ov[dkey(date)]?.memo;
   if(memo){const m=document.createElement('div');m.className='cm';m.textContent='📝'+memo;c.appendChild(m);}
+  // 공휴일 표시
+  const hd=holidays[dkey(date)];
+  if(hd){
+    c.classList.add('hday');
+    if(hd.type==='substitute')c.classList.add('hday-sub');
+    const hn=document.createElement('div');
+    hn.className='hd';hn.textContent=hd.name;
+    c.appendChild(hn);
+  }
   c.addEventListener('click',()=>openDaySheet(date));
   return c;
 }
@@ -1122,7 +1414,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov','dg-sov','dgd-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -1572,6 +1864,60 @@ function openDgRequestGuide(){
 }
 
 
+// ━━ MEAL (급식) ━━
+let mealYr=0,mealMo=0;
+function mealMonth(d){mealMo+=d;if(mealMo>11){mealMo=0;mealYr++;}if(mealMo<0){mealMo=11;mealYr--;}renderMealTab();}
+function mealGotoToday(){const t=new Date();mealYr=t.getFullYear();mealMo=t.getMonth();renderMealTab();}
+async function renderMealTab(){
+  const yr=mealYr,mo=mealMo;
+  document.getElementById('meal-month-label').textContent=`${yr}년 ${mo+1}월`;
+  const box=document.getElementById('meal-list');
+  box.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3)"><div class="sp"></div></div>';
+  const startKey=`${yr}-${String(mo+1).padStart(2,'0')}-01`;
+  const endKey=`${yr}-${String(mo+1).padStart(2,'0')}-31`;
+  try{
+    const snap=await dbG('menus');
+    box.innerHTML='';
+    if(!snap){showMealEmpty(box);return;}
+    const entries=[];
+    Object.entries(snap).forEach(([dateKey,items])=>{
+      if(dateKey>=startKey&&dateKey<=endKey&&items){
+        Object.entries(items).forEach(([id,item])=>{
+          if(item&&item.url)entries.push({dateKey,id,...item});
+        });
+      }
+    });
+    if(!entries.length){showMealEmpty(box);return;}
+    entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
+    entries.forEach(item=>{
+      const dt=new Date(item.dateKey+'T00:00:00');
+      const dow=['일','월','화','수','목','금','토'][dt.getDay()];
+      const dateStr=`${dt.getMonth()+1}월 ${dt.getDate()}일 (${dow})`;
+      const hd=holidays[item.dateKey];
+      const card=document.createElement('div');
+      card.style.cssText='background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:12px';
+      card.innerHTML=`
+        <div style="padding:9px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:.82rem;font-weight:800;color:var(--a);font-family:'JetBrains Mono',monospace">${dateStr}</span>
+          ${hd?`<span style="font-size:.62rem;color:var(--red);font-weight:700">${hd.name}</span>`:''}
+          ${item.desc?`<span style="font-size:.72rem;color:var(--tx2);margin-left:auto">${escHtml(item.desc)}</span>`:''}
+        </div>
+        <img src="${item.url}" loading="lazy"
+          style="width:100%;display:block;cursor:zoom-in;background:var(--bg3)"
+          onclick="openLightbox('${item.url}')"
+          onerror="this.parentElement.style.display='none'">
+        <div style="padding:6px 14px;font-size:.63rem;color:var(--tx3)">${item.uploadedBy||''} · ${new Date(item.uploadedAt).toLocaleDateString('ko-KR')}</div>`;
+      box.appendChild(card);
+    });
+  }catch(e){box.innerHTML='<div style="text-align:center;padding:20px;color:var(--ng);font-size:.8rem">불러오기 실패</div>';}
+}
+function showMealEmpty(box){box.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:.82rem">이번 달 식단표가 없어요<br><span style="color:var(--a);font-size:.72rem">+ 업로드 버튼으로 추가해주세요</span></div>';}
+function openLightbox(url){
+  const lb=document.getElementById('img-lightbox');
+  document.getElementById('lightbox-img').src=url;
+  lb.style.opacity='1';lb.style.pointerEvents='all';
+}
+
 let chatTopId='';
 function startChat(topId){stopChat();chatTopId=topId;chatUnsub=dbL('chats/'+topId,msgs=>renderChat(msgs));}
 function stopChat(){if(chatUnsub){chatUnsub();chatUnsub=null;}}
@@ -1606,6 +1952,8 @@ function renderSettings(){
   document.getElementById('btn-light').className='btn fg'+(!dark?' pri':'');
   const adminCard=document.getElementById('admin-card');adminCard.style.display=isAdmin()?'':'none';
   if(isAdmin())loadAcctList();
+  const hdCard=document.getElementById('holiday-mgr-card');
+  if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
 }
 function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();}
 function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
@@ -1659,6 +2007,7 @@ async function boot(){
   S.yr=t.getFullYear();S.mo=t.getMonth();
   S.tyr=t.getFullYear();S.tmo=t.getMonth();
   dgYr=t.getFullYear();dgMo=t.getMonth();
+  mealYr=t.getFullYear();mealMo=t.getMonth();
   applyTheme();
   if(S.topId&&S.divId){
     const tp=await dbG(`teams/${S.topId}/divs/${S.divId}/pattern`);
@@ -1668,6 +2017,7 @@ async function boot(){
     document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
     document.getElementById('cal-badge').style.display='flex';
   }
+  await loadHolidays();
   renderCal();
   startEventListen();
 }
