@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<title>식단표 업로드</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bd:#30363d;--tx:#e6edf3;--tx2:#8b949e;--tx3:#484f58;--a:#58a6ff;--ok:#3fb950;--ng:#f85149;--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.ph{font-size:1.2rem;font-weight:800;margin-bottom:18px;text-align:center}
+.lbl{display:block;font-size:.68rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx);padding:10px 12px;border-radius:var(--rs);font-size:.9rem;outline:none;-webkit-appearance:none;margin-bottom:12px}
+input:focus,select:focus{border-color:var(--a)}
+textarea{resize:vertical;min-height:60px}
+button{font-family:inherit;cursor:pointer;border:none;width:100%;padding:12px;border-radius:var(--rs);font-size:.9rem;font-weight:700;transition:all .15s;margin-bottom:8px}
+button:active{filter:brightness(.85)}
+.pri{background:var(--a);color:#000}
+.sec{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
+.dan{background:rgba(248,81,73,.13);color:var(--ng);border:1px solid rgba(248,81,73,.28)}
+.preview-wrap{width:100%;aspect-ratio:4/3;background:var(--bg3);border:2px dashed var(--bd);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;cursor:pointer;position:relative}
+.preview-wrap img{width:100%;height:100%;object-fit:contain}
+.preview-placeholder{text-align:center;color:var(--tx3)}
+.preview-placeholder .icon{font-size:2.5rem;margin-bottom:8px}
+.preview-placeholder p{font-size:.8rem}
+input[type=file]{display:none}
+.progress-wrap{background:var(--bg3);border-radius:6px;overflow:hidden;height:8px;margin-bottom:8px;display:none}
+.progress-bar{height:100%;background:var(--a);transition:width .2s;width:0%}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--tx);color:var(--bg);padding:9px 18px;border-radius:20px;font-size:.8rem;font-weight:700;opacity:0;transition:all .18s;white-space:nowrap;z-index:100}
+.toast.sh{opacity:1;transform:translateX(-50%) translateY(0)}
+.menu-item{background:var(--bg3);border-radius:var(--rs);overflow:hidden;margin-bottom:10px}
+.menu-item img{width:100%;display:block;max-height:200px;object-fit:cover}
+.menu-item-info{padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+.menu-date{font-size:.75rem;font-weight:700;color:var(--a)}
+.menu-desc{font-size:.72rem;color:var(--tx2);margin-top:2px}
+.del-btn{background:rgba(248,81,73,.13);color:var(--ng);border:none;border-radius:6px;padding:4px 9px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+#login-section{max-width:340px;margin:60px auto 0}
+.sp{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--a);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login-section">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:2rem;margin-bottom:8px">🍽</div>
+    <div class="ph" style="margin-bottom:4px">식단표 관리</div>
+    <div style="font-size:.75rem;color:var(--tx3)">로그인 후 식단표를 업로드할 수 있어요</div>
+  </div>
+  <div class="card">
+    <div class="lbl">이름</div>
+    <input type="text" id="ln" placeholder="이름" maxlength="10" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
+    <div class="lbl">비밀번호</div>
+    <input type="password" id="lp" placeholder="비밀번호" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()">
+    <div id="lerr" style="font-size:.72rem;color:var(--ng);text-align:center;margin-bottom:8px;display:none"></div>
+    <button class="pri" id="lbtn" onclick="doLogin()">로그인</button>
+  </div>
+</div>
+
+<!-- 업로드 UI -->
+<div id="upload-section" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:1.1rem;font-weight:800">🍽 식단표 업로드</div>
+    <div id="user-name" style="font-size:.78rem;color:var(--tx2)"></div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">날짜</div>
+    <input type="date" id="menu-date">
+    <div class="lbl">설명 (선택)</div>
+    <input type="text" id="menu-desc" placeholder="예: 10월 1주차 점심 메뉴" maxlength="40">
+    <div class="lbl">이미지</div>
+    <div class="preview-wrap" onclick="document.getElementById('img-input').click()">
+      <div class="preview-placeholder" id="preview-placeholder">
+        <div class="icon">📷</div>
+        <p>클릭해서 이미지 선택</p>
+      </div>
+      <img id="preview-img" style="display:none">
+    </div>
+    <input type="file" id="img-input" accept="image/*" onchange="onImageSelect(this)">
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <button class="pri" id="upload-btn" onclick="uploadMenu()">업로드</button>
+    <button class="sec" onclick="clearForm()">초기화</button>
+  </div>
+
+  <!-- 기존 업로드 목록 -->
+  <div style="font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">최근 업로드</div>
+  <div id="menu-list">
+    <div style="text-align:center;padding:20px;color:var(--tx3)"><div class="sp"></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CFG={
+  apiKey:"AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
+  authDomain:"shift-calender-17a58.firebaseapp.com",
+  databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
+  projectId:"shift-calender-17a58",
+  storageBucket:"shift-calender-17a58.appspot.com",
+  messagingSenderId:"434862222996",
+  appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
+};
+firebase.initializeApp(CFG);
+const db=firebase.database();
+const storage=firebase.storage();
+
+let myName='', selectedFile=null;
+let toastT;
+
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('sh');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('sh'),2400);}
+
+async function hashPw(pw){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('sc2025'+pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,20);
+}
+
+async function doLogin(){
+  const name=document.getElementById('ln').value.trim();
+  const pw=document.getElementById('lp').value;
+  if(!name||!pw){showErr('이름과 비밀번호를 입력해주세요');return;}
+  const btn=document.getElementById('lbtn');
+  btn.innerHTML='<div class="sp" style="margin:0 auto"></div>';
+  const hash=await hashPw(pw);
+  const acct=await db.ref('accounts/'+name).once('value');
+  if(!acct.exists()||acct.val().pwHash!==hash){
+    showErr('이름 또는 비밀번호가 틀렸습니다');
+    btn.textContent='로그인';return;
+  }
+  myName=name;
+  document.getElementById('login-section').style.display='none';
+  document.getElementById('upload-section').style.display='';
+  document.getElementById('user-name').textContent=name+' 님';
+  // 오늘 날짜 기본값
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('menu-date').value=today;
+  loadMenuList();
+}
+function showErr(m){const e=document.getElementById('lerr');e.textContent=m;e.style.display='';document.getElementById('lbtn').textContent='로그인';}
+
+function onImageSelect(inp){
+  const file=inp.files[0];if(!file)return;
+  selectedFile=file;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('preview-img').src=e.target.result;
+    document.getElementById('preview-img').style.display='';
+    document.getElementById('preview-placeholder').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadMenu(){
+  const date=document.getElementById('menu-date').value;
+  const desc=document.getElementById('menu-desc').value.trim();
+  if(!date){showToast('날짜를 선택해주세요');return;}
+  if(!selectedFile){showToast('이미지를 선택해주세요');return;}
+
+  const btn=document.getElementById('upload-btn');
+  btn.textContent='업로드 중...';btn.disabled=true;
+  const pw=document.getElementById('progress-wrap');
+  const pb=document.getElementById('progress-bar');
+  pw.style.display='';pb.style.width='0%';
+
+  try{
+    const ext=selectedFile.name.split('.').pop()||'jpg';
+    const path=`menus/${date}_${Date.now()}.${ext}`;
+    const ref=storage.ref(path);
+    const task=ref.put(selectedFile);
+
+    task.on('state_changed',snap=>{
+      const pct=(snap.bytesTransferred/snap.totalBytes)*100;
+      pb.style.width=pct+'%';
+    });
+
+    await task;
+    const url=await ref.getDownloadURL();
+
+    // RTDB에 메타데이터 저장
+    await db.ref('menus/'+date).push({
+      url,desc,uploadedBy:myName,uploadedAt:Date.now(),
+    });
+
+    showToast('업로드 완료! ✓');
+    clearForm();
+    loadMenuList();
+  }catch(e){
+    showToast('오류: '+e.message);
+  }finally{
+    btn.textContent='업로드';btn.disabled=false;
+    pw.style.display='none';
+  }
+}
+
+function clearForm(){
+  selectedFile=null;
+  document.getElementById('menu-desc').value='';
+  document.getElementById('preview-img').src='';
+  document.getElementById('preview-img').style.display='none';
+  document.getElementById('preview-placeholder').style.display='';
+  document.getElementById('img-input').value='';
+}
+
+async function loadMenuList(){
+  const box=document.getElementById('menu-list');
+  box.innerHTML='<div style="text-align:center;padding:16px;color:var(--tx3)"><div class="sp"></div></div>';
+  const snap=await db.ref('menus').orderByKey().limitToLast(20).once('value');
+  box.innerHTML='';
+  if(!snap.exists()){box.innerHTML='<div style="text-align:center;padding:16px;color:var(--tx3);font-size:.8rem">업로드된 식단표가 없어요</div>';return;}
+  const entries=[];
+  snap.forEach(daySnap=>{
+    const dateKey=daySnap.key;
+    daySnap.forEach(itemSnap=>{
+      entries.push({dateKey,id:itemSnap.key,...itemSnap.val()});
+    });
+  });
+  entries.sort((a,b)=>b.uploadedAt-a.uploadedAt);
+  entries.forEach(item=>{
+    const div=document.createElement('div');div.className='menu-item';
+    const dt=new Date(item.dateKey+'T00:00:00');
+    const dateStr=`${dt.getMonth()+1}월 ${dt.getDate()}일 (${['일','월','화','수','목','금','토'][dt.getDay()]})`;
+    div.innerHTML=`<img src="${item.url}" loading="lazy" onerror="this.style.display='none'">
+      <div class="menu-item-info">
+        <div>
+          <div class="menu-date">${dateStr}</div>
+          ${item.desc?`<div class="menu-desc">${item.desc}</div>`:''}
+          <div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${item.uploadedBy||''}</div>
+        </div>
+        <button class="del-btn" onclick="deleteMenu('${item.dateKey}','${item.id}')">삭제</button>
+      </div>`;
+    box.appendChild(div);
+  });
+}
+
+async function deleteMenu(dateKey,id){
+  if(!confirm('이 식단표를 삭제하시겠어요?'))return;
+  await db.ref(`menus/${dateKey}/${id}`).remove();
+  showToast('삭제됨');loadMenuList();
+}
+</script>
+</body>
+</html>
