@@ -107,7 +107,7 @@ const CFG={
   authDomain:"shift-calender-17a58.firebaseapp.com",
   databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
   projectId:"shift-calender-17a58",
-  storageBucket:"shift-calender-17a58.appspot.com",
+  storageBucket:"shift-calender-17a58.firebasestorage.app", // 신규 프로젝트용 도메인으로 수정됨
   messagingSenderId:"434862222996",
   appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
 };
@@ -141,7 +141,6 @@ async function doLogin(){
   document.getElementById('login-section').style.display='none';
   document.getElementById('upload-section').style.display='';
   document.getElementById('user-name').textContent=name+' 님';
-  // 오늘 날짜 기본값
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('menu-date').value=today;
   loadMenuList();
@@ -186,7 +185,6 @@ async function uploadMenu(){
     await task;
     const url=await ref.getDownloadURL();
 
-    // RTDB에 메타데이터 저장
     await db.ref('menus/'+date).push({
       url,desc,uploadedBy:myName,uploadedAt:Date.now(),
     });
@@ -195,6 +193,7 @@ async function uploadMenu(){
     clearForm();
     loadMenuList();
   }catch(e){
+    console.error("Firebase Storage 업로드 에러 상세 정보:", e); // 개발자 도구 콘솔 로깅 추가
     showToast('오류: '+e.message);
   }finally{
     btn.textContent='업로드';btn.disabled=false;
