@@ -107,7 +107,7 @@ const CFG={
   authDomain:"shift-calender-17a58.firebaseapp.com",
   databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
   projectId:"shift-calender-17a58",
-  storageBucket:"shift-calender-17a58.firebasestorage.app", // 신규 프로젝트용 도메인으로 수정됨
+  storageBucket:"shift-calender-17a58.firebasestorage.app", // 올바른 신규 버킷 주소 반영 완료
   messagingSenderId:"434862222996",
   appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
 };
@@ -193,7 +193,7 @@ async function uploadMenu(){
     clearForm();
     loadMenuList();
   }catch(e){
-    console.error("Firebase Storage 업로드 에러 상세 정보:", e); // 개발자 도구 콘솔 로깅 추가
+    console.error("Firebase Storage 업로드 에러 상세 정보:", e);
     showToast('오류: '+e.message);
   }finally{
     btn.textContent='업로드';btn.disabled=false;
