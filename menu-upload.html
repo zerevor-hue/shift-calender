@@ -28,7 +28,8 @@ button:active{filter:brightness(.85)}
 .preview-wrap img{width:100%;height:100%;object-fit:contain}
 .ph-icon{font-size:2.8rem;margin-bottom:8px}
 .ph-txt{font-size:.82rem;color:var(--tx3)}
-input[type=file]{display:none}
+/* 파일 입력창 숨김 처리 (모바일 호환성 강화) */
+input[type=file]{position:absolute;width:0;height:0;padding:0;overflow:hidden;border:0}
 .progress-wrap{background:var(--bg3);border-radius:6px;overflow:hidden;height:10px;margin-bottom:10px;display:none}
 .progress-bar{height:100%;background:var(--a);transition:width .2s;width:0%}
 .progress-label{font-size:.7rem;color:var(--tx2);margin-bottom:6px;display:none}
@@ -84,14 +85,17 @@ input[type=file]{display:none}
     <div class="lbl">설명 (선택)</div>
     <input type="text" id="menu-desc" placeholder="예: 10월 1주차 점심 메뉴" maxlength="40">
     <div class="lbl">이미지 <span style="color:var(--tx3);font-size:.65rem;font-weight:400">(탭하여 선택 · 자동 압축)</span></div>
-    <div class="preview-wrap" id="preview-wrap" onclick="document.getElementById('img-input').click()">
+    
+    <!-- 수정된 부분: div 대신 label 사용, for 속성 추가 -->
+    <label class="preview-wrap" id="preview-wrap" for="img-input">
       <div id="ph-content" style="text-align:center">
         <div class="ph-icon">📷</div>
         <div class="ph-txt">탭하여 이미지 선택</div>
       </div>
       <img id="preview-img" style="display:none">
-    </div>
+    </label>
     <input type="file" id="img-input" accept="image/*" onchange="onImageSelect(this)">
+    
     <div class="progress-label" id="prog-label">압축 및 업로드 중...</div>
     <div class="progress-wrap" id="prog-wrap"><div class="progress-bar" id="prog-bar"></div></div>
     <div class="err-box" id="upload-err"></div>
@@ -121,7 +125,7 @@ const CFG={
   authDomain:"shift-calender-17a58.firebaseapp.com",
   databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
   projectId:"shift-calender-17a58",
-  storageBucket:"shift-calender-17a58.firebasestorage.app",  // ← 수정
+  storageBucket:"shift-calender-17a58.firebasestorage.app",
   messagingSenderId:"434862222996",
   appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
 };
