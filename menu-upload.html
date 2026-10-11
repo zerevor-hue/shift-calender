@@ -25,25 +25,55 @@ button:active{filter:brightness(.85)}
 .sec{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd)}
 .dan{background:rgba(248,81,73,.13);color:var(--ng);border:1px solid rgba(248,81,73,.28)}
 
-/* 라벨(버튼 역할) 스타일 */
-.preview-wrap{width:100%;aspect-ratio:4/3;background:var(--bg3);border:2px dashed var(--bd);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;cursor:pointer;position:relative}
+/* 이미지 영역 부모 컨테이너 */
+.preview-wrap{
+  width:100%;
+  aspect-ratio:4/3;
+  background:var(--bg3);
+  border:2px dashed var(--bd);
+  border-radius:var(--rs);
+  position:relative; /* 중요 */
+  margin-bottom:12px;
+  overflow:hidden;
+}
 
-/* 내부 요소들 터치 무시 강제 (iOS 호환성 핵심) */
-.preview-wrap > div, .preview-wrap > img { pointer-events: none; }
-.preview-wrap img{width:100%;height:100%;object-fit:contain}
+/* 핵심 해결책: 투명한 실제 파일 입력창이 영역 전체를 덮도록 설정 */
+.preview-wrap input[type=file] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0; /* 화면에 보이지 않게 투명 처리 */
+  z-index: 999; /* 가장 위에 배치하여 터치를 무조건 받음 */
+  cursor: pointer;
+  font-size: 200px; /* 구형 안드로이드 버그 방지용 */
+}
+
+/* 안내 문구 중앙 정렬 */
+#ph-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+  pointer-events: none; /* 클릭 방해 금지 */
+}
 .ph-icon{font-size:2.8rem;margin-bottom:8px}
 .ph-txt{font-size:.82rem;color:var(--tx3)}
 
-/* 인앱 브라우저 호환성을 위한 파일 입력창 숨김 처리 (웹 표준 방식) */
-input[type=file] {
+/* 미리보기 이미지 */
+.preview-wrap img {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  border: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 50;
+  pointer-events: none; /* 클릭 방해 금지 */
+  background: var(--bg3);
 }
 
 .progress-wrap{background:var(--bg3);border-radius:6px;overflow:hidden;height:10px;margin-bottom:10px;display:none}
@@ -102,16 +132,20 @@ input[type=file] {
     <input type="text" id="menu-desc" placeholder="예: 10월 1주차 점심 메뉴" maxlength="40">
     <div class="lbl">이미지 <span style="color:var(--tx3);font-size:.65rem;font-weight:400">(탭하여 선택 · 자동 압축)</span></div>
     
-    <!-- 터치 영역 (label 활용) -->
-    <label class="preview-wrap" for="img-input">
-      <div id="ph-content" style="text-align:center">
+    <!-- 완전히 새로 구성된 터치 영역 -->
+    <div class="preview-wrap">
+      <!-- 1. 투명한 실제 버튼이 제일 위에 덮임 -->
+      <input type="file" id="img-input" accept="image/*" onchange="onImageSelect(this)">
+      
+      <!-- 2. 아래에 깔려있는 디자인 요소 -->
+      <div id="ph-content">
         <div class="ph-icon">📷</div>
         <div class="ph-txt">탭하여 이미지 선택</div>
       </div>
+      
+      <!-- 3. 선택 후 보여질 미리보기 (선택 전엔 숨김) -->
       <img id="preview-img" style="display:none">
-    </label>
-    <!-- 실제 인풋: accept 속성 강화 및 sr-only 처리 -->
-    <input type="file" id="img-input" accept="image/*, image/jpeg, image/png, image/heic" onchange="onImageSelect(this)">
+    </div>
     
     <div class="progress-label" id="prog-label">압축 및 업로드 중...</div>
     <div class="progress-wrap" id="prog-wrap"><div class="progress-bar" id="prog-bar"></div></div>
@@ -245,7 +279,6 @@ function onImageSelect(inp){
   const url=URL.createObjectURL(file);
   document.getElementById('preview-img').src=url;
   document.getElementById('preview-img').style.display='';
-  document.getElementById('ph-content').style.display='none';
   hideErr('upload-err');
   document.getElementById('upload-suc').style.display='none';
 }
@@ -310,7 +343,6 @@ function clearForm(){
   selectedFile=null;
   document.getElementById('preview-img').src='';
   document.getElementById('preview-img').style.display='none';
-  document.getElementById('ph-content').style.display='';
   
   const inp=document.getElementById('img-input');
   inp.value='';
