@@ -1280,27 +1280,27 @@ async function createDivision(){
   if(!name){showToast('이름을 입력해주세요');return;}if(!sv){showToast('시작 날짜를 입력해주세요');return;}
   const p=sv.split('-'),patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
   const divId='D'+uid();
-  await FB.set(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
-  const idx=await FB.get('teamIndex/'+ND.topId)||{};
-  await FB.set('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
+  await dbS(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
+  const idx=await dbG('teamIndex/'+ND.topId)||{};
+  await dbS('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
   cs('new-div-sov');showToast(`"${name}" 하위팀 생성됨 ✓`);
 }
 async function deleteDivision(){
   if(!isAdmin())return;
   const topId=viewTopId,divId=viewDivId;
-  const divData=await FB.get(`teams/${topId}/divs/${divId}`);
+  const divData=await dbG(`teams/${topId}/divs/${divId}`);
   if(!confirm(`"${divData?.name||'이 팀'}" 삭제?`))return;
-  await FB.set(`teams/${topId}/divs/${divId}`,null);
-  const idx=await FB.get('teamIndex/'+topId)||{};
-  await FB.set('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
+  await dbS(`teams/${topId}/divs/${divId}`,null);
+  const idx=await dbG('teamIndex/'+topId)||{};
+  await dbS('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
   if(S.topId===topId&&S.divId===divId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   cs('div-info-sov');renderAllTeams();refreshCal();showToast('삭제됨');
 }
 async function deleteTopTeam(topId){
   if(!isAdmin())return;
-  const info=await FB.get('teamIndex/'+topId);
+  const info=await dbG('teamIndex/'+topId);
   if(!confirm(`"${info?.name||'이 팀'}" 및 모든 하위팀 삭제?`))return;
-  await FB.set('teams/'+topId,null);await FB.set('teamIndex/'+topId,null);
+  await dbS('teams/'+topId,null);await dbS('teamIndex/'+topId,null);
   if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   renderAllTeams();refreshCal();showToast('팀 삭제됨');
 }
@@ -1341,12 +1341,12 @@ function renderAllTeams(){
 
 async function openDivInfo(topId,divId,divName,topName,topColor){
   viewTopId=topId;viewDivId=divId;
-  const div=await FB.get(`teams/${topId}/divs/${divId}`);viewDivData=div;
+  const div=await dbG(`teams/${topId}/divs/${divId}`);viewDivData=div;
   const isMine=S.topId===topId&&S.divId===divId;
   document.getElementById('di-title').textContent=`${topName} · ${divName}`;
   const tp=div?.pattern;
   const patEl=document.getElementById('di-pattern');
-  if(tp){const st=new Date(tp.patternStart);patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b>　🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;}
+  if(tp){const st=new Date(tp.patternStart);patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b> 🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;}
   else patEl.textContent='패턴 없음';
   const mEl=document.getElementById('di-members');mEl.innerHTML='<div class="stitle">팀원</div>';
   const members=div?.members||{};
@@ -1372,23 +1372,23 @@ async function toggleJoin(){
   const isMine=S.topId===topId&&S.divId===divId;
   if(isMine){
     if(!confirm('팀을 나가시겠어요?'))return;
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
     S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';
     await saveProfile();cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
   } else {
     if(S.topId&&S.divId){
       if(!confirm('현재 팀을 나가고 새 팀에 참여할까요?\n(1개 팀만 참여 가능)'))return;
-      await FB.set(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
+      await dbS(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
     }
-    const div=viewDivData||await FB.get(`teams/${topId}/divs/${divId}`);
+    const div=viewDivData||await dbG(`teams/${topId}/divs/${divId}`);
     if(div?.pattern)S.patCache[`${topId}_${divId}`]=div.pattern;
-    const topInfo=await FB.get('teamIndex/'+topId);
+    const topInfo=await dbG('teamIndex/'+topId);
     S.topId=topId;S.topName=topInfo?.name||'';S.topColor=topInfo?.color||'#f59e0b';
     S.divId=divId;
     const divNames=topInfo?.divNames||[];
     const found=divNames.find(d=>d.id===divId);
     S.divName=found?.name||div?.name||'';
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
     await saveProfile();cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
   }
 }
@@ -1494,9 +1494,9 @@ function toggleTable(){
   tableOpen=!tableOpen;
   document.getElementById('month-table-wrap').style.display=tableOpen?'':'none';
   document.getElementById('toggle-btn').textContent=tableOpen?'접기 ▲':'펼치기 ▼';
-  if(tableOpen){FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+  if(tableOpen){dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 }
-function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 
 let dgYr=0,dgMo=0,dgEditDate=null;
 let dgRecruitListUnsub=null;
@@ -1767,7 +1767,10 @@ async function renderMealTab(){
       }
     });
     if(!entries.length){showMealEmpty(box);return;}
-    entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
+    
+    // ✅ 업로드 시간순 최신순 (방금 올린게 무조건 위로)
+    entries.sort((a,b)=>(b.uploadedAt||0)-(a.uploadedAt||0));
+    
     entries.forEach(item=>{
       const dt=new Date(item.dateKey+'T00:00:00');
       const dow=['일','월','화','수','목','금','토'][dt.getDay()];
