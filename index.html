@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#18181B">
 <title>교대근무 달력</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script type="module">
@@ -29,23 +29,20 @@ window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
 </script>
 <style>
 :root{
-  --a:#f59e0b;--as:#fcd34d;--n:#6366f1;--ns:#a5b4fc;--vac:#10b981;--red:#f87171;
+  --a:#f59e0b;--as:#fcd34d;--n:#818cf8;--ns:#a5b4fc;--vac:#34d399;--red:#f87171;
   --a-bg:rgba(245,158,11,.15);--n-bg:rgba(99,102,241,.15);
   --off-bg:rgba(239,68,68,.12);--vac-bg:rgba(16,185,129,.15);
-  --bg:#0f1117;--bg2:#181b24;--bg3:#1e2130;
-  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);
-  --tx:#f1f5f9;--tx2:#94a3b8;--tx3:#475569;
-  --r:14px;--rs:9px;
+  --bg:#121214;--bg2:#18181b;--bg3:#27272a;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);
+  --tx:#f4f4f5;--tx2:#a1a1aa;--tx3:#71717a;
+  --r:16px;--rs:10px;
 }
 body.light{
-  --bg:#f4f4f6;--bg2:#fff;--bg3:#ececef;
-  --bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);
+  --bg:#f4f4f6;--bg2:#ffffff;--bg3:#f4f4f5;
+  --bd:rgba(0,0,0,.06);--bd2:rgba(0,0,0,.1);
   --tx:#18181b;--tx2:#52525b;--tx3:#a1a1aa;
-  --a-bg:rgba(245,158,11,.11);--n-bg:rgba(99,102,241,.11);
-  --off-bg:rgba(239,68,68,.09);--vac-bg:rgba(16,185,129,.11);
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;
-  transition:background-color .18s,color .18s,border-color .18s}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;transition:background-color .18s,color .18s,border-color .18s}
 html,body{height:100%;overscroll-behavior:none}
 body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;max-width:480px;margin:0 auto}
 
@@ -54,22 +51,20 @@ body{font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--tx);
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:18px;overflow-y:auto}
 .lcard{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:11px}
 .qbtn{width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 16px;display:flex;align-items:center;gap:10px;font-family:inherit;font-size:.85rem;font-weight:700;color:var(--tx2);cursor:pointer;text-align:left}
-.qbtn:active{background:var(--bg3)}
 
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(5,1fr);z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
-.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:13px 0 11px;gap:4px;background:none;border:none;color:var(--tx3);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:color .12s;min-height:60px}
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:13px 0 11px;gap:4px;background:none;border:none;color:var(--tx3);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;min-height:60px}
 .ni.on{color:var(--a)}.ni-ico{font-size:1.55rem;line-height:1}
 
 .page{display:none;padding:16px 12px 100px;min-height:100vh;animation:fu .22s ease}
 .page.on{display:block}
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
 .stitle{font-size:.69rem;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
 .ph{font-size:1.25rem;font-weight:800;letter-spacing:-.03em;margin-bottom:16px}
 button{font-family:inherit;cursor:pointer;border:none;transition:all .15s}
 .btn{background:var(--bg2);color:var(--tx);border:1.5px solid var(--bd);padding:11px 16px;border-radius:var(--rs);font-size:.85rem;font-weight:700}
-.btn:active{filter:brightness(.87)}
 .pri{background:var(--a);color:#000;border-color:var(--a)}
 .sec{background:var(--bg3);color:var(--tx2);border-color:var(--bd)}
 .dan{background:rgba(239,68,68,.13);color:var(--red);border-color:rgba(239,68,68,.28)}
@@ -77,8 +72,6 @@ button{font-family:inherit;cursor:pointer;border:none;transition:all .15s}
 .form-g{margin-bottom:12px}
 .lbl{display:block;font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:5px}
 input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx);padding:11px 13px;border-radius:var(--rs);font-size:.9rem;outline:none;-webkit-appearance:none}
-input:focus,select:focus,textarea:focus{border-color:var(--a)}
-textarea{resize:vertical;min-height:65px}
 
 .abadge{display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.14);color:var(--a);font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:9px;border:1px solid rgba(245,158,11,.28);vertical-align:middle;margin-left:5px}
 
@@ -100,35 +93,38 @@ textarea{resize:vertical;min-height:65px}
 .scn{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;line-height:1}
 .scsep{color:var(--tx3);font-size:.78rem;margin-top:9px}
 
-.cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-.dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--bg3)}
-.dow-cell{text-align:center;padding:8px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
+/* 깔끔해진 달력 그리드 */
+.cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:transparent;border-bottom:1px solid var(--bd)}
+.dow-cell{text-align:center;padding:10px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
 .dow-cell:first-child{color:var(--red)}.dow-cell:last-child{color:#60a5fa}
 .days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 
-.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:78px;padding:4px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0}
-.dc:nth-child(7n){border-right:none}.dc.lr{border-bottom:none}
+/* 세로선을 없애고 가로선만 옅게 유지 */
+.dc{position:relative;border-bottom:1px solid var(--bd);min-height:86px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;overflow:hidden;min-width:0}
+.dc.lr{border-bottom:none}
 .dc:active{background:var(--bg3)}.dc.om{opacity:.12;pointer-events:none}
 .dc.sun .dn{color:var(--red)}.dc.sat .dn{color:#60a5fa}
 .dc.td .dn{background:var(--a);color:#000;border-radius:50%}
 
-.stk-wrap{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:4px;width:100%;justify-content:center;pointer-events:none}
-.stk{font-size:.55rem;font-weight:800;padding:1px 4px;border-radius:4px;border:1.5px solid;line-height:1.2;}
+/* 스티커 컨테이너 */
+.stk-wrap{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;width:100%;justify-content:center;pointer-events:none}
+.stk{font-size:.55rem;font-weight:800;padding:2px 5px;border-radius:4px;border:1px solid;line-height:1.2;}
 .stk-d{background:rgba(245,158,11,.15);border-color:var(--a);color:var(--a);}
 .stk-n{background:rgba(99,102,241,.15);border-color:var(--n);color:var(--n);}
 
-.dn{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dr{display:flex;align-items:center;gap:2px;width:100%;min-width:0}
-.cb{font-size:.6rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;flex-shrink:1;min-width:0}
+.dn{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:6px}
+.dr{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;min-width:0}
+.cb{width:90%;font-size:.62rem;font-weight:800;padding:4px 0;text-align:center;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em}
 .cb-dr{background:var(--a-bg);color:var(--a)}.cb-ds{background:rgba(252,211,77,.15);color:var(--as)}
 .cb-nr{background:var(--n-bg);color:var(--n)}.cb-ns{background:rgba(165,180,252,.15);color:var(--ns)}
 .cb-of{background:var(--off-bg);color:var(--red)}.cb-vc{background:var(--vac-bg);color:var(--vac)}
-.cm{font-size:.48rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.hd{font-size:.42rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.cm{font-size:.48rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:center;margin-top:2px}
+.hd{font-size:.45rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .dc.hday>.dr>.dn{color:var(--red)!important}
 .dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
-.hday-sub .hd{color:var(--wa)}
-.hday-sub>.dr>.dn{color:var(--wa)!important}
+.hday-sub .hd{color:var(--a)}
+.hday-sub>.dr>.dn{color:var(--a)!important}
 
 .event-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;position:relative}
 .event-dot{width:8px;height:8px;border-radius:50%;background:var(--a);flex-shrink:0;margin-top:3px}
@@ -212,9 +208,9 @@ textarea{resize:vertical;min-height:65px}
 .shandle{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:10px auto 14px}
 .stitle-s{font-size:.95rem;font-weight:800;margin-bottom:16px}
 
-.leg{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.li{display:flex;align-items:center;gap:3px;font-size:.65rem;color:var(--tx2)}
-.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.leg{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px}
+.li{display:flex;align-items:center;gap:4px;font-size:.65rem;color:var(--tx2)}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .no-banner{background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:26px 14px;text-align:center;margin-bottom:12px}
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:22px;font-size:.8rem;font-weight:700;opacity:0;pointer-events:none;transition:all .18s;white-space:nowrap;z-index:300}
 .toast.sh{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -225,10 +221,8 @@ textarea{resize:vertical;min-height:65px}
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splash"><div style="font-size:3rem">🔄</div><div class="sp"></div><div style="font-size:.8rem;color:var(--tx3)">연결 중...</div></div>
 
-<!-- LOGIN -->
 <div id="login-screen" class="h">
   <div style="font-size:2.6rem">🔄</div>
   <div style="text-align:center">
@@ -251,7 +245,6 @@ textarea{resize:vertical;min-height:65px}
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
 
-<!-- PAGE: 내 달력 -->
 <div class="page on" id="page-cal">
   <div class="cnav">
     <div class="cnav-l">
@@ -302,6 +295,7 @@ textarea{resize:vertical;min-height:65px}
         </div>
       </div>
     </div>
+    
     <div class="cal-grid">
       <div class="dow-row">
         <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
@@ -309,6 +303,7 @@ textarea{resize:vertical;min-height:65px}
       </div>
       <div class="days-grid" id="days-grid"></div>
     </div>
+    
     <div class="leg">
       <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
       <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
@@ -317,7 +312,8 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <div class="card" style="margin-top:12px">
+    
+    <div class="card" style="margin-top:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
         <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
@@ -327,7 +323,6 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<!-- PAGE: 대근 -->
 <div class="page" id="page-dg">
   <div class="cnav">
     <div class="cnav-l">
@@ -396,7 +391,7 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <div class="card" style="margin-top:12px">
+    <div class="card" style="margin-top:16px">
       <div class="stitle">🔄 대근 요청 현황</div>
       <div style="font-size:.73rem;color:var(--tx3);margin-bottom:10px">달력에서 날짜를 클릭 → 대근요청 버튼으로 공고를 올릴 수 있어요</div>
       <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div></div>
@@ -404,7 +399,6 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<!-- PAGE: 팀 달력 -->
 <div class="page" id="page-tcal">
   <div style="margin-bottom:12px">
     <div class="ph" style="margin-bottom:0">📋 팀 달력</div>
@@ -449,7 +443,6 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<!-- 팀 관리 시트 -->
 <div class="sov" id="team-mgr-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -463,7 +456,6 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
-<!-- PAGE: 급식 -->
 <div class="page" id="page-meal">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <div class="ph" style="margin-bottom:0">🍽 급식</div>
@@ -473,7 +465,6 @@ textarea{resize:vertical;min-height:65px}
       + 업로드
     </a>
   </div>
-
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
     <button class="ibtn" onclick="mealMonth(-1)">◀</button>
     <span id="meal-month-label"
@@ -481,13 +472,11 @@ textarea{resize:vertical;min-height:65px}
     <button class="ibtn" onclick="mealMonth(1)">▶</button>
     <button class="ibtn" onclick="mealGotoToday()" style="font-size:.62rem;font-weight:800">오늘</button>
   </div>
-
   <div id="meal-list">
     <div style="text-align:center;padding:30px;color:var(--tx3)"><div class="sp"></div></div>
   </div>
 </div>
 
-<!-- 이미지 확대 -->
 <div id="img-lightbox" onclick="this.classList.remove('op')"
   style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
          display:flex;align-items:center;justify-content:center;
@@ -495,7 +484,6 @@ textarea{resize:vertical;min-height:65px}
   <img id="lightbox-img" style="max-width:96%;max-height:90vh;object-fit:contain;border-radius:8px">
 </div>
 
-<!-- PAGE: 설정 -->
 <div class="page" id="page-settings">
   <div class="ph">⚙️ 설정</div>
   <div class="card">
@@ -547,7 +535,6 @@ textarea{resize:vertical;min-height:65px}
   <button class="btn dan fw" onclick="doLogout()">로그아웃</button>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="bnav" style="grid-template-columns:repeat(5,1fr)">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
   <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
@@ -556,7 +543,6 @@ textarea{resize:vertical;min-height:65px}
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
-<!-- SHEETS -->
 <div class="sov" id="day-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -765,7 +751,7 @@ const SM={
   of:{l:'휴무',i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
   vc:{l:'연차',i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
 };
-const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
+const CL={dr:'주간',ds:'주(대)',nr:'야간',ns:'야(대)',of:'휴무',vc:'연차'};
 const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
@@ -1086,7 +1072,7 @@ async function refreshCal(){
           name:S.myName||'',
           topName:S.topName||'',
           divName:S.divName||'',
-          allPats: window._allPatsCache || {} 
+          allPats: window._allPatsCache || {}
         }));
       }catch(e){}
     }
@@ -1969,7 +1955,7 @@ function renderSettings(){
   const hdCard=document.getElementById('holiday-mgr-card');
   if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
 }
-function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();}
+function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#18181B');ls.s('theme',m);renderSettings();}
 function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
 async function saveVac(){S.vacTotal=parseInt(document.getElementById('vac-inp').value)||0;renderCal();updateVacSum();await saveProfile();}
 function updateVacSum(){
