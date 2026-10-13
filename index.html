@@ -106,29 +106,31 @@ textarea{resize:vertical;min-height:65px}
 .dow-cell:first-child{color:var(--red)}.dow-cell:last-child{color:#60a5fa}
 .days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 
-/* 셀 높이 약간 확장 (80px), relative 추가 */
-.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:80px;padding:4px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0}
+/* 셀 높이 약간 확장, 컨텐츠가 많아도 스티커를 가리지 않게 패딩 증가 */
+.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:92px;padding:4px 3px 20px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;overflow:hidden;min-width:0}
 .dc:nth-child(7n){border-right:none}.dc.lr{border-bottom:none}
 .dc:active{background:var(--bg3)}.dc.om{opacity:.12;pointer-events:none}
 .dc.sun .dn{color:var(--red)}.dc.sat .dn{color:#60a5fa}
 .dc.td .dn{background:var(--a);color:#000;border-radius:50%}
 
-/* 날짜 폰트 크기 약간 증가 */
 .dn{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dr{display:flex;align-items:center;gap:2px;width:100%;min-width:0}
-.cb{font-size:.6rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;flex-shrink:1;min-width:0}
+.dr{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;min-width:0}
+.cb{font-size:.62rem;font-weight:800;padding:3px 0;width:90%;text-align:center;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;flex-shrink:1;min-width:0}
 .cb-dr{background:var(--a-bg);color:var(--a)}.cb-ds{background:rgba(252,211,77,.15);color:var(--as)}
 .cb-nr{background:var(--n-bg);color:var(--n)}.cb-ns{background:rgba(165,180,252,.15);color:var(--ns)}
 .cb-of{background:var(--off-bg);color:var(--red)}.cb-vc{background:var(--vac-bg);color:var(--vac)}
 
 /* 스티커 배경/테두리 없애고 글자만! */
-.stk-wrap{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:12px;width:100%;justify-content:center;pointer-events:none}
+.stk-wrap{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:6px;width:100%;justify-content:center;pointer-events:none}
 .stk{font-size:.65rem;font-weight:800;background:transparent;border:none;padding:0;}
 .stk-d{color:var(--a);}
 .stk-n{color:var(--n);}
 
-.cm{font-size:.48rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-.hd{font-size:.42rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+/* 메모 및 이벤트 시인성 대폭 개선 */
+.cm{font-size:.53rem;color:var(--tx);background:rgba(255,255,255,0.1);border-radius:3px;padding:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:96%;text-align:center;margin-top:3px;font-weight:700}
+.ce{font-size:.53rem;color:var(--a);background:var(--a-bg);border-radius:3px;padding:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:96%;text-align:center;margin-top:3px;font-weight:700}
+
+.hd{font-size:.42rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .dc.hday>.dr>.dn{color:var(--red)!important}
 .dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
 .hday-sub .hd{color:var(--wa)}
@@ -190,7 +192,6 @@ textarea{resize:vertical;min-height:65px}
 .spicker{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .sopt{display:none}
 .slbl{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:var(--rs);border:2px solid var(--bd);cursor:pointer;font-size:.66rem;font-weight:700;color:var(--tx2);text-align:center;line-height:1.3}
-.slbl .si{font-size:1.1rem}
 .sopt:checked+.slbl{border-color:currentColor;background:rgba(255,255,255,.06)}
 .sl-dr{color:var(--a)}.sl-ds{color:var(--as)}.sl-nr{color:var(--n)}.sl-ns{color:var(--ns)}.sl-of{color:var(--tx2)}.sl-vc{color:var(--vac)}
 
@@ -207,7 +208,6 @@ textarea{resize:vertical;min-height:65px}
 .pc-dr{background:var(--a-bg);border-color:var(--a);color:var(--a)}
 .pc-nr{background:var(--n-bg);border-color:var(--n);color:var(--n)}
 .pc-of{background:var(--off-bg);border-color:var(--tx3);color:var(--tx2)}
-.pcell .pi{font-size:.9rem;line-height:1}.pcell .pn{font-size:.48rem;opacity:.7}
 
 .sov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .sov.op{opacity:1;pointer-events:all}
@@ -248,7 +248,6 @@ textarea{resize:vertical;min-height:65px}
     </div>
     <div id="lerr" style="font-size:.7rem;color:var(--red);text-align:center;display:none;margin-top:2px"></div>
     <button class="btn pri fw" id="lbtn" onclick="doLogin()" style="margin-top:5px">로그인 / 가입</button>
-    <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">처음이면 자동 가입</div>
   </div>
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
@@ -303,6 +302,7 @@ textarea{resize:vertical;min-height:65px}
         </div>
       </div>
     </div>
+    
     <div class="cal-grid">
       <div class="dow-row">
         <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
@@ -310,6 +310,7 @@ textarea{resize:vertical;min-height:65px}
       </div>
       <div class="days-grid" id="days-grid"></div>
     </div>
+    
     <div class="leg">
       <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
       <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
@@ -318,7 +319,8 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <div class="card" style="margin-top:12px">
+    
+    <div class="card" style="margin-top:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
         <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
@@ -396,7 +398,7 @@ textarea{resize:vertical;min-height:65px}
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <div class="card" style="margin-top:12px">
+    <div class="card" style="margin-top:16px">
       <div class="stitle">🔄 대근 요청 현황</div>
       <div style="font-size:.73rem;color:var(--tx3);margin-bottom:10px">달력에서 날짜를 클릭 → 대근요청 버튼으로 공고를 올릴 수 있어요</div>
       <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div></div>
@@ -464,14 +466,12 @@ textarea{resize:vertical;min-height:65px}
 <div class="page" id="page-meal">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <div class="ph" style="margin-bottom:0">🍽 급식</div>
-    <!-- target=_blank 삭제, 동일 창에서 열기 -->
     <a href="menu-upload.html"
       style="font-size:.75rem;font-weight:700;color:var(--a);text-decoration:none;
              background:var(--bg2);border:1px solid var(--bd);padding:6px 12px;border-radius:var(--rs)">
       + 업로드
     </a>
   </div>
-
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
     <button class="ibtn" onclick="mealMonth(-1)">◀</button>
     <span id="meal-month-label"
@@ -479,7 +479,6 @@ textarea{resize:vertical;min-height:65px}
     <button class="ibtn" onclick="mealMonth(1)">▶</button>
     <button class="ibtn" onclick="mealGotoToday()" style="font-size:.62rem;font-weight:800">오늘</button>
   </div>
-
   <div id="meal-list">
     <div style="text-align:center;padding:30px;color:var(--tx3)"><div class="sp"></div></div>
   </div>
@@ -759,8 +758,7 @@ const SM={
   of:{l:'휴',i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
   vc:{l:'연',i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
 };
-const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연차'};
-const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
+const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
 let holidays={}; 
@@ -859,7 +857,8 @@ function renderHolidayList(){
   });
 }
 
-let S={myName:'',myColor:'',myId:'',isAdmin:false,yr:0,mo:0,tyr:0,tmo:0,ov:{},vacTotal:0,topId:'',topName:'',topColor:'',divId:'',divName:'',patCache:{}};
+// events 필드 추가됨
+let S={myName:'',myColor:'',myId:'',isAdmin:false,yr:0,mo:0,tyr:0,tmo:0,ov:{},vacTotal:0,topId:'',topName:'',topColor:'',divId:'',divName:'',patCache:{},events:{}};
 let ND={pat:['dr','nr','of','of'],pick:'dr',topId:''};
 let tcalUnsub=null,chatUnsub=null,teamsUnsub=null,eventUnsub=null;
 let viewTopId='',viewDivId='',viewDivData=null;
@@ -937,6 +936,7 @@ function goTab(t){
 function openTeamMgr(){renderAllTeams();os('team-mgr-sov');}
 
 async function refreshCal(){
+  let parsedPats = [];
   if(S.topId){
     const divs = await FB.get(`teams/${S.topId}/divs`);
     window._allPatsCache = {};
@@ -945,10 +945,17 @@ async function refreshCal(){
         const dName = dData.name || '';
         if(dData.pattern?.patternStart && !dName.includes('일근') && !dName.includes('통상')) {
           window._allPatsCache[dName] = dData.pattern;
+          parsedPats.push({
+            name: dName.length >= 2 ? dName.substring(0, 2) : dName,
+            startMs: new Date(dData.pattern.patternStart).getTime(),
+            pat: dData.pattern.pattern,
+            len: dData.pattern.pattern.length
+          });
         }
       });
     }
   }
+  window._parsedPats = parsedPats; // 글로벌 저장
 
   if(S.topId&&S.divId){
     const tp=await FB.get(`teams/${S.topId}/divs/${S.divId}/pattern`);
@@ -985,10 +992,12 @@ function renderCal(){
   document.getElementById('cal-month').textContent=`${yr}년 ${mo+1}월`;
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
   const grid=document.getElementById('days-grid');grid.innerHTML='';
+  
   for(let i=0;i<first.getDay();i++)grid.appendChild(mkCell(new Date(yr,mo,i-first.getDay()+1),true));
   for(let d=1;d<=last.getDate();d++){const dt=new Date(yr,mo,d);const sh=getShift(dt);if(sh)stats[sh]=(stats[sh]||0)+1;grid.appendChild(mkCell(dt,false));}
   const trail=(7-(first.getDay()+last.getDate())%7)%7;
   for(let i=1;i<=trail;i++)grid.appendChild(mkCell(new Date(yr,mo+1,i),true));
+  
   const cells=grid.querySelectorAll('.dc'),tot=cells.length;
   for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
   ['dr','ds','nr','ns'].forEach(k=>document.getElementById('s-'+k).textContent=stats[k]);
@@ -1031,27 +1040,44 @@ function mkCell(date,other){
   }
   c.appendChild(row);
   
-  const memo=S.ov[dkey(date)]?.memo;
-  if(memo){const m=document.createElement('div');m.className='cm';m.textContent='📝'+memo;c.appendChild(m);}
-  const hd=holidays[dkey(date)];
+  const dtKey = dkey(date);
+  
+  const hd=holidays[dtKey];
   if(hd){
     c.classList.add('hday');
     if(hd.type==='substitute')c.classList.add('hday-sub');
     const hn=document.createElement('div');hn.className='hd';hn.textContent=hd.name;c.appendChild(hn);
   }
 
-  let dtMs = date.getTime();
-  let dayTeam='', nightTeam='';
-  if(window._allPatsCache){
-    Object.entries(window._allPatsCache).forEach(([tName,tPat])=>{
-      const diff=Math.floor((dtMs-new Date(tPat.patternStart))/86400000);
-      if(diff>=0){
-        const s=tPat.pattern[diff%tPat.pattern.length];
-        const shortName=tName.length>=2?tName.substring(0,2):tName;
-        if(s==='dr'||s==='ds') dayTeam=shortName;
-        if(s==='nr'||s==='ns') nightTeam=shortName;
+  // 📝 메모 개선 반영
+  const memo=S.ov[dtKey]?.memo;
+  if(memo){const m=document.createElement('div');m.className='cm';m.textContent='📝 '+memo;c.appendChild(m);}
+
+  // 📌 팀 이벤트 표시 (내 달력용)
+  if(S.events){
+    Object.values(S.events).forEach(ev => {
+      const s = ev.startDate;
+      const e = ev.endDate || ev.startDate;
+      if (dtKey >= s && dtKey <= e) {
+        const el = document.createElement('div');
+        el.className = 'ce';
+        el.textContent = '📌 ' + ev.title;
+        c.appendChild(el);
       }
     });
+  }
+
+  let dtMs = date.getTime();
+  let dayTeam='', nightTeam='';
+  if(window._parsedPats){
+    for(let p of window._parsedPats){
+      let diff = Math.floor((dtMs - p.startMs)/86400000);
+      if(diff>=0){
+        let s = p.pat[diff % p.len];
+        if(s==='dr'||s==='ds') dayTeam = p.name;
+        if(s==='nr'||s==='ns') nightTeam = p.name;
+      }
+    }
   }
   if(dayTeam || nightTeam){
     const sw=document.createElement('div');sw.className='stk-wrap';
@@ -1095,16 +1121,15 @@ function mkDgCell(date,other){
 
   let dtMs = date.getTime();
   let dayTeam='', nightTeam='';
-  if(window._allPatsCache){
-    Object.entries(window._allPatsCache).forEach(([tName,tPat])=>{
-      const diff=Math.floor((dtMs-new Date(tPat.patternStart))/86400000);
+  if(window._parsedPats){
+    for(let p of window._parsedPats){
+      let diff = Math.floor((dtMs - p.startMs)/86400000);
       if(diff>=0){
-        const s=tPat.pattern[diff%tPat.pattern.length];
-        const shortName=tName.length>=2?tName.substring(0,2):tName;
-        if(s==='dr'||s==='ds') dayTeam=shortName;
-        if(s==='nr'||s==='ns') nightTeam=shortName;
+        let s = p.pat[diff % p.len];
+        if(s==='dr'||s==='ds') dayTeam = p.name;
+        if(s==='nr'||s==='ns') nightTeam = p.name;
       }
-    });
+    }
   }
   if(dayTeam || nightTeam){
     const sw=document.createElement('div');sw.className='stk-wrap';
@@ -1139,9 +1164,14 @@ async function saveDaySheet(){
 }
 
 function startEventListen(){
-  if(!S.topId){renderEventList(null);return;}
+  if(!S.topId){S.events={}; renderEventList(null);return;}
   if(eventUnsub){eventUnsub();eventUnsub=null;}
-  eventUnsub=dbL('events/'+S.topId,renderEventList);
+  eventUnsub=dbL('events/'+S.topId, events=>{
+    S.events = events || {};
+    renderEventList(events);
+    if(window._parsedPats) renderCal(); 
+    else refreshCal();
+  });
 }
 function renderEventList(events){
   const box=document.getElementById('event-list');box.innerHTML='';
@@ -1246,27 +1276,27 @@ async function createDivision(){
   if(!name){showToast('이름을 입력해주세요');return;}if(!sv){showToast('시작 날짜를 입력해주세요');return;}
   const p=sv.split('-'),patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
   const divId='D'+uid();
-  await FB.set(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
-  const idx=await FB.get('teamIndex/'+ND.topId)||{};
-  await FB.set('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
+  await dbS(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
+  const idx=await dbG('teamIndex/'+ND.topId)||{};
+  await dbS('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
   cs('new-div-sov');showToast(`"${name}" 하위팀 생성됨 ✓`);
 }
 async function deleteDivision(){
   if(!isAdmin())return;
   const topId=viewTopId,divId=viewDivId;
-  const divData=await FB.get(`teams/${topId}/divs/${divId}`);
+  const divData=await dbG(`teams/${topId}/divs/${divId}`);
   if(!confirm(`"${divData?.name||'이 팀'}" 삭제?`))return;
-  await FB.set(`teams/${topId}/divs/${divId}`,null);
-  const idx=await FB.get('teamIndex/'+topId)||{};
-  await FB.set('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
+  await dbS(`teams/${topId}/divs/${divId}`,null);
+  const idx=await dbG('teamIndex/'+topId)||{};
+  await dbS('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
   if(S.topId===topId&&S.divId===divId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   cs('div-info-sov');renderAllTeams();refreshCal();showToast('삭제됨');
 }
 async function deleteTopTeam(topId){
   if(!isAdmin())return;
-  const info=await FB.get('teamIndex/'+topId);
+  const info=await dbG('teamIndex/'+topId);
   if(!confirm(`"${info?.name||'이 팀'}" 및 모든 하위팀 삭제?`))return;
-  await FB.set('teams/'+topId,null);await FB.set('teamIndex/'+topId,null);
+  await dbS('teams/'+topId,null);await dbS('teamIndex/'+topId,null);
   if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   renderAllTeams();refreshCal();showToast('팀 삭제됨');
 }
@@ -1307,7 +1337,7 @@ function renderAllTeams(){
 
 async function openDivInfo(topId,divId,divName,topName,topColor){
   viewTopId=topId;viewDivId=divId;
-  const div=await FB.get(`teams/${topId}/divs/${divId}`);viewDivData=div;
+  const div=await dbG(`teams/${topId}/divs/${divId}`);viewDivData=div;
   const isMine=S.topId===topId&&S.divId===divId;
   document.getElementById('di-title').textContent=`${topName} · ${divName}`;
   const tp=div?.pattern;
@@ -1338,23 +1368,23 @@ async function toggleJoin(){
   const isMine=S.topId===topId&&S.divId===divId;
   if(isMine){
     if(!confirm('팀을 나가시겠어요?'))return;
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
     S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';
     await saveProfile();cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
   } else {
     if(S.topId&&S.divId){
       if(!confirm('현재 팀을 나가고 새 팀에 참여할까요?\n(1개 팀만 참여 가능)'))return;
-      await FB.set(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
+      await dbS(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
     }
-    const div=viewDivData||await FB.get(`teams/${topId}/divs/${divId}`);
+    const div=viewDivData||await dbG(`teams/${topId}/divs/${divId}`);
     if(div?.pattern)S.patCache[`${topId}_${divId}`]=div.pattern;
-    const topInfo=await FB.get('teamIndex/'+topId);
+    const topInfo=await dbG('teamIndex/'+topId);
     S.topId=topId;S.topName=topInfo?.name||'';S.topColor=topInfo?.color||'#f59e0b';
     S.divId=divId;
     const divNames=topInfo?.divNames||[];
     const found=divNames.find(d=>d.id===divId);
     S.divName=found?.name||div?.name||'';
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
     await saveProfile();cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
   }
 }
@@ -1460,9 +1490,9 @@ function toggleTable(){
   tableOpen=!tableOpen;
   document.getElementById('month-table-wrap').style.display=tableOpen?'':'none';
   document.getElementById('toggle-btn').textContent=tableOpen?'접기 ▲':'펼치기 ▼';
-  if(tableOpen){FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+  if(tableOpen){dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 }
-function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 
 let dgYr=0,dgMo=0,dgEditDate=null;
 let dgRecruitListUnsub=null;
