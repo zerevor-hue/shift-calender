@@ -313,8 +313,8 @@ async function loadMenuList(){
       });
     });
     
-    // ✅ 내림차순 정렬 (최신 날짜가 위로)
-    entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
+    // ✅ 업로드 시간순으로 정렬 (최신 업로드한 사진이 무조건 맨 위로!)
+    entries.sort((a,b)=>(b.uploadedAt||0)-(a.uploadedAt||0));
     
     entries.forEach(item=>{
       const dt=new Date(item.dateKey+'T00:00:00');
