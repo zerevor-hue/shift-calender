@@ -93,23 +93,20 @@ input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);borde
 .scn{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;line-height:1}
 .scsep{color:var(--tx3);font-size:.78rem;margin-top:9px}
 
-/* 깔끔해진 달력 그리드 */
 .cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
 .dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:transparent;border-bottom:1px solid var(--bd)}
 .dow-cell{text-align:center;padding:10px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
 .dow-cell:first-child{color:var(--red)}.dow-cell:last-child{color:#60a5fa}
 .days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 
-/* 세로선을 없애고 가로선만 옅게 유지 */
-.dc{position:relative;border-bottom:1px solid var(--bd);min-height:86px;padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;overflow:hidden;min-width:0}
-.dc.lr{border-bottom:none}
+.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:78px;padding:4px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0}
+.dc:nth-child(7n){border-right:none}.dc.lr{border-bottom:none}
 .dc:active{background:var(--bg3)}.dc.om{opacity:.12;pointer-events:none}
 .dc.sun .dn{color:var(--red)}.dc.sat .dn{color:#60a5fa}
 .dc.td .dn{background:var(--a);color:#000;border-radius:50%}
 
-/* 스티커 컨테이너 */
-.stk-wrap{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;width:100%;justify-content:center;pointer-events:none}
-.stk{font-size:.55rem;font-weight:800;padding:2px 5px;border-radius:4px;border:1px solid;line-height:1.2;}
+.stk-wrap{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:4px;width:100%;justify-content:center;pointer-events:none}
+.stk{font-size:.55rem;font-weight:800;padding:1px 4px;border-radius:4px;border:1.5px solid;line-height:1.2;}
 .stk-d{background:rgba(245,158,11,.15);border-color:var(--a);color:var(--a);}
 .stk-n{background:rgba(99,102,241,.15);border-color:var(--n);color:var(--n);}
 
@@ -459,7 +456,8 @@ input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);borde
 <div class="page" id="page-meal">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <div class="ph" style="margin-bottom:0">🍽 급식</div>
-    <a href="menu-upload.html" target="_blank"
+    <!-- target="_blank" 속성을 삭제하여 앱 내부에서 열리게 함 -->
+    <a href="menu-upload.html" 
       style="font-size:.75rem;font-weight:700;color:var(--a);text-decoration:none;
              background:var(--bg2);border:1px solid var(--bd);padding:6px 12px;border-radius:var(--rs)">
       + 업로드
@@ -1072,7 +1070,7 @@ async function refreshCal(){
           name:S.myName||'',
           topName:S.topName||'',
           divName:S.divName||'',
-          allPats: window._allPatsCache || {}
+          allPats: window._allPatsCache || {} 
         }));
       }catch(e){}
     }
@@ -1740,7 +1738,7 @@ function renderDgRecruitList(allPosts){
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
           <div style="width:22px;height:22px;border-radius:50%;background:${post.color||'#f59e0b'};display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
           <span style="font-size:.85rem;font-weight:700">${post.name||'?'}</span>
-          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i}${bMeta.l}</span>`:''}
+          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i} ${bMeta.l}</span>`:''}
           ${isOwner?'<span style="font-size:.6rem;color:var(--a);font-weight:700">내 요청</span>':''}
           ${isClosed?'<span style="font-size:.6rem;color:var(--vac);font-weight:800">✓ 종결</span>':''}
         </div>
@@ -1766,7 +1764,7 @@ function openDgDetailSheet(dateKey,postId,post){
       <div style="width:30px;height:30px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
       <div>
         <div style="font-size:.88rem;font-weight:800">${post.name||'?'} <span style="font-size:.65rem;color:var(--tx3)">연차</span></div>
-        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i}${bMeta.l} 대근 필요</span></div>`:''}
+        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i} ${bMeta.l} 대근 필요</span></div>`:''}
         ${isClosed?`<div style="margin-top:4px;font-size:.65rem;color:var(--vac);font-weight:800">✅ 대근 확정 완료</div>`:''}
       </div>
     </div>`;
@@ -1889,7 +1887,10 @@ async function renderMealTab(){
       }
     });
     if(!entries.length){showMealEmpty(box);return;}
-    entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
+    
+    // ✅ 날짜 최신순 정렬 (내림차순)
+    entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
+    
     entries.forEach(item=>{
       const dt=new Date(item.dateKey+'T00:00:00');
       const dow=['일','월','화','수','목','금','토'][dt.getDay()];
