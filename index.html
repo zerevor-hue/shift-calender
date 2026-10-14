@@ -92,7 +92,6 @@ textarea{resize:vertical;min-height:65px}
 .ibtn{width:34px;height:34px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 
 .sstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-/* 칩 내부 패딩 축소, 간격 축소하여 글씨 크기 유지하되 상자 크기 축소 */
 .schip{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .sct{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}
 .scb{display:flex;align-items:center;justify-content:center;gap:4px}
@@ -102,7 +101,6 @@ textarea{resize:vertical;min-height:65px}
 .scsep{color:var(--tx3);font-size:.78rem;margin-top:7px}
 
 .cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-/* 요일 윗줄에 가로선 표시 복원 */
 .dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--bg3);border-bottom:1px solid var(--bd)}
 .dow-cell{text-align:center;padding:8px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
 .dow-cell:first-child{color:var(--red)}.dow-cell:last-child{color:#60a5fa}
@@ -110,7 +108,8 @@ textarea{resize:vertical;min-height:65px}
 
 .dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:92px;padding:4px 3px 20px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0}
 .dc:nth-child(7n){border-right:none}.dc.lr{border-bottom:none}
-.dc:active{background:var(--bg3)}.dc.om{opacity:.12;pointer-events:none}
+/* 투명도 제거: 테두리선 정상 표시되도록 수정 */
+.dc:active{background:var(--bg3)}.dc.om{pointer-events:none}
 .dc.sun .dn{color:var(--red)}.dc.sat .dn{color:#60a5fa}
 .dc.td .dn{background:var(--a);color:#000;border-radius:50%}
 
@@ -1276,27 +1275,27 @@ async function createDivision(){
   if(!name){showToast('이름을 입력해주세요');return;}if(!sv){showToast('시작 날짜를 입력해주세요');return;}
   const p=sv.split('-'),patternStart=new Date(+p[0],+p[1]-1,+p[2]).toISOString();
   const divId='D'+uid();
-  await FB.set(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
-  const idx=await FB.get('teamIndex/'+ND.topId)||{};
-  await FB.set('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
+  await dbS(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
+  const idx=await dbG('teamIndex/'+ND.topId)||{};
+  await dbS('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
   cs('new-div-sov');showToast(`"${name}" 하위팀 생성됨 ✓`);
 }
 async function deleteDivision(){
   if(!isAdmin())return;
   const topId=viewTopId,divId=viewDivId;
-  const divData=await FB.get(`teams/${topId}/divs/${divId}`);
+  const divData=await dbG(`teams/${topId}/divs/${divId}`);
   if(!confirm(`"${divData?.name||'이 팀'}" 삭제?`))return;
-  await FB.set(`teams/${topId}/divs/${divId}`,null);
-  const idx=await FB.get('teamIndex/'+topId)||{};
-  await FB.set('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
+  await dbS(`teams/${topId}/divs/${divId}`,null);
+  const idx=await dbG('teamIndex/'+topId)||{};
+  await dbS('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
   if(S.topId===topId&&S.divId===divId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   cs('div-info-sov');renderAllTeams();refreshCal();showToast('삭제됨');
 }
 async function deleteTopTeam(topId){
   if(!isAdmin())return;
-  const info=await FB.get('teamIndex/'+topId);
+  const info=await dbG('teamIndex/'+topId);
   if(!confirm(`"${info?.name||'이 팀'}" 및 모든 하위팀 삭제?`))return;
-  await FB.set('teams/'+topId,null);await FB.set('teamIndex/'+topId,null);
+  await dbS('teams/'+topId,null);await dbS('teamIndex/'+topId,null);
   if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
   renderAllTeams();refreshCal();showToast('팀 삭제됨');
 }
@@ -1337,7 +1336,7 @@ function renderAllTeams(){
 
 async function openDivInfo(topId,divId,divName,topName,topColor){
   viewTopId=topId;viewDivId=divId;
-  const div=await FB.get(`teams/${topId}/divs/${divId}`);viewDivData=div;
+  const div=await dbG(`teams/${topId}/divs/${divId}`);viewDivData=div;
   const isMine=S.topId===topId&&S.divId===divId;
   document.getElementById('di-title').textContent=`${topName} · ${divName}`;
   const tp=div?.pattern;
@@ -1368,23 +1367,23 @@ async function toggleJoin(){
   const isMine=S.topId===topId&&S.divId===divId;
   if(isMine){
     if(!confirm('팀을 나가시겠어요?'))return;
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
     S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';
     await saveProfile();cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
   } else {
     if(S.topId&&S.divId){
       if(!confirm('현재 팀을 나가고 새 팀에 참여할까요?\n(1개 팀만 참여 가능)'))return;
-      await FB.set(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
+      await dbS(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}`,null);
     }
-    const div=viewDivData||await FB.get(`teams/${topId}/divs/${divId}`);
+    const div=viewDivData||await dbG(`teams/${topId}/divs/${divId}`);
     if(div?.pattern)S.patCache[`${topId}_${divId}`]=div.pattern;
-    const topInfo=await FB.get('teamIndex/'+topId);
+    const topInfo=await dbG('teamIndex/'+topId);
     S.topId=topId;S.topName=topInfo?.name||'';S.topColor=topInfo?.color||'#f59e0b';
     S.divId=divId;
     const divNames=topInfo?.divNames||[];
     const found=divNames.find(d=>d.id===divId);
     S.divName=found?.name||div?.name||'';
-    await FB.set(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
     await saveProfile();cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
   }
 }
@@ -1490,9 +1489,9 @@ function toggleTable(){
   tableOpen=!tableOpen;
   document.getElementById('month-table-wrap').style.display=tableOpen?'':'none';
   document.getElementById('toggle-btn').textContent=tableOpen?'접기 ▲':'펼치기 ▼';
-  if(tableOpen){FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+  if(tableOpen){dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 }
-function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)FB.get(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
+function changeTeamMonth(d){S.tmo+=d;if(S.tmo>11){S.tmo=0;S.tyr++;}if(S.tmo<0){S.tmo=11;S.tyr--;}document.getElementById('tcal-sub').textContent=`${S.tyr}년 ${S.tmo+1}월`;if(tableOpen)dbG(`teams/${S.topId}/divs/${S.divId}/members`).then(m=>renderMonthTable(m||{}));}
 
 let dgYr=0,dgMo=0,dgEditDate=null;
 let dgRecruitListUnsub=null;
