@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0f1117">
 <title>교대근무 달력</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script type="module">
 const CFG={
   apiKey:"AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
@@ -29,9 +30,9 @@ window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
 </script>
 <style>
 :root{
-  --a:#f59e0b;--as:#fcd34d;--n:#6366f1;--ns:#a5b4fc;--vac:#10b981;--red:#f87171;
-  --a-bg:rgba(245,158,11,.15);--n-bg:rgba(99,102,241,.15);
-  --off-bg:rgba(239,68,68,.12);--vac-bg:rgba(16,185,129,.15);
+  --a:#f59e0b;--as:#fcd34d;--n:#818cf8;--ns:#a5b4fc;--vac:#10b981;--red:#f87171;
+  --a-bg:rgba(245,158,11,.16);--n-bg:rgba(99,102,241,.16);
+  --off-bg:rgba(239,68,68,.13);--vac-bg:rgba(16,185,129,.16);
   --bg:#0f1117;--bg2:#181b24;--bg3:#1e2130;
   --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);
   --tx:#f1f5f9;--tx2:#94a3b8;--tx3:#475569;
@@ -91,8 +92,9 @@ textarea{resize:vertical;min-height:65px}
 .cnav-btns{display:flex;gap:6px}
 .ibtn{width:34px;height:34px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 
-.sstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.schip{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:7px 6px;display:flex;flex-direction:column;align-items:center;gap:3px}
+/* 통계 바 (달력 하단, 이벤트 창 위로 배치 & 슬림 패딩) */
+.sstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;margin-bottom:12px}
+.schip{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .sct{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}
 .scb{display:flex;align-items:center;justify-content:center;gap:4px}
 .scc{display:flex;flex-direction:column;align-items:center;gap:1px}
@@ -100,42 +102,52 @@ textarea{resize:vertical;min-height:65px}
 .scn{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:700;line-height:1}
 .scsep{color:var(--tx3);font-size:.78rem;margin-top:7px}
 
-.cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-.dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--bg3);border-bottom:1px solid var(--bd)}
-.dow-cell{text-align:center;padding:8px 2px;font-size:.7rem;font-weight:800;color:var(--tx3)}
+/* 달력 7열 가로폭 1/7 완전 고정 */
+.cal-grid{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;width:100%;table-layout:fixed}
+.dow-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--bg3);border-bottom:1px solid var(--bd);width:100%}
+.dow-cell{text-align:center;padding:8px 2px;font-size:.7rem;font-weight:800;color:var(--tx3);min-width:0}
 .dow-cell:first-child{color:var(--red)}.dow-cell:last-child{color:#60a5fa}
-.days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%}
 
-.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:92px;padding:4px 3px 20px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0}
+/* 날짜 칸: 5층 구조 확보 (min-height: 94px) 및 가로 크기 불변 */
+.dc{position:relative;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);min-height:94px;padding:4px 3px 21px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;min-width:0;max-width:100%}
 .dc:nth-child(7n){border-right:none}.dc.lr{border-bottom:none}
 .dc:active{background:var(--bg3)}
-.dc.om { pointer-events: none; }
-.dc.om > * { opacity: 0.15; }
+.dc.om{pointer-events:none}
+.dc.om > *{opacity:.15}
 
 .dc.sun .dn{color:var(--red)}.dc.sat .dn{color:#60a5fa}
 .dc.td .dn{background:var(--a);color:#000;border-radius:50%}
 
-.dn{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* 1층: 날짜 + 우측 1글자 근무 뱃지 */
+.dn{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;width:23px;height:23px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dr{display:flex;align-items:center;gap:2px;width:100%;min-width:0}
-
-.cb{font-size:.62rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:-.02em;flex-shrink:1;min-width:0}
+.cb{font-size:.61rem;font-weight:800;padding:2px 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;letter-spacing:-.02em;flex-shrink:1;min-width:0}
 .cb-dr{background:var(--a-bg);color:var(--a)}.cb-ds{background:rgba(252,211,77,.15);color:var(--as)}
 .cb-nr{background:var(--n-bg);color:var(--n)}.cb-ns{background:rgba(165,180,252,.15);color:var(--ns)}
 .cb-of{background:var(--off-bg);color:var(--red)}.cb-vc{background:var(--vac-bg);color:var(--vac)}
 
-.stk-wrap{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:6px;width:100%;justify-content:center;pointer-events:none}
-.stk{font-size:.65rem;font-weight:800;background:transparent;border:none;padding:0;}
-.stk-d{color:var(--a);}
-.stk-n{color:var(--n);}
-
-.cm{font-size:.5rem;color:var(--tx);background:rgba(255,255,255,0.1);border-radius:3px;padding:3px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:3px;font-weight:700;box-sizing:border-box}
-.ce{font-size:.5rem;color:var(--a);background:var(--a-bg);border-radius:3px;padding:3px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:3px;font-weight:700;box-sizing:border-box}
-
-.hd{font-size:.42rem;color:var(--red);font-weight:800;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+/* 2층: 공휴일 */
+.hd{font-size:.44rem;color:var(--red);font-weight:800;line-height:1.15;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;padding-left:1px}
 .dc.hday>.dr>.dn{color:var(--red)!important}
 .dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
-.hday-sub .hd{color:var(--wa)}
-.hday-sub>.dr>.dn{color:var(--wa)!important}
+.hday-sub .hd{color:var(--a)}
+.hday-sub>.dr>.dn{color:var(--a)!important}
+
+/* 3층·4층: 일정/메모 2줄 고정 및 말줄임(...) 처리 */
+.mid-wrap{display:flex;flex-direction:column;gap:2px;width:100%;min-width:0;margin-top:2px;overflow:hidden}
+.cm,.ce{display:block;font-size:.5rem;border-radius:3px;padding:2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:1.25}
+.cm{color:var(--tx);background:rgba(255,255,255,0.11)}
+.ce{color:#fbbf24;background:rgba(245,158,11,0.18)}
+
+/* 5층 (하단 고정): 주간/야간 근무과 간격 확대 (13px) */
+.stk-wrap{position:absolute;bottom:4px;left:0;display:flex;gap:13px;width:100%;justify-content:center;pointer-events:none;padding:0 2px}
+.stk{font-size:.65rem;font-weight:800;background:transparent;border:none;padding:0;white-space:nowrap}
+.stk-d{color:#fbbf24;}
+.stk-n{color:#818cf8;}
+
+/* 오프스크린 위젯 캡처용 컨테이너 */
+#offscreen-capture-host{position:fixed;left:-9999px;top:0;width:420px;z-index:-1;pointer-events:none}
 
 .event-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;position:relative}
 .event-dot{width:8px;height:8px;border-radius:50%;background:var(--a);flex-shrink:0;margin-top:3px}
@@ -193,6 +205,7 @@ textarea{resize:vertical;min-height:65px}
 .spicker{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .sopt{display:none}
 .slbl{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:var(--rs);border:2px solid var(--bd);cursor:pointer;font-size:.66rem;font-weight:700;color:var(--tx2);text-align:center;line-height:1.3}
+.slbl .si{font-size:1.1rem}
 .sopt:checked+.slbl{border-color:currentColor;background:rgba(255,255,255,.06)}
 .sl-dr{color:var(--a)}.sl-ds{color:var(--as)}.sl-nr{color:var(--n)}.sl-ns{color:var(--ns)}.sl-of{color:var(--tx2)}.sl-vc{color:var(--vac)}
 
@@ -209,6 +222,7 @@ textarea{resize:vertical;min-height:65px}
 .pc-dr{background:var(--a-bg);border-color:var(--a);color:var(--a)}
 .pc-nr{background:var(--n-bg);border-color:var(--n);color:var(--n)}
 .pc-of{background:var(--off-bg);border-color:var(--tx3);color:var(--tx2)}
+.pcell .pi{font-size:.9rem;line-height:1}.pcell .pn{font-size:.48rem;opacity:.7}
 
 .sov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .sov.op{opacity:1;pointer-events:all}
@@ -217,7 +231,7 @@ textarea{resize:vertical;min-height:65px}
 .shandle{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:10px auto 14px}
 .stitle-s{font-size:.95rem;font-weight:800;margin-bottom:16px}
 
-.leg{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px}
+.leg{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px}
 .li{display:flex;align-items:center;gap:4px;font-size:.65rem;color:var(--tx2)}
 .ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .no-banner{background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:26px 14px;text-align:center;margin-bottom:12px}
@@ -249,10 +263,12 @@ textarea{resize:vertical;min-height:65px}
     </div>
     <div id="lerr" style="font-size:.7rem;color:var(--red);text-align:center;display:none;margin-top:2px"></div>
     <button class="btn pri fw" id="lbtn" onclick="doLogin()" style="margin-top:5px">로그인 / 가입</button>
+    <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">처음이면 자동 가입</div>
   </div>
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
 
+<!-- PAGE: 내 달력 -->
 <div class="page on" id="page-cal">
   <div class="cnav">
     <div class="cnav-l">
@@ -277,6 +293,26 @@ textarea{resize:vertical;min-height:65px}
   </div>
 
   <div id="cal-body" style="display:none">
+    <!-- 1. 메인 달력 -->
+    <div class="cal-grid" id="main-cal-grid">
+      <div class="dow-row">
+        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
+        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+    </div>
+    
+    <!-- 2. 범례 -->
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
+      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
+      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
+      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
+      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
+    </div>
+
+    <!-- 3. 달력과 팀 이벤트 사이로 이동한 주간/야간/연차 통계 바 -->
     <div class="sstrip">
       <div class="schip">
         <div class="sct" style="color:var(--a)">☀️ 주간</div>
@@ -304,24 +340,8 @@ textarea{resize:vertical;min-height:65px}
       </div>
     </div>
     
-    <div class="cal-grid">
-      <div class="dow-row">
-        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
-        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
-      </div>
-      <div class="days-grid" id="days-grid"></div>
-    </div>
-    
-    <div class="leg">
-      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
-      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
-      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
-      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
-      <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
-      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
-    </div>
-    
-    <div class="card" style="margin-top:16px">
+    <!-- 4. 팀 이벤트 -->
+    <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
         <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
@@ -331,6 +351,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- PAGE: 대근 -->
 <div class="page" id="page-dg">
   <div class="cnav">
     <div class="cnav-l">
@@ -358,6 +379,21 @@ textarea{resize:vertical;min-height:65px}
     <div style="font-size:.75rem;color:var(--tx3);margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rs);line-height:1.6">
       📌 날짜를 클릭해 <b style="color:var(--a)">연차 등록</b>을 하거나, 연차 등록 후 <b style="color:var(--n)">대근 요청</b>을 올릴 수 있어요
     </div>
+    <div class="cal-grid">
+      <div class="dow-row">
+        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
+        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+      </div>
+      <div class="days-grid" id="dg-grid"></div>
+    </div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
+      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
+      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
+      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
+      <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
+      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
+    </div>
     <div class="sstrip">
       <div class="schip">
         <div class="sct" style="color:var(--a)">☀️ 주간</div>
@@ -384,22 +420,7 @@ textarea{resize:vertical;min-height:65px}
         </div>
       </div>
     </div>
-    <div class="cal-grid">
-      <div class="dow-row">
-        <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
-        <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
-      </div>
-      <div class="days-grid" id="dg-grid"></div>
-    </div>
-    <div class="leg">
-      <div class="li"><div class="ld" style="background:var(--a)"></div>주간정규</div>
-      <div class="li"><div class="ld" style="background:var(--as)"></div>주간대근</div>
-      <div class="li"><div class="ld" style="background:var(--n)"></div>야간정규</div>
-      <div class="li"><div class="ld" style="background:var(--ns)"></div>야간대근</div>
-      <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
-      <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
-    </div>
-    <div class="card" style="margin-top:16px">
+    <div class="card">
       <div class="stitle">🔄 대근 요청 현황</div>
       <div style="font-size:.73rem;color:var(--tx3);margin-bottom:10px">달력에서 날짜를 클릭 → 대근요청 버튼으로 공고를 올릴 수 있어요</div>
       <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div></div>
@@ -407,6 +428,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- PAGE: 팀 달력 -->
 <div class="page" id="page-tcal">
   <div style="margin-bottom:12px">
     <div class="ph" style="margin-bottom:0">📋 팀 달력</div>
@@ -451,6 +473,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 팀 관리 시트 -->
 <div class="sov" id="team-mgr-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -464,6 +487,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- PAGE: 급식 -->
 <div class="page" id="page-meal">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
     <div class="ph" style="margin-bottom:0">🍽 급식</div>
@@ -473,7 +497,6 @@ textarea{resize:vertical;min-height:65px}
       + 업로드
     </a>
   </div>
-
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
     <button class="ibtn" onclick="mealMonth(-1)">◀</button>
     <span id="meal-month-label"
@@ -481,7 +504,6 @@ textarea{resize:vertical;min-height:65px}
     <button class="ibtn" onclick="mealMonth(1)">▶</button>
     <button class="ibtn" onclick="mealGotoToday()" style="font-size:.62rem;font-weight:800">오늘</button>
   </div>
-
   <div id="meal-list">
     <div style="text-align:center;padding:30px;color:var(--tx3)"><div class="sp"></div></div>
   </div>
@@ -494,6 +516,7 @@ textarea{resize:vertical;min-height:65px}
   <img id="lightbox-img" style="max-width:96%;max-height:90vh;object-fit:contain;border-radius:8px">
 </div>
 
+<!-- PAGE: 설정 -->
 <div class="page" id="page-settings">
   <div class="ph">⚙️ 설정</div>
   <div class="card">
@@ -553,6 +576,7 @@ textarea{resize:vertical;min-height:65px}
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
 </nav>
 
+<!-- 날짜 클릭 시트 -->
 <div class="sov" id="day-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -572,7 +596,7 @@ textarea{resize:vertical;min-height:65px}
       </div>
     </div>
     <div class="form-g">
-      <div class="lbl">메모</div>
+      <div class="lbl">메모 (엔터로 2줄 입력 가능)</div>
       <textarea id="day-memo" placeholder="메모..."></textarea>
     </div>
     <div class="fl">
@@ -582,6 +606,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 새 상위팀 시트 -->
 <div class="sov" id="new-top-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -597,6 +622,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 새 하위팀 시트 -->
 <div class="sov" id="new-div-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -638,6 +664,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 하위팀 정보 시트 -->
 <div class="sov" id="div-info-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -653,6 +680,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 공휴일 시트 -->
 <div class="sov" id="holiday-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -683,6 +711,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 이벤트 추가 시트 -->
 <div class="sov" id="new-event-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -708,6 +737,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 대근 날짜 클릭 시트 -->
 <div class="sov" id="dg-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -737,6 +767,7 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<!-- 대근 공고 상세 시트 -->
 <div class="sov" id="dgd-sov">
   <div class="sheet">
     <div class="shandle"></div>
@@ -749,19 +780,21 @@ textarea{resize:vertical;min-height:65px}
   </div>
 </div>
 
+<div id="offscreen-capture-host"></div>
 <div id="toast" class="toast"></div>
 
 <script>
 const ADMIN_NAME='정호철';
 const SM={
-  dr:{l:'주',i:'☀️',c:'cb-dr',tc:'tc-dr',s:'주'},
-  ds:{l:'주대',i:'🌤',c:'cb-ds',tc:'tc-ds',s:'주대'},
-  nr:{l:'야',i:'🌙',c:'cb-nr',tc:'tc-nr',s:'야'},
-  ns:{l:'야대',i:'🌛',c:'cb-ns',tc:'tc-ns',s:'야대'},
-  of:{l:'휴',i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
-  vc:{l:'연',i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
+  dr:{l:'주간정규',i:'☀️',c:'cb-dr',tc:'tc-dr',s:'주'},
+  ds:{l:'주간대근',i:'🌤',c:'cb-ds',tc:'tc-ds',s:'주대'},
+  nr:{l:'야간정규',i:'🌙',c:'cb-nr',tc:'tc-nr',s:'야'},
+  ns:{l:'야간대근',i:'🌛',c:'cb-ns',tc:'tc-ns',s:'야대'},
+  of:{l:'휴무',i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
+  vc:{l:'연차',i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
 };
 const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연'};
+const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
 let holidays={}; 
@@ -778,6 +811,7 @@ async function loadHolidays(){
   const yr=new Date().getFullYear();
   const years=[yr-1,yr,yr+1,yr+2];
   for(const y of years){
+    if(DEFAULT_HOLIDAYS[y]) Object.assign(holidays, DEFAULT_HOLIDAYS[y]);
     const data=await dbG('holidays/'+y);
     if(data)Object.assign(holidays,data);
   }
@@ -791,7 +825,7 @@ async function initDefaultHolidays(){
     Object.assign(holidays,data);
   }
   showToast('공휴일 초기화 완료 ✓');
-  renderCal();renderHolidayList();
+  refreshCal();renderHolidayList();
 }
 
 function openHolidayAddSheet(dateKey){
@@ -820,7 +854,7 @@ async function saveHoliday(){
   const yr=date.slice(0,4);
   await dbS(`holidays/${yr}/${date}`,{name,type});
   holidays[date]={name,type};
-  cs('holiday-sov');renderCal();renderHolidayList();
+  cs('holiday-sov');refreshCal();renderHolidayList();
   showToast('저장됨 ✓');
 }
 
@@ -829,7 +863,7 @@ async function deleteHoliday(){
   const yr=hdEditKey.slice(0,4);
   await dbS(`holidays/${yr}/${hdEditKey}`,null);
   delete holidays[hdEditKey];
-  cs('holiday-sov');renderCal();renderHolidayList();
+  cs('holiday-sov');refreshCal();renderHolidayList();
   showToast('삭제됨');
 }
 
@@ -881,7 +915,7 @@ const os=id=>document.getElementById(id).classList.add('op');
 function getDivPat(topId,divId){return S.patCache[`${topId}_${divId}`]||null;}
 function getBaseShift(date,topId,divId){
   const tp=getDivPat(topId||S.topId,divId||S.divId);
-  if(!tp||!tp.pattern||!tp.patternStart)return null;
+  if(!tp||!Array.isArray(tp.pattern)||!tp.pattern.length||!tp.patternStart)return null;
   const diff=Math.floor((date-new Date(tp.patternStart))/86400000);
   return diff<0?null:tp.pattern[diff%tp.pattern.length];
 }
@@ -937,6 +971,71 @@ function goTab(t){
 }
 function openTeamMgr(){renderAllTeams();os('team-mgr-sov');}
 
+// 위젯에 전체 데이터 전달
+function syncToWidget(){
+  if(!window.Android||!S.myId)return;
+  try{
+    const tp=S.patCache[`${S.topId}_${S.divId}`];
+    window.Android.savePattern(JSON.stringify({
+      patternStartKey: tp?.patternStart ? dkey(new Date(tp.patternStart)) : "",
+      pattern: Array.isArray(tp?.pattern) ? tp.pattern : [],
+      ov: S.ov || {},
+      name: S.myName||'',
+      topName: S.topName||'',
+      topColor: S.topColor||'#f59e0b',
+      divName: S.divName||'',
+      allPats: window._allPatsCache || {},
+      events: S.events || {},
+      holidays: holidays || {}
+    }));
+  }catch(e){}
+}
+
+// A방식: 현재 달 + 앞뒤 달력을 HTML 그대로 캡처해 안드로이드 위젯 파일로 저장
+let captureTimer=null;
+function scheduleWidgetCapture(){
+  if(!window.Android||typeof window.Android.saveCapturedCal!=='function'||typeof html2canvas==='undefined')return;
+  clearTimeout(captureTimer);
+  captureTimer=setTimeout(async()=>{
+    try{
+      // 1. 현재 화면에 떠 있는 달력 즉시 캡처
+      const mainGrid=document.getElementById('main-cal-grid');
+      if(mainGrid && S.topId && S.divId){
+        const cv=await html2canvas(mainGrid,{backgroundColor:'#181b24',scale:2,logging:false,useCORS:true});
+        window.Android.saveCapturedCal(S.yr, S.mo, cv.toDataURL('image/png'));
+      }
+      // 2. 오늘 기준 이전 달(-1), 이번 달(0), 다음 달(+1)을 오프스크린에서 조용히 캡처해 저장
+      const host=document.getElementById('offscreen-capture-host');
+      if(!host)return;
+      const now=new Date();
+      for(const off of [-1, 0, 1]){
+        const target=new Date(now.getFullYear(), now.getMonth()+off, 1);
+        const ty=target.getFullYear(), tm=target.getMonth();
+        if(ty===S.yr && tm===S.mo) continue;
+        host.innerHTML=`<div class="cal-grid" id="temp-cap-grid">
+          <div class="dow-row">
+            <div class="dow-cell">일</div><div class="dow-cell">월</div><div class="dow-cell">화</div>
+            <div class="dow-cell">수</div><div class="dow-cell">목</div><div class="dow-cell">금</div><div class="dow-cell">토</div>
+          </div>
+          <div class="days-grid" id="temp-days-grid"></div>
+        </div>`;
+        const tg=document.getElementById('temp-days-grid');
+        const first=new Date(ty,tm,1), last=new Date(ty,tm+1,0);
+        for(let i=0;i<first.getDay();i++)tg.appendChild(mkCell(new Date(ty,tm,i-first.getDay()+1),true));
+        for(let d=1;d<=last.getDate();d++)tg.appendChild(mkCell(new Date(ty,tm,d),false));
+        const trail=(7-(first.getDay()+last.getDate())%7)%7;
+        for(let i=1;i<=trail;i++)tg.appendChild(mkCell(new Date(ty,tm+1,i),true));
+        const cells=tg.querySelectorAll('.dc'),tot=cells.length;
+        for(let i=tot-7;i<tot;i++)if(cells[i])cells[i].classList.add('lr');
+        const tempCal=document.getElementById('temp-cap-grid');
+        const cv2=await html2canvas(tempCal,{backgroundColor:'#181b24',scale:2,logging:false,useCORS:true});
+        window.Android.saveCapturedCal(ty, tm, cv2.toDataURL('image/png'));
+      }
+      host.innerHTML='';
+    }catch(e){}
+  }, 300);
+}
+
 async function refreshCal(){
   let parsedPats = [];
   if(S.topId){
@@ -944,14 +1043,21 @@ async function refreshCal(){
     window._allPatsCache = {};
     if(divs){
       Object.entries(divs).forEach(([dId, dData]) => {
-        const dName = dData.name || '';
-        if(dData.pattern?.patternStart && !dName.includes('일근') && !dName.includes('통상')) {
-          window._allPatsCache[dName] = dData.pattern;
+        if(!dData) return;
+        const dName = String(dData.name || '');
+        const patArr = dData.pattern?.pattern;
+        const patStart = dData.pattern?.patternStart;
+        if(patStart && Array.isArray(patArr) && patArr.length > 0 && !dName.includes('일근') && !dName.includes('통상')) {
+          window._allPatsCache[dName] = {
+            patternStartKey: dkey(new Date(patStart)),
+            patternStart: patStart,
+            pattern: patArr
+          };
           parsedPats.push({
             name: dName.length >= 2 ? dName.substring(0, 2) : dName,
-            startMs: new Date(dData.pattern.patternStart).getTime(),
-            pat: dData.pattern.pattern,
-            len: dData.pattern.pattern.length
+            startMs: new Date(patStart).getTime(),
+            pat: patArr,
+            len: patArr.length
           });
         }
       });
@@ -965,21 +1071,8 @@ async function refreshCal(){
     document.getElementById('cal-badge-dot').style.background=S.topColor||'#f59e0b';
     document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
     document.getElementById('cal-badge').style.display='flex';
-    
-    if(window.Android&&S.myId){
-      try{
-        window.Android.savePattern(JSON.stringify({
-          patternStartKey: tp?.patternStart ? dkey(new Date(tp.patternStart)) : "",
-          pattern: tp?.pattern || [],
-          ov: S.ov,
-          name: S.myName||'',
-          topName: S.topName||'',
-          divName: S.divName||'',
-          allPats: window._allPatsCache || {},
-          events: S.events || {}
-        }));
-      }catch(e){}
-    }
+    const evTitle=document.getElementById('event-section-title');
+    if(evTitle)evTitle.textContent=`📌 ${S.topName} 이벤트`;
   }
   renderCal();
 }
@@ -1002,13 +1095,17 @@ function renderCal(){
   for(let i=1;i<=trail;i++)grid.appendChild(mkCell(new Date(yr,mo+1,i),true));
   
   const cells=grid.querySelectorAll('.dc'),tot=cells.length;
-  for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
+  for(let i=tot-7;i<tot;i++)if(cells[i])cells[i].classList.add('lr');
   ['dr','ds','nr','ns'].forEach(k=>document.getElementById('s-'+k).textContent=stats[k]);
   let uv=0;
   for(let d=new Date(today.getFullYear(),0,1);d<=today;d.setDate(d.getDate()+1))if(getShift(new Date(d))==='vc')uv++;
   document.getElementById('s-vc').textContent=uv;
-  document.getElementById('s-vt').textContent=S.vacTotal>0?S.vacTotal:'-';
+  const vt=document.getElementById('s-vt');
+  vt.textContent=S.vacTotal>0?S.vacTotal:'-';
+  vt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
   
+  syncToWidget();
+  scheduleWidgetCapture();
   if(window.Android&&S.myId){
     try{
       const todaySh=getShift(new Date());
@@ -1026,25 +1123,27 @@ function renderCal(){
 
 function mkCell(date,other){
   const c=document.createElement('div');c.className='dc';
-  if(other){c.classList.add('om');return c;}
+  if(other){c.classList.add('om');}
   const dow=date.getDay();
   if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
-  if(date.toDateString()===new Date().toDateString())c.classList.add('td');
-  const sh=getShift(date),isOv=!!S.ov[dkey(date)];
+  if(!other && date.toDateString()===new Date().toDateString())c.classList.add('td');
+  const dtKey = dkey(date);
+  const sh=other?null:getShift(date),isOv=!other && !!S.ov[dtKey]?.shift;
   
+  // 1층: 날짜 + 근무 뱃지
   const row=document.createElement('div');row.className='dr';
-  row.innerHTML = `<div class="dn">${date.getDate()}</div>`;
+  row.innerHTML = `<div class="dn">${other?'':date.getDate()}</div>`;
   if(sh){
     const b=document.createElement('div');
     b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
     b.textContent=CL[sh];
-    if(isOv)b.style.outline='1.5px solid currentColor';
+    if(isOv||sh==='vc')b.style.outline='1.4px solid currentColor';
     row.appendChild(b);
   }
   c.appendChild(row);
+  if(other) return c;
   
-  const dtKey = dkey(date);
-  
+  // 2층: 공휴일
   const hd=holidays[dtKey];
   if(hd){
     c.classList.add('hday');
@@ -1052,28 +1151,42 @@ function mkCell(date,other){
     const hn=document.createElement('div');hn.className='hd';hn.textContent=hd.name;c.appendChild(hn);
   }
 
-  const memo=S.ov[dtKey]?.memo;
-  if(memo){const m=document.createElement('div');m.className='cm';m.textContent='📝 '+memo;c.appendChild(m);}
-
+  // 3층 & 4층: 일정/메모 최대 2줄, 각 줄은 무조건 1줄 말줄임(...) 처리하여 가로폭 고정
+  const lines=[];
   if(S.events){
     Object.values(S.events).forEach(ev => {
+      if(!ev) return;
       const s = ev.startDate;
       const e = ev.endDate || ev.startDate;
-      if (dtKey >= s && dtKey <= e) {
-        const el = document.createElement('div');
-        el.className = 'ce';
-        el.textContent = '📌 ' + ev.title;
-        c.appendChild(el);
-      }
+      if (dtKey >= s && dtKey <= e && ev.title) lines.push({type:'ce', text:'📌 '+ev.title});
+    });
+  }
+  const memoRaw=(S.ov[dtKey]?.memo||'').trim();
+  if(memoRaw){
+    const mParts=memoRaw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    mParts.forEach((part,idx)=>{
+      lines.push({type:'cm', text:(idx===0?'📝 ':'')+part});
     });
   }
 
+  if(lines.length){
+    const mw=document.createElement('div');mw.className='mid-wrap';
+    lines.slice(0,2).forEach(item=>{
+      const el=document.createElement('div');
+      el.className=item.type;
+      el.textContent=item.text;
+      mw.appendChild(el);
+    });
+    c.appendChild(mw);
+  }
+
+  // 5층 (하단 고정): 주간/야간 근무과 (간격 13px)
   let dtMs = date.getTime();
   let dayTeam='', nightTeam='';
   if(window._parsedPats){
     for(let p of window._parsedPats){
       let diff = Math.floor((dtMs - p.startMs)/86400000);
-      if(diff>=0){
+      if(diff>=0 && p.len>0){
         let s = p.pat[diff % p.len];
         if(s==='dr'||s==='ds') dayTeam = p.name;
         if(s==='nr'||s==='ns') nightTeam = p.name;
@@ -1097,7 +1210,8 @@ function mkDgCell(date,other){
   const dow=date.getDay();
   if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
   if(date.toDateString()===new Date().toDateString())c.classList.add('td');
-  const sh=getShift(date),isOv=!!S.ov[dkey(date)];
+  const k=dkey(date);
+  const sh=getShift(date),isOv=!!S.ov[k]?.shift;
   const row=document.createElement('div');row.className='dr';
   
   row.innerHTML = `<div class="dn">${date.getDate()}</div>`;
@@ -1105,16 +1219,15 @@ function mkDgCell(date,other){
     const b=document.createElement('div');
     b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
     b.textContent=CL[sh];
-    if(isOv)b.style.outline='1.5px solid currentColor';
+    if(isOv||sh==='vc')b.style.outline='1.4px solid currentColor';
     row.appendChild(b);
   }
   c.appendChild(row);
   
-  const k=dkey(date);
   const posts=dgPostCache[k];
   if(posts&&Object.keys(posts).length){
     const tag=document.createElement('div');
-    tag.style.cssText='font-size:.48rem;color:var(--n);font-weight:800;margin-top:1px;line-height:1.2';
+    tag.style.cssText='font-size:.48rem;color:var(--n);font-weight:800;margin-top:2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%';
     const bMeta=SM[Object.values(posts)[0]?.baseShift];
     tag.textContent=`🔄 ${bMeta?bMeta.s:''}대근요청`;
     c.appendChild(tag);
@@ -1125,7 +1238,7 @@ function mkDgCell(date,other){
   if(window._parsedPats){
     for(let p of window._parsedPats){
       let diff = Math.floor((dtMs - p.startMs)/86400000);
-      if(diff>=0){
+      if(diff>=0 && p.len>0){
         let s = p.pat[diff % p.len];
         if(s==='dr'||s==='ds') dayTeam = p.name;
         if(s==='nr'||s==='ns') nightTeam = p.name;
@@ -1149,8 +1262,9 @@ function gotoToday(){const t=new Date();S.yr=t.getFullYear();S.mo=t.getMonth();r
 let editDate=null;
 function openDaySheet(date){
   editDate=date;
-  const k=dkey(date),sh=getShift(date)||'of',memo=S.ov[k]?.memo||'';
-  document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일`;
+  const k=dkey(date),bSh=getBaseShift(date),sh=getShift(date)||'of',memo=S.ov[k]?.memo||'';
+  document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
+  document.getElementById('day-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
   document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
   document.getElementById('day-memo').value=memo;
   os('day-sov');
@@ -1161,7 +1275,7 @@ async function saveDaySheet(){
   const bSh=getBaseShift(editDate);
   if(sh===bSh&&!memo){delete S.ov[k];}
   else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;if(memo)S.ov[k].memo=memo;else delete S.ov[k].memo;}
-  cs('day-sov');refreshCal();await saveProfile();showToast('저장됨 ✓');
+  cs('day-sov');await saveProfile();refreshCal();showToast('저장됨 ✓');
 }
 
 function startEventListen(){
@@ -1181,8 +1295,6 @@ function renderEventList(events){
   list.forEach(([evId,ev])=>{
     const item=document.createElement('div');item.className='event-item';
     const dot=document.createElement('div');dot.className='event-dot';
-    let dateStr=ev.startDate;
-    if(ev.endDate&&ev.endDate!==ev.startDate)dateStr=`${ev.startDate}~${ev.endDate}`;
     const txt=document.createElement('div');txt.style.cssText='flex:1;min-width:0';
     txt.innerHTML=`<div class="event-date">${formatDateRange(ev.startDate,ev.endDate)}</div><div class="event-title">${escHtml(ev.title||'')}</div><div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${ev.createdBy||''}</div>`;
     item.appendChild(dot);item.appendChild(txt);
@@ -1343,7 +1455,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-title').textContent=`${topName} · ${divName}`;
   const tp=div?.pattern;
   const patEl=document.getElementById('di-pattern');
-  if(tp){const st=new Date(tp.patternStart);patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b> 🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;}
+  if(tp&&tp.patternStart){const st=new Date(tp.patternStart);patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b> 🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;}
   else patEl.textContent='패턴 없음';
   const mEl=document.getElementById('di-members');mEl.innerHTML='<div class="stitle">팀원</div>';
   const members=div?.members||{};
@@ -1414,6 +1526,7 @@ function renderTodayWorkers(divs){
   const topId=S.topId;
   const day=[],night=[],other=[];
   Object.entries(divs||{}).forEach(([divId,div])=>{
+    if(!div) return;
     if(div.pattern)S.patCache[`${topId}_${divId}`]=div.pattern;
     Object.entries(div.members||{}).forEach(([uid,m])=>{
       const sh=getMemberShift(today,m.ov||{},topId,divId);
@@ -1522,7 +1635,7 @@ function renderDgCal(){
   const trail=(7-(first.getDay()+last.getDate())%7)%7;
   for(let i=1;i<=trail;i++)grid.appendChild(mkDgCell(new Date(yr,mo+1,i),true));
   const cells=grid.querySelectorAll('.dc'),tot=cells.length;
-  for(let i=tot-7;i<tot;i++)cells[i].classList.add('lr');
+  for(let i=tot-7;i<tot;i++)if(cells[i])cells[i].classList.add('lr');
   ['dr','ds','nr','ns'].forEach(k=>document.getElementById('dg-'+k).textContent=stats[k]);
   let uv=0;
   for(let dd=new Date(today.getFullYear(),0,1);dd<=today;dd.setDate(dd.getDate()+1))if(getShift(new Date(dd))==='vc')uv++;
@@ -1548,8 +1661,7 @@ async function saveDgMyShift(){
   const bSh=getBaseShift(dgEditDate);
   if(sh===bSh){delete S.ov[k];}
   else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;}
-  cs('dg-sov');renderDgCal();refreshCal();
-  await saveProfile();showToast('저장됨 ✓');
+  cs('dg-sov');await saveProfile();renderDgCal();refreshCal();showToast('저장됨 ✓');
 }
 
 async function confirmDgRequest(){
@@ -1615,7 +1727,7 @@ function renderDgRecruitList(allPosts){
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
           <div style="width:22px;height:22px;border-radius:50%;background:${post.color||'#f59e0b'};display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
           <span style="font-size:.85rem;font-weight:700">${post.name||'?'}</span>
-          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i}${bMeta.l}</span>`:''}
+          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i} ${bMeta.l}</span>`:''}
           ${isOwner?'<span style="font-size:.6rem;color:var(--a);font-weight:700">내 요청</span>':''}
           ${isClosed?'<span style="font-size:.6rem;color:var(--vac);font-weight:800">✓ 종결</span>':''}
         </div>
@@ -1641,7 +1753,7 @@ function openDgDetailSheet(dateKey,postId,post){
       <div style="width:30px;height:30px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
       <div>
         <div style="font-size:.88rem;font-weight:800">${post.name||'?'} <span style="font-size:.65rem;color:var(--tx3)">연차</span></div>
-        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i}${bMeta.l} 대근 필요</span></div>`:''}
+        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i} ${bMeta.l} 대근 필요</span></div>`:''}
         ${isClosed?`<div style="margin-top:4px;font-size:.65rem;color:var(--vac);font-weight:800">✅ 대근 확정 완료</div>`:''}
       </div>
     </div>`;
@@ -1868,7 +1980,7 @@ async function deleteAcct(name,myId){
 let toastT;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('sh'),2300);}
 function renderSavedAccts(){
-  const box=document.getElementById('saved-accts');box.innerHTML='';
+  const box=document.getElementById('saved-accts');if(!box)return;box.innerHTML='';
   const sess=ls.g('sess');if(!sess?.name)return;
   const lbl=document.createElement('div');lbl.style.cssText='font-size:.66rem;color:var(--tx3);text-align:center;margin-bottom:5px';lbl.textContent='최근 계정';box.appendChild(lbl);
   const btn=document.createElement('button');btn.className='qbtn';btn.innerHTML=`<span>👤</span>${sess.name}으로 빠른 로그인`;
@@ -1882,7 +1994,6 @@ async function boot(){
   dgYr=t.getFullYear();dgMo=t.getMonth();
   mealYr=t.getFullYear();mealMo=t.getMonth();
   applyTheme();
-  
   await loadHolidays();
   await refreshCal(); 
   startEventListen();
