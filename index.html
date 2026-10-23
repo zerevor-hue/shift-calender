@@ -83,7 +83,10 @@ textarea{resize:vertical;min-height:65px}
 
 .abadge{display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.14);color:var(--a);font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:9px;border:1px solid rgba(245,158,11,.28);vertical-align:middle;margin-left:5px}
 
-.cnav{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:12px}
+.cnav{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;transition:border-color .25s ease,box-shadow .25s ease}
+.cnav-art{position:absolute;inset:0;pointer-events:none;z-index:0}
+.cnav-art svg{width:100%;height:100%;display:block}
+.cnav-l,.cnav-btns{position:relative;z-index:1}
 .cnav-l{display:flex;flex-direction:column;gap:4px}
 .ctitle{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
 .tbadge{display:none;align-items:center;gap:5px}
@@ -270,7 +273,8 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- PAGE: 내 달력 -->
 <div class="page on" id="page-cal">
-  <div class="cnav">
+  <div class="cnav" id="cal-cnav">
+    <div class="cnav-art" id="cal-cnav-art"></div>
     <div class="cnav-l">
       <div class="ctitle" id="cal-month"></div>
       <div class="tbadge" id="cal-badge" style="display:none;align-items:center;gap:5px">
@@ -353,7 +357,8 @@ textarea{resize:vertical;min-height:65px}
 
 <!-- PAGE: 대근 -->
 <div class="page" id="page-dg">
-  <div class="cnav">
+  <div class="cnav" id="dg-cnav">
+    <div class="cnav-art" id="dg-cnav-art"></div>
     <div class="cnav-l">
       <div class="ctitle" id="dg-month"></div>
       <div class="tbadge" id="dg-badge" style="display:none">
@@ -797,6 +802,32 @@ const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연'};
 const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
+const MONTH_THEMES=[
+  {month:1,name:"해돋이와 설원",glow:"radial-gradient(circle at 62% 50%, rgba(251, 191, 36, 0.22), rgba(147, 197, 253, 0.10) 45%, transparent 72%)",border:"rgba(251, 191, 36, 0.38)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><circle cx="245" cy="58" r="22" fill="#FBBF24" fill-opacity="0.22"/><circle cx="245" cy="58" r="14" fill="#FDE68A" fill-opacity="0.28"/><path d="M170 90 L215 42 L255 90 Z" fill="#93C5FD" fill-opacity="0.13"/><path d="M225 90 L272 34 L320 90 Z" fill="#BFDBFE" fill-opacity="0.16"/><g stroke="#E0F2FE" stroke-opacity="0.45" stroke-width="1.3" stroke-linecap="round"><line x1="200" y1="18" x2="200" y2="30"/><line x1="194" y1="24" x2="206" y2="24"/><line x1="295" y1="22" x2="295" y2="32"/><line x1="290" y1="27" x2="300" y2="27"/></g></svg>`},
+  {month:2,name:"홍매화와 봄소식",glow:"radial-gradient(circle at 63% 50%, rgba(251, 113, 133, 0.24), rgba(244, 63, 94, 0.08) 48%, transparent 72%)",border:"rgba(251, 113, 133, 0.38)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><path d="M295 85 Q255 52 210 22" stroke="#9F1239" stroke-opacity="0.45" stroke-width="2.2" fill="none"/><path d="M260 56 Q240 65 220 62" stroke="#9F1239" stroke-opacity="0.35" stroke-width="1.6" fill="none"/><g fill="#FDA4AF" fill-opacity="0.42"><circle cx="222" cy="30" r="6"/><circle cx="248" cy="46" r="7.5"/><circle cx="232" cy="62" r="5.5"/><circle cx="272" cy="64" r="6.5"/></g><g fill="#FECDD3" fill-opacity="0.65"><circle cx="222" cy="30" r="2"/><circle cx="248" cy="46" r="2.2"/><circle cx="200" cy="48" r="2.5"/></g></svg>`},
+  {month:3,name:"봄바람과 새순",glow:"radial-gradient(circle at 62% 50%, rgba(52, 211, 153, 0.22), rgba(16, 185, 129, 0.08) 48%, transparent 72%)",border:"rgba(52, 211, 153, 0.38)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><path d="M180 42 Q225 26 270 42 T325 38" stroke="#6EE7B7" stroke-opacity="0.28" stroke-width="1.8" fill="none"/><path d="M195 58 Q240 44 285 58" stroke="#A7F3D0" stroke-opacity="0.22" stroke-width="1.4" fill="none"/><path d="M235 88 Q236 62 252 46 Q240 46 235 64 Q230 48 218 50 Q232 64 235 88 Z" fill="#34D399" fill-opacity="0.36"/><path d="M275 88 Q276 68 288 56 Q278 56 275 70 Q271 58 262 60 Q272 70 275 88 Z" fill="#6EE7B7" fill-opacity="0.30"/></svg>`},
+  {month:4,name:"흩날리는 벚꽃잎",glow:"radial-gradient(circle at 62% 50%, rgba(244, 114, 182, 0.25), rgba(251, 207, 232, 0.09) 48%, transparent 72%)",border:"rgba(244, 114, 182, 0.42)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><g fill="#F9A8D4" fill-opacity="0.42"><path d="M210 28 C216 20, 226 26, 218 36 C212 42, 204 34, 210 28 Z"/><path d="M248 48 C256 38, 268 46, 258 58 C250 64, 240 56, 248 48 Z"/><path d="M284 26 C290 18, 300 24, 292 34 C286 40, 278 32, 284 26 Z"/><path d="M226 64 C232 58, 240 62, 234 70 C228 74, 222 68, 226 64 Z"/><path d="M272 66 C278 60, 286 64, 280 72 C274 76, 268 70, 272 66 Z"/></g><circle cx="195" cy="52" r="2.5" fill="#FBCFE8" fill-opacity="0.45"/><circle cx="265" cy="24" r="2" fill="#FBCFE8" fill-opacity="0.45"/></svg>`},
+  {month:5,name:"푸른 신록과 햇살",glow:"radial-gradient(circle at 62% 45%, rgba(16, 185, 129, 0.24), rgba(163, 230, 53, 0.10) 48%, transparent 72%)",border:"rgba(16, 185, 129, 0.40)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><polygon points="210,0 245,0 285,90 240,90" fill="#BEF264" fill-opacity="0.08"/><polygon points="250,0 275,0 315,90 280,90" fill="#FEF08A" fill-opacity="0.07"/><g fill="#34D399" fill-opacity="0.34"><path d="M215 88 Q225 55 248 38 Q245 68 215 88 Z"/><path d="M242 88 Q258 50 285 32 Q278 68 242 88 Z"/><path d="M270 88 Q282 62 302 48 Q296 74 270 88 Z"/></g></svg>`},
+  {month:6,name:"초여름 비와 수국",glow:"radial-gradient(circle at 62% 50%, rgba(56, 189, 248, 0.24), rgba(167, 139, 250, 0.12) 48%, transparent 72%)",border:"rgba(56, 189, 248, 0.40)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><g stroke="#7DD3FC" stroke-opacity="0.35" stroke-width="1.4" stroke-linecap="round"><line x1="205" y1="16" x2="198" y2="30"/><line x1="235" y1="12" x2="228" y2="26"/><line x1="275" y1="18" x2="268" y2="32"/><line x1="302" y1="14" x2="295" y2="28"/></g><g fill="#93C5FD" fill-opacity="0.30"><circle cx="245" cy="64" r="14"/><circle cx="258" cy="58" r="12"/><circle cx="234" cy="56" r="11"/></g><g fill="#C4B5FD" fill-opacity="0.32"><circle cx="282" cy="68" r="12"/><circle cx="292" cy="60" r="10"/></g></svg>`},
+  {month:7,name:"시원한 여름 파도",glow:"radial-gradient(circle at 62% 50%, rgba(34, 211, 238, 0.24), rgba(59, 130, 246, 0.10) 48%, transparent 72%)",border:"rgba(34, 211, 238, 0.40)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><path d="M175 58 Q195 46 215 58 T255 58 T295 58 T335 58" stroke="#22D3EE" stroke-opacity="0.38" stroke-width="2.2" fill="none"/><path d="M185 72 Q205 60 225 72 T265 72 T305 72" stroke="#67E8F9" stroke-opacity="0.26" stroke-width="1.8" fill="none"/><g fill="#A5F3FC" fill-opacity="0.6"><circle cx="220" cy="30" r="2"/><circle cx="265" cy="24" r="2.5"/><circle cx="290" cy="36" r="1.8"/></g></svg>`},
+  {month:8,name:"한여름 밤 반딧불이",glow:"radial-gradient(circle at 62% 50%, rgba(96, 165, 250, 0.22), rgba(250, 204, 21, 0.12) 48%, transparent 72%)",border:"rgba(96, 165, 250, 0.38)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><g fill="#FDE047"><circle cx="215" cy="54" r="3.5" fill-opacity="0.75"/><circle cx="215" cy="54" r="9" fill-opacity="0.18"/><circle cx="258" cy="32" r="3" fill-opacity="0.8"/><circle cx="258" cy="32" r="8" fill-opacity="0.20"/><circle cx="288" cy="60" r="3.5" fill-opacity="0.7"/><circle cx="288" cy="60" r="9" fill-opacity="0.16"/></g><g fill="#E2E8F0" fill-opacity="0.45"><circle cx="195" cy="24" r="1.3"/><circle cx="235" cy="18" r="1.5"/><circle cx="305" cy="26" r="1.4"/></g></svg>`},
+  {month:9,name:"가을 보름달과 코스모스",glow:"radial-gradient(circle at 62% 50%, rgba(251, 146, 60, 0.24), rgba(244, 114, 182, 0.10) 48%, transparent 72%)",border:"rgba(251, 146, 60, 0.40)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><circle cx="268" cy="32" r="16" fill="#FDE68A" fill-opacity="0.32"/><circle cx="268" cy="32" r="24" fill="#FBBF24" fill-opacity="0.12"/><g fill="#FDBA74" fill-opacity="0.38"><circle cx="218" cy="64" r="8"/><circle cx="244" cy="70" r="7"/><circle cx="288" cy="66" r="8.5"/></g><g fill="#FDE047" fill-opacity="0.6"><circle cx="218" cy="64" r="2.2"/><circle cx="244" cy="70" r="2"/><circle cx="288" cy="66" r="2.2"/></g></svg>`},
+  {month:10,name:"단풍잎과 은행잎",glow:"radial-gradient(circle at 62% 50%, rgba(245, 158, 11, 0.26), rgba(234, 88, 12, 0.12) 48%, transparent 72%)",border:"rgba(245, 158, 11, 0.45)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><path d="M238 58 C230 38, 258 32, 260 52 C252 54, 245 55, 238 58 Z" fill="#FBBF24" fill-opacity="0.45"/><path d="M238 58 L230 68" stroke="#FBBF24" stroke-opacity="0.45" stroke-width="1.5"/><path d="M208 32 L214 20 L220 30 L232 26 L224 38 L232 46 L218 44 L212 54 L208 42 L196 42 Z" fill="#F97316" fill-opacity="0.38"/><path d="M278 44 L283 34 L288 42 L298 38 L292 48 L298 55 L286 53 L282 62 L278 52 L268 52 Z" fill="#EF4444" fill-opacity="0.34"/></svg>`},
+  {month:11,name:"은빛 억새와 늦가을 낙엽",glow:"radial-gradient(circle at 62% 50%, rgba(217, 119, 6, 0.22), rgba(180, 83, 9, 0.10) 48%, transparent 72%)",border:"rgba(217, 119, 6, 0.38)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><g stroke="#E2E8F0" stroke-opacity="0.32" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M220 88 Q230 52 258 26"/><path d="M238 88 Q248 56 278 32"/><path d="M260 88 Q270 60 296 40"/></g><path d="M205 44 C214 38, 222 44, 212 52 C206 54, 200 48, 205 44 Z" fill="#D97706" fill-opacity="0.42"/></svg>`},
+  {month:12,name:"겨울 눈결정과 별빛",glow:"radial-gradient(circle at 62% 50%, rgba(165, 180, 252, 0.25), rgba(129, 140, 248, 0.10) 48%, transparent 72%)",border:"rgba(165, 180, 252, 0.42)",svg:`<svg viewBox="0 0 400 90" preserveAspectRatio="xMidYMid slice"><g stroke="#E0E7FF" stroke-opacity="0.48" stroke-width="1.6" stroke-linecap="round"><line x1="225" y1="24" x2="225" y2="48"/><line x1="213" y1="36" x2="237" y2="36"/><line x1="217" y1="28" x2="233" y2="44"/><line x1="233" y1="28" x2="217" y2="44"/><line x1="276" y1="44" x2="276" y2="64"/><line x1="266" y1="54" x2="286" y2="54"/><line x1="269" y1="47" x2="283" y2="61"/><line x1="283" y1="47" x2="269" y2="61"/></g><circle cx="198" cy="54" r="2.2" fill="#C7D2FE" fill-opacity="0.55"/><circle cx="252" cy="24" r="2.5" fill="#E0E7FF" fill-opacity="0.6"/><circle cx="304" cy="34" r="2" fill="#C7D2FE" fill-opacity="0.5"/></svg>`}
+];
+
+function applyMonthTheme(cnavId, artId, mo){
+  const cnav=document.getElementById(cnavId);
+  const art=document.getElementById(artId);
+  const t=MONTH_THEMES[(mo%12+12)%12];
+  if(!cnav||!art||!t)return;
+  art.style.background=t.glow;
+  art.innerHTML=t.svg;
+  cnav.style.borderColor=t.border;
+  cnav.style.boxShadow=`0 0 16px -5px ${t.border}`;
+}
+
 let holidays={}; 
 let hdViewYear=new Date().getFullYear();
 let hdEditKey=''; 
@@ -1078,14 +1109,15 @@ async function refreshCal(){
 }
 
 function renderCal(){
+  const{yr,mo}=S;
+  document.getElementById('cal-month').textContent=`${yr}년 ${mo+1}월`;
+  applyMonthTheme('cal-cnav','cal-cnav-art',mo);
   const has=!!(S.topId&&S.divId);
   document.getElementById('no-team-banner').style.display=has?'none':'';
   document.getElementById('cal-body').style.display=has?'block':'none';
   if(!has)return;
-  const{yr,mo}=S;
   const today=new Date();today.setHours(0,0,0,0);
   const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
-  document.getElementById('cal-month').textContent=`${yr}년 ${mo+1}월`;
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
   const grid=document.getElementById('days-grid');grid.innerHTML='';
   
@@ -1614,6 +1646,9 @@ let dgDetailKey='',dgDetailPostId='',dgDetailPost=null;
 let dgPostCache={}; 
 
 function renderDgCal(){
+  const yr=dgYr,mo=dgMo;
+  document.getElementById('dg-month').textContent=`${yr}년 ${mo+1}월`;
+  applyMonthTheme('dg-cnav','dg-cnav-art',mo);
   const has=!!(S.topId&&S.divId);
   document.getElementById('no-dg-banner').style.display=has?'none':'';
   document.getElementById('dg-body').style.display=has?'block':'none';
@@ -1621,10 +1656,8 @@ function renderDgCal(){
   document.getElementById('dg-badge-dot').style.background=S.topColor||'#f59e0b';
   document.getElementById('dg-badge-name').textContent=`${S.topName||''}${S.divName?' · '+S.divName:''}`;
   document.getElementById('dg-badge').style.display='flex';
-  const yr=dgYr,mo=dgMo;
   const today=new Date();today.setHours(0,0,0,0);
   const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
-  document.getElementById('dg-month').textContent=`${yr}년 ${mo+1}월`;
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
   const grid=document.getElementById('dg-grid');grid.innerHTML='';
   for(let i=0;i<first.getDay();i++)grid.appendChild(mkDgCell(new Date(yr,mo,i-first.getDay()+1),true));
