@@ -25,12 +25,12 @@ window._fb={
   async set(p,v){await set(ref(db,p),v)},
   async push(p,v){return await push(ref(db,p),v)},
   listen(p,cb){const r=ref(db,p);onValue(r,s=>cb(s.exists()?s.val():null));return()=>off(r)},
-};
+};ㅃ
 window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
 </script>
 <style>
 :root{
-  --a:#f59e0b;--as:#fbbf24;--n:#818cf8;--ns:#a5b4fc;--vac:#10b981;--red:#f87171;
+  --a:#f59e0b;--as:#fbbf24;--n:#818cf8;--ns:#a5b4ㅃfc;--vac:#10b981;--red:#f87171;
   --a-bg:rgba(245,158,11,.18);--ds-bg:rgba(251,191,36,.16);
   --n-bg:rgba(129,140,248,.18);--ns-bg:rgba(165,180,252,.16);
   --off-bg:rgba(248,113,113,.15);--vac-bg:rgba(16,185,129,.18);
@@ -1019,7 +1019,8 @@ function syncToWidget(){
       divName: S.divName||'',
       allPats: window._allPatsCache || {},
       events: S.events || {},
-      holidays: holidays || {}
+      holidays: holidays || {},
+      theme: document.body.classList.contains("light") ? "light" : "dark"
     }));
   }catch(e){}
 }
@@ -1974,7 +1975,7 @@ function renderSettings(){
   const hdCard=document.getElementById('holiday-mgr-card');
   if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
 }
-function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#ffffff':'#0f1117');ls.s('theme',m);renderSettings();scheduleWidgetCapture();}
+function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#ffffff':'#0f1117');ls.s('theme',m);renderSettings();syncToWidget();}
 function applyTheme(){const t=ls.g('theme')||'light';setTheme(t);}
 async function saveVac(){S.vacTotal=parseInt(document.getElementById('vac-inp').value)||0;refreshCal();updateVacSum();await saveProfile();}
 function updateVacSum(){
