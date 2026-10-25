@@ -1000,6 +1000,10 @@ const ls={s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},g:k=>
 let _modalHistoryPushed=false;
 function _pushHashState(hashName){
   try{
+    history.pushState({hash:hashName},'','#'+hashName);
+    return true;
+  }catch(e){}
+  try{
     let a=document.getElementById('_nav-hash-anchor');
     if(!a){
       a=document.createElement('a');
@@ -1014,10 +1018,6 @@ function _pushHashState(hashName){
   try{
     location.hash=hashName;
     if(location.hash==='#'+hashName)return true;
-  }catch(e){}
-  try{
-    history.pushState({hash:hashName},'','#'+hashName);
-    return true;
   }catch(e){}
   return false;
 }
@@ -2147,9 +2147,16 @@ window.addEventListener('keydown',e=>{
 });
 window.closeLightbox=closeLightbox;
 window.handleBackPress=function(){
-  if(_lightboxOpen){closeLightbox();return true;}
+  const lb=document.getElementById('img-lightbox');
+  const isLbVisible=_lightboxOpen||(lb&&(lb.classList.contains('op')||lb.style.opacity==='1'));
+  if(isLbVisible){closeLightbox(true);return true;}
   const openSov=document.querySelector('.sov.op');
-  if(openSov){cs(openSov.id);return true;}
+  if(openSov){cs(openSov.id,true);return true;}
+  const activePage=document.querySelector('.page.on');
+  if(activePage&&activePage.id&&activePage.id!=='page-cal'){
+    goTab('cal');
+    return true;
+  }
   return false;
 };
 window.onBackPressed=window.handleBackPress;
