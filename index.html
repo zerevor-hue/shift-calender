@@ -586,11 +586,22 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
   </div>
 </div>
 
-<div id="img-lightbox" onclick="this.classList.remove('op')"
+<div id="img-lightbox" onclick="closeLightbox()"
   style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
-         display:flex;align-items:center;justify-content:center;
+         display:flex;flex-direction:column;align-items:center;justify-content:center;
          opacity:0;pointer-events:none;transition:opacity .2s">
-  <img id="lightbox-img" style="max-width:96%;max-height:90vh;object-fit:contain;border-radius:8px">
+  <div style="position:absolute;top:max(14px,env(safe-area-inset-top,14px));left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;z-index:401">
+    <button type="button" onclick="event.stopPropagation();closeLightbox()"
+      style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28);padding:8px 14px;border-radius:999px;font-size:.82rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)">
+      ← 뒤로
+    </button>
+    <button type="button" onclick="event.stopPropagation();closeLightbox()"
+      style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:50%;font-size:1rem;font-weight:800;cursor:pointer;backdrop-filter:blur(6px)">
+      ✕
+    </button>
+  </div>
+  <img id="lightbox-img" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px">
+  <div style="position:absolute;bottom:max(18px,env(safe-area-inset-bottom,18px));color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;pointer-events:none">화면을 터치하거나 뒤로가기를 누르면 닫힙니다</div>
 </div>
 
 <!-- PAGE: 설정 -->
@@ -1977,11 +1988,46 @@ async function renderMealTab(){
   }catch(e){box.innerHTML='<div style="text-align:center;padding:20px;color:var(--ng);font-size:.8rem">불러오기 실패</div>';}
 }
 function showMealEmpty(box){box.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:.82rem">이번 달 식단표가 없어요<br><span style="color:var(--a);font-size:.72rem">+ 업로드 버튼으로 추가해주세요</span></div>';}
+let _lightboxOpen=false;
 function openLightbox(url){
   const lb=document.getElementById('img-lightbox');
   document.getElementById('lightbox-img').src=url;
+  lb.classList.add('op');
   lb.style.opacity='1';lb.style.pointerEvents='all';
+  if(!_lightboxOpen){
+    _lightboxOpen=true;
+    try{history.pushState({lightbox:true},'','#lightbox');}catch(e){}
+  }
 }
+function closeLightbox(fromHistory){
+  const lb=document.getElementById('img-lightbox');
+  if(!lb)return;
+  const wasOpen=_lightboxOpen||lb.style.opacity==='1'||lb.classList.contains('op');
+  _lightboxOpen=false;
+  lb.classList.remove('op');
+  lb.style.opacity='0';lb.style.pointerEvents='none';
+  if(!fromHistory&&wasOpen&&(location.hash==='#lightbox'||(history.state&&history.state.lightbox))){
+    try{history.back();}catch(e){}
+  }
+}
+window.addEventListener('popstate',()=>{
+  if(_lightboxOpen){closeLightbox(true);return;}
+  const openSov=document.querySelector('.sov.op');
+  if(openSov)openSov.classList.remove('op');
+});
+window.addEventListener('hashchange',()=>{
+  if(_lightboxOpen&&location.hash!=='#lightbox')closeLightbox(true);
+});
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&_lightboxOpen)closeLightbox();
+});
+window.closeLightbox=closeLightbox;
+window.handleBackPress=function(){
+  if(_lightboxOpen){closeLightbox();return true;}
+  const openSov=document.querySelector('.sov.op');
+  if(openSov){openSov.classList.remove('op');return true;}
+  return false;
+};
 
 let chatTopId='';
 function startChat(topId){stopChat();chatTopId=topId;chatUnsub=dbL('chats/'+topId,msgs=>renderChat(msgs));}
