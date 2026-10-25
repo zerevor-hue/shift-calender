@@ -586,10 +586,10 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
   </div>
 </div>
 
-<div id="img-lightbox" onclick="closeLightbox()"
+<div id="img-lightbox" onclick="onLightboxBgClick(event)"
   style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:400;
          display:flex;flex-direction:column;align-items:center;justify-content:center;
-         opacity:0;pointer-events:none;transition:opacity .2s">
+         opacity:0;pointer-events:none;transition:opacity .2s;overflow:hidden;touch-action:none">
   <div style="position:absolute;top:max(14px,env(safe-area-inset-top,14px));left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;z-index:401">
     <button type="button" onclick="event.stopPropagation();closeLightbox()"
       style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28);padding:8px 14px;border-radius:999px;font-size:.82rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)">
@@ -600,8 +600,8 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
       ✕
     </button>
   </div>
-  <img id="lightbox-img" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px">
-  <div style="position:absolute;bottom:max(18px,env(safe-area-inset-bottom,18px));color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;pointer-events:none">화면을 터치하거나 뒤로가기를 누르면 닫힙니다</div>
+  <img id="lightbox-img" onclick="event.stopPropagation()" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px;transform-origin:center center;transition:transform .08s ease-out;user-select:none;-webkit-user-drag:none">
+  <div style="position:absolute;bottom:max(18px,env(safe-area-inset-bottom,18px));color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;pointer-events:none">두 손가락으로 확대/축소 · 배경 터치 또는 뒤로가기로 닫기</div>
 </div>
 
 <!-- PAGE: 설정 -->
@@ -997,8 +997,48 @@ const dbS=(p,v)=>FB.set(p,v);
 const dbP=(p,v)=>FB.push(p,v);
 const dbL=(p,cb)=>FB.listen(p,cb);
 const ls={s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},g:k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},d:k=>{try{localStorage.removeItem(k)}catch{}}};
-const cs=id=>document.getElementById(id).classList.remove('op');
-const os=id=>document.getElementById(id).classList.add('op');
+let _modalHistoryPushed=false;
+function _pushHashState(hashName){
+  try{
+    let a=document.getElementById('_nav-hash-anchor');
+    if(!a){
+      a=document.createElement('a');
+      a.id='_nav-hash-anchor';
+      a.style.display='none';
+      document.body.appendChild(a);
+    }
+    a.setAttribute('href','#'+hashName);
+    a.click();
+    if(location.hash==='#'+hashName)return true;
+  }catch(e){}
+  try{
+    location.hash=hashName;
+    if(location.hash==='#'+hashName)return true;
+  }catch(e){}
+  try{
+    history.pushState({hash:hashName},'','#'+hashName);
+    return true;
+  }catch(e){}
+  return false;
+}
+const cs=(id,fromHistory)=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  const wasOpen=el.classList.contains('op');
+  el.classList.remove('op');
+  if(!fromHistory&&wasOpen&&_modalHistoryPushed&&!document.querySelector('.sov.op')&&location.hash==='#modal'){
+    _modalHistoryPushed=false;
+    try{history.back();}catch(e){}
+  }
+};
+const os=id=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.add('op');
+  if(location.hash!=='#modal'&&location.hash!=='#lightbox'){
+    _modalHistoryPushed=_pushHashState('modal');
+  }
+};
 
 function getDivPat(topId,divId){return S.patCache[`${topId}_${divId}`]||null;}
 function getBaseShift(date,topId,divId){
@@ -1989,14 +2029,85 @@ async function renderMealTab(){
 }
 function showMealEmpty(box){box.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:.82rem">이번 달 식단표가 없어요<br><span style="color:var(--a);font-size:.72rem">+ 업로드 버튼으로 추가해주세요</span></div>';}
 let _lightboxOpen=false;
+let _lightboxHistoryPushed=false;
+let _lightboxScrollY=0;
+let _lbScale=1,_lbX=0,_lbY=0,_lbStartDist=0,_lbStartScale=1,_lbDrag=false,_lbStartX=0,_lbStartY=0,_lbLastTap=0;
+
+function _applyLbTransform(){
+  const img=document.getElementById('lightbox-img');
+  if(img)img.style.transform=`translate3d(${_lbX}px,${_lbY}px,0) scale(${_lbScale})`;
+}
+function resetLightboxZoom(){
+  _lbScale=1;_lbX=0;_lbY=0;_applyLbTransform();
+}
+function onLightboxBgClick(e){
+  if(e.target&&e.target.id==='img-lightbox')closeLightbox();
+}
+(function initLightboxTouch(){
+  const lb=document.getElementById('img-lightbox');
+  if(!lb)return;
+  lb.addEventListener('touchstart',e=>{
+    if(!_lightboxOpen)return;
+    if(e.touches.length===2){
+      _lbDrag=false;
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      _lbStartDist=Math.hypot(dx,dy);
+      _lbStartScale=_lbScale;
+    }else if(e.touches.length===1){
+      const now=Date.now();
+      if(now-_lbLastTap<280&&e.target&&e.target.id==='lightbox-img'){
+        if(_lbScale>1.2){resetLightboxZoom();}
+        else{_lbScale=2.4;_lbX=0;_lbY=0;_applyLbTransform();}
+        _lbLastTap=0;
+        e.preventDefault();
+        return;
+      }
+      _lbLastTap=now;
+      if(_lbScale>1.02){
+        _lbDrag=true;
+        _lbStartX=e.touches[0].clientX-_lbX;
+        _lbStartY=e.touches[0].clientY-_lbY;
+      }
+    }
+  },{passive:false});
+  lb.addEventListener('touchmove',e=>{
+    if(!_lightboxOpen)return;
+    if(e.touches.length===2&&_lbStartDist>0){
+      e.preventDefault();
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.hypot(dx,dy);
+      _lbScale=Math.min(4,Math.max(1,_lbStartScale*(dist/_lbStartDist)));
+      if(_lbScale<=1.02){_lbX=0;_lbY=0;}
+      _applyLbTransform();
+    }else if(e.touches.length===1&&_lbDrag&&_lbScale>1.02){
+      e.preventDefault();
+      _lbX=e.touches[0].clientX-_lbStartX;
+      _lbY=e.touches[0].clientY-_lbStartY;
+      _applyLbTransform();
+    }
+  },{passive:false});
+  lb.addEventListener('touchend',e=>{
+    if(e.touches.length<2)_lbStartDist=0;
+    if(e.touches.length===0){
+      _lbDrag=false;
+      if(_lbScale<=1.02)resetLightboxZoom();
+    }
+  });
+})();
+
 function openLightbox(url){
   const lb=document.getElementById('img-lightbox');
+  if(!lb)return;
+  _lightboxScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  resetLightboxZoom();
   document.getElementById('lightbox-img').src=url;
   lb.classList.add('op');
   lb.style.opacity='1';lb.style.pointerEvents='all';
   if(!_lightboxOpen){
     _lightboxOpen=true;
-    try{history.pushState({lightbox:true},'','#lightbox');}catch(e){}
+    _lightboxHistoryPushed=_pushHashState('lightbox');
   }
 }
 function closeLightbox(fromHistory){
@@ -2004,30 +2115,45 @@ function closeLightbox(fromHistory){
   if(!lb)return;
   const wasOpen=_lightboxOpen||lb.style.opacity==='1'||lb.classList.contains('op');
   _lightboxOpen=false;
+  resetLightboxZoom();
   lb.classList.remove('op');
   lb.style.opacity='0';lb.style.pointerEvents='none';
-  if(!fromHistory&&wasOpen&&(location.hash==='#lightbox'||(history.state&&history.state.lightbox))){
+  const savedY=_lightboxScrollY;
+  if(!fromHistory&&wasOpen&&_lightboxHistoryPushed&&location.hash==='#lightbox'){
+    _lightboxHistoryPushed=false;
     try{history.back();}catch(e){}
+  }else{
+    _lightboxHistoryPushed=false;
   }
+  requestAnimationFrame(()=>window.scrollTo(0,savedY));
 }
 window.addEventListener('popstate',()=>{
   if(_lightboxOpen){closeLightbox(true);return;}
   const openSov=document.querySelector('.sov.op');
-  if(openSov)openSov.classList.remove('op');
+  if(openSov){_modalHistoryPushed=false;openSov.classList.remove('op');}
 });
 window.addEventListener('hashchange',()=>{
-  if(_lightboxOpen&&location.hash!=='#lightbox')closeLightbox(true);
+  if(_lightboxOpen&&location.hash!=='#lightbox'){closeLightbox(true);return;}
+  if(location.hash!=='#modal'){
+    const openSov=document.querySelector('.sov.op');
+    if(openSov){_modalHistoryPushed=false;openSov.classList.remove('op');}
+  }
 });
 window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&_lightboxOpen)closeLightbox();
+  if((e.key==='Escape'||e.key==='Back'||e.key==='BrowserBack'||e.key==='GoBack'||e.keyCode===27||e.keyCode===4)&&_lightboxOpen){
+    e.preventDefault();
+    closeLightbox();
+  }
 });
 window.closeLightbox=closeLightbox;
 window.handleBackPress=function(){
   if(_lightboxOpen){closeLightbox();return true;}
   const openSov=document.querySelector('.sov.op');
-  if(openSov){openSov.classList.remove('op');return true;}
+  if(openSov){cs(openSov.id);return true;}
   return false;
 };
+window.onBackPressed=window.handleBackPress;
+window.onAndroidBack=window.handleBackPress;
 
 let chatTopId='';
 function startChat(topId){stopChat();chatTopId=topId;chatUnsub=dbL('chats/'+topId,msgs=>renderChat(msgs));}
