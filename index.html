@@ -209,6 +209,25 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
 .cm,.ce{display:block;font-size:.52rem;border-radius:5px;padding:2.5px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:1.25}
 .ce{color:var(--ev-tx);background:var(--ev-bg)}
 .cm{color:var(--mm-tx);background:var(--mm-bg)}
+.tag-sky{background:rgba(56,189,248,.18)!important;color:#38bdf8!important}
+.tag-pink{background:rgba(232,121,249,.16)!important;color:#e879f9!important}
+.tag-green{background:rgba(16,185,129,.18)!important;color:#34d399!important}
+.tag-amber{background:rgba(245,158,11,.18)!important;color:#fbbf24!important}
+.tag-purple{background:rgba(139,92,246,.18)!important;color:#a78bfa!important}
+.tag-red{background:rgba(244,63,94,.18)!important;color:#fb7185!important}
+.tag-orange{background:rgba(249,115,22,.18)!important;color:#fb923c!important}
+.tag-teal{background:rgba(20,184,166,.18)!important;color:#2dd4bf!important}
+body.light .tag-sky{background:#dbeafe!important;color:#1d4ed8!important}
+body.light .tag-pink{background:#fce7f3!important;color:#be185d!important}
+body.light .tag-green{background:#d1fae5!important;color:#047857!important}
+body.light .tag-amber{background:#fef3c7!important;color:#b45309!important}
+body.light .tag-purple{background:#ede9fe!important;color:#6d28d9!important}
+body.light .tag-red{background:#ffe4e6!important;color:#be123c!important}
+body.light .tag-orange{background:#ffedd5!important;color:#c2410c!important}
+body.light .tag-teal{background:#ccfbf1!important;color:#0f766e!important}
+.cpicker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:2px 0}
+.cchip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#fff;transition:transform .14s,box-shadow .14s;flex-shrink:0}
+.cchip.on{transform:scale(1.14);border-color:var(--tx);box-shadow:0 2px 8px rgba(0,0,0,.28)}
 
 /* 오프스크린 위젯 캡처용 컨테이너 */
 #offscreen-capture-host{position:fixed;left:-9999px;top:0;width:420px;z-index:-1;pointer-events:none}
@@ -687,6 +706,10 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
       <div class="lbl">메모 (엔터로 2줄 입력 가능)</div>
       <textarea id="day-memo" placeholder="메모..."></textarea>
     </div>
+    <div class="form-g">
+      <div class="lbl">메모 색상</div>
+      <div class="cpicker" id="memo-color-picker"></div>
+    </div>
     <div class="fl">
       <button class="btn sec fg" onclick="cs('day-sov')">취소</button>
       <button class="btn pri fg" onclick="saveDaySheet()">저장</button>
@@ -799,11 +822,11 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
   </div>
 </div>
 
-<!-- 이벤트 추가 시트 -->
+<!-- 이벤트 추가/편집 시트 -->
 <div class="sov" id="new-event-sov">
   <div class="sheet">
     <div class="shandle"></div>
-    <div class="stitle-s">📌 이벤트 추가</div>
+    <div class="stitle-s" id="ev-sheet-title">📌 이벤트 추가</div>
     <div class="form-g">
       <div class="lbl">이벤트 제목</div>
       <input type="text" id="ev-title" placeholder="예: 안전교육, 설비점검" maxlength="30">
@@ -818,9 +841,13 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
         <input type="date" id="ev-end">
       </div>
     </div>
+    <div class="form-g">
+      <div class="lbl">이벤트 색상</div>
+      <div class="cpicker" id="ev-color-picker"></div>
+    </div>
     <div class="fl">
       <button class="btn sec fg" onclick="cs('new-event-sov')">취소</button>
-      <button class="btn pri fg" onclick="addEvent()">추가</button>
+      <button class="btn pri fg" id="ev-save-btn" onclick="addEvent()">추가</button>
     </div>
   </div>
 </div>
@@ -884,6 +911,38 @@ const SM={
 const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연'};
 const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
 const COLORS=['#f59e0b','#6366f1','#10b981','#f43f5e','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+const TAG_COLORS=[
+  {k:'sky',l:'하늘',hex:'#38bdf8'},
+  {k:'pink',l:'핑크',hex:'#e879f9'},
+  {k:'green',l:'초록',hex:'#10b981'},
+  {k:'amber',l:'노랑',hex:'#f59e0b'},
+  {k:'purple',l:'보라',hex:'#8b5cf6'},
+  {k:'red',l:'빨강',hex:'#f43f5e'},
+  {k:'orange',l:'주황',hex:'#f97316'},
+  {k:'teal',l:'청록',hex:'#14b8a6'}
+];
+let pickedMemoColor='pink';
+let pickedEventColor='sky';
+let editEventId='';
+function renderColorPicker(containerId,selectedKey,onPick){
+  const box=document.getElementById(containerId);
+  if(!box)return;
+  box.innerHTML='';
+  TAG_COLORS.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='cchip'+(c.k===selectedKey?' on':'');
+    btn.style.background=c.hex;
+    btn.title=c.l;
+    btn.textContent=c.k===selectedKey?'✓':'';
+    btn.onclick=()=>onPick(c.k);
+    box.appendChild(btn);
+  });
+}
+function getTagHex(k,defHex){
+  const found=TAG_COLORS.find(c=>c.k===k);
+  return found?found.hex:(defHex||'#38bdf8');
+}
 
 let holidays={}; 
 let hdViewYear=new Date().getFullYear();
@@ -1307,14 +1366,15 @@ function mkCell(date,other){
       if(!ev) return;
       const s = ev.startDate;
       const e = ev.endDate || ev.startDate;
-      if (dtKey >= s && dtKey <= e && ev.title) lines.push({type:'ce', text:'• '+ev.title});
+      if (dtKey >= s && dtKey <= e && ev.title) lines.push({type:'ce', text:'• '+ev.title, color:ev.color||'sky'});
     });
   }
   const memoRaw=(S.ov[dtKey]?.memo||'').trim();
+  const memoColor=S.ov[dtKey]?.memoColor||'pink';
   if(memoRaw){
     const mParts=memoRaw.split(/\n+/).map(s=>s.trim()).filter(Boolean);
     mParts.forEach((part,idx)=>{
-      lines.push({type:'cm', text:(idx===0?'✦ ':'')+part});
+      lines.push({type:'cm', text:(idx===0?'✦ ':'')+part, color:memoColor});
     });
   }
 
@@ -1322,7 +1382,7 @@ function mkCell(date,other){
     const mw=document.createElement('div');mw.className='mid-wrap';
     lines.slice(0,2).forEach(item=>{
       const el=document.createElement('div');
-      el.className=item.type;
+      el.className=item.type+(item.color?` tag-${item.color}`:'');
       el.textContent=item.text;
       mw.appendChild(el);
     });
@@ -1387,13 +1447,23 @@ function changeMonth(d){S.mo+=d;if(S.mo>11){S.mo=0;S.yr++;}if(S.mo<0){S.mo=11;S.
 function gotoToday(){const t=new Date();S.yr=t.getFullYear();S.mo=t.getMonth();refreshCal();}
 
 let editDate=null;
+function pickMemoColor(k){
+  pickedMemoColor=k;
+  renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
+}
+function pickEventColor(k){
+  pickedEventColor=k;
+  renderColorPicker('ev-color-picker',pickedEventColor,pickEventColor);
+}
 function openDaySheet(date){
   editDate=date;
   const k=dkey(date),bSh=getBaseShift(date),sh=getShift(date)||'of',memo=S.ov[k]?.memo||'';
+  pickedMemoColor=S.ov[k]?.memoColor||'pink';
   document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
   document.getElementById('day-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
   document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
   document.getElementById('day-memo').value=memo;
+  renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
   os('day-sov');
 }
 async function saveDaySheet(){
@@ -1401,7 +1471,18 @@ async function saveDaySheet(){
   const k=dkey(editDate),sh=document.querySelector('input[name="sh"]:checked')?.value, memo=document.getElementById('day-memo').value.trim();
   const bSh=getBaseShift(editDate);
   if(sh===bSh&&!memo){delete S.ov[k];}
-  else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;if(memo)S.ov[k].memo=memo;else delete S.ov[k].memo;}
+  else{
+    if(!S.ov[k])S.ov[k]={};
+    if(sh&&sh!==bSh)S.ov[k].shift=sh;
+    else if(sh===bSh)delete S.ov[k].shift;
+    if(memo){
+      S.ov[k].memo=memo;
+      S.ov[k].memoColor=pickedMemoColor||'pink';
+    }else{
+      delete S.ov[k].memo;
+      delete S.ov[k].memoColor;
+    }
+  }
   cs('day-sov');await saveProfile();refreshCal();showToast('저장됨 ✓');
 }
 
@@ -1422,12 +1503,15 @@ function renderEventList(events){
   list.forEach(([evId,ev])=>{
     const item=document.createElement('div');item.className='event-item';
     const dot=document.createElement('div');dot.className='event-dot';
+    dot.style.background=getTagHex(ev.color||'sky','#38bdf8');
     const txt=document.createElement('div');txt.style.cssText='flex:1;min-width:0';
     txt.innerHTML=`<div class="event-date">${formatDateRange(ev.startDate,ev.endDate)}</div><div class="event-title">${escHtml(ev.title||'')}</div><div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${ev.createdBy||''}</div>`;
     item.appendChild(dot);item.appendChild(txt);
     if(ev.createdById===S.myId||isAdmin()){
+      item.style.cursor='pointer';
+      item.onclick=(e)=>{if(e.target.closest('.event-del'))return;openEventSheet(evId);};
       const del=document.createElement('button');del.className='event-del';del.textContent='✕';
-      del.onclick=()=>deleteEvent(evId);item.appendChild(del);
+      del.onclick=(e)=>{e.stopPropagation();deleteEvent(evId);};item.appendChild(del);
     }
     box.appendChild(item);
   });
@@ -1439,11 +1523,17 @@ function formatDateRange(s,e){
   return `${fmt(s)} ~ ${fmt(e)}`;
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function openEventSheet(){
+function openEventSheet(evId){
   if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
-  document.getElementById('ev-title').value='';
-  document.getElementById('ev-start').value='';
-  document.getElementById('ev-end').value='';
+  editEventId=evId||'';
+  const ev=editEventId&&S.events?S.events[editEventId]:null;
+  document.getElementById('ev-sheet-title').textContent=ev?'📌 이벤트 수정':'📌 이벤트 추가';
+  document.getElementById('ev-save-btn').textContent=ev?'저장':'추가';
+  document.getElementById('ev-title').value=ev?(ev.title||''):'';
+  document.getElementById('ev-start').value=ev?(ev.startDate||''):dkey(new Date());
+  document.getElementById('ev-end').value=ev&&ev.endDate&&ev.endDate!==ev.startDate?ev.endDate:'';
+  pickedEventColor=ev?.color||'sky';
+  renderColorPicker('ev-color-picker',pickedEventColor,pickEventColor);
   os('new-event-sov');
 }
 async function addEvent(){
@@ -1453,8 +1543,16 @@ async function addEvent(){
   if(!title){showToast('제목을 입력해주세요');return;}
   if(!startDate){showToast('시작일을 입력해주세요');return;}
   if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
-  await dbP('events/'+S.topId,{title,startDate,endDate:endDate||startDate,createdBy:S.myName,createdById:S.myId,createdAt:Date.now()});
-  cs('new-event-sov');showToast('이벤트 추가됨 ✓');
+  const color=pickedEventColor||'sky';
+  if(editEventId&&S.events&&S.events[editEventId]){
+    const prev=S.events[editEventId];
+    await dbS('events/'+S.topId+'/'+editEventId,{...prev,title,startDate,endDate:endDate||startDate,color,updatedAt:Date.now()});
+    editEventId='';
+    cs('new-event-sov');showToast('이벤트 수정됨 ✓');
+  }else{
+    await dbP('events/'+S.topId,{title,startDate,endDate:endDate||startDate,color,createdBy:S.myName,createdById:S.myId,createdAt:Date.now()});
+    cs('new-event-sov');showToast('이벤트 추가됨 ✓');
+  }
 }
 async function deleteEvent(evId){
   if(!confirm('이벤트를 삭제하시겠어요?'))return;
