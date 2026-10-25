@@ -3,12 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0f1117">
 <title>교대근무 달력</title>
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
+<script>
+(function(){
+  const CFG={
+    apiKey:"AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
+    authDomain:"shift-calender-17a58.firebaseapp.com",
+    databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
+    projectId:"shift-calender-17a58",
+    storageBucket:"shift-calender-17a58.firebasestorage.app",
+    messagingSenderId:"434862222996",
+    appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
+  };
+  window._fbCfg = CFG;
+  if(window.firebase && window.firebase.initializeApp){
+    try{
+      const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(CFG);
+      const db = window.firebase.database(app);
+      window._fb={
+        async get(p){try{const s=await db.ref(p).get();return s.exists()?s.val():null}catch(e){
+          try{const r=await fetch(`${CFG.databaseURL}/${p}.json`);return r.ok?await r.json():null}catch{return null}
+        }},
+        async set(p,v){try{await db.ref(p).set(v)}catch(e){
+          await fetch(`${CFG.databaseURL}/${p}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});
+        }},
+        async push(p,v){try{const ref=await db.ref(p).push(v);return {key:ref.key}}catch(e){
+          const r=await fetch(`${CFG.databaseURL}/${p}.json`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});
+          const d=await r.json();return {key:d&&d.name};
+        }},
+        listen(p,cb){
+          const r=db.ref(p);
+          const fn=s=>cb(s.exists()?s.val():null);
+          r.on("value",fn);
+          return()=>r.off("value",fn);
+        }
+      };
+      window._fbReady=true;
+      window.dispatchEvent(new Event("fbReady"));
+    }catch(e){}
+  }
+})();
+</script>
 <script type="module">
-const CFG={
+const CFG=window._fbCfg||{
   apiKey:"AIzaSyCnpGR_zNBP-9quyF-OCnDC_4FbG4w8xlc",
   authDomain:"shift-calender-17a58.firebaseapp.com",
   databaseURL:"https://shift-calender-17a58-default-rtdb.firebaseio.com",
@@ -19,14 +61,16 @@ const CFG={
 };
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getDatabase,ref,set,get,push,onValue,off}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const db=getDatabase(initializeApp(CFG));
-window._fb={
-  async get(p){try{const s=await get(ref(db,p));return s.exists()?s.val():null}catch{return null}},
-  async set(p,v){await set(ref(db,p),v)},
-  async push(p,v){return await push(ref(db,p),v)},
-  listen(p,cb){const r=ref(db,p);onValue(r,s=>cb(s.exists()?s.val():null));return()=>off(r)},
-};
-window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
+if(!window._fbReady){
+  const db=getDatabase(initializeApp(CFG));
+  window._fb={
+    async get(p){try{const s=await get(ref(db,p));return s.exists()?s.val():null}catch{return null}},
+    async set(p,v){await set(ref(db,p),v)},
+    async push(p,v){return await push(ref(db,p),v)},
+    listen(p,cb){const r=ref(db,p);onValue(r,s=>cb(s.exists()?s.val():null));return()=>off(r)},
+  };
+  window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
+}
 </script>
 <style>
 :root{
@@ -262,7 +306,7 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
 ::-webkit-scrollbar{display:none}
 </style>
 </head>
-<body class="light">
+<body>
 
 <div id="splash"><div style="font-size:3rem">🔄</div><div class="sp"></div><div style="font-size:.8rem;color:var(--tx3)">연결 중...</div></div>
 
@@ -1019,7 +1063,8 @@ function syncToWidget(){
       divName: S.divName||'',
       allPats: window._allPatsCache || {},
       events: S.events || {},
-      holidays: holidays || {}
+      holidays: holidays || {},
+      theme: document.body.classList.contains("light") ? "light" : "dark"
     }));
   }catch(e){}
 }
@@ -1974,8 +2019,8 @@ function renderSettings(){
   const hdCard=document.getElementById('holiday-mgr-card');
   if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
 }
-function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#ffffff':'#0f1117');ls.s('theme',m);renderSettings();scheduleWidgetCapture();}
-function applyTheme(){const t=ls.g('theme')||'light';setTheme(t);}
+function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();syncToWidget();}
+function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
 async function saveVac(){S.vacTotal=parseInt(document.getElementById('vac-inp').value)||0;refreshCal();updateVacSum();await saveProfile();}
 function updateVacSum(){
   const today=new Date();today.setHours(0,0,0,0);let u=0;
