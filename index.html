@@ -360,9 +360,6 @@ body.light .tag-gray{background:#f1f5f9!important;color:#334155!important}
     <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">처음이면 자동 가입</div>
   </div>
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
-  <button type="button" class="qbtn" onclick="startDemoPreview()" style="justify-content:center;color:var(--a);border-color:var(--bd2)">
-    <span>✨</span><span>달력 디자인 미리보기 (샘플 데이터)</span>
-  </button>
 </div>
 
 <!-- PAGE: 내 달력 -->
@@ -1023,52 +1020,6 @@ function askConfirm(msg){
 document.getElementById('confirm-yes')?.addEventListener('click',()=>{cs('confirm-sov');if(_confirmResolve){const r=_confirmResolve;_confirmResolve=null;r(true);}});
 document.getElementById('confirm-no')?.addEventListener('click',()=>{cs('confirm-sov');if(_confirmResolve){const r=_confirmResolve;_confirmResolve=null;r(false);}});
 
-function startDemoPreview(){
-  const now=new Date();
-  const yr=now.getFullYear(), mo=now.getMonth();
-  S.myId='DEMO'; S.myName='홍길동'; S.myColor='#f59e0b'; S.isAdmin=true;
-  S.yr=yr; S.mo=mo; S.tyr=yr; S.tmo=mo; dgYr=yr; dgMo=mo; mealYr=yr; mealMo=mo;
-  S.topId='T_DEMO'; S.topName='환경팀'; S.topColor='#f59e0b';
-  S.divId='D_1'; S.divName='1과'; S.vacTotal=15;
-  const pStart=new Date(yr,mo,1).toISOString();
-  const demoDivs={
-    D_1:{id:'D_1',name:'1과',pattern:{pattern:['dr','dr','nr','nr','of','of'],patternStart:pStart}},
-    D_2:{id:'D_2',name:'2과',pattern:{pattern:['nr','nr','of','of','dr','dr'],patternStart:pStart}},
-    D_3:{id:'D_3',name:'3과',pattern:{pattern:['of','of','dr','dr','nr','nr'],patternStart:pStart}}
-  };
-  applyDivsToCache(demoDivs);
-  const k1=`${yr}-${String(mo+1).padStart(2,'0')}-05`;
-  const k2=`${yr}-${String(mo+1).padStart(2,'0')}-12`;
-  const k3=`${yr}-${String(mo+1).padStart(2,'0')}-18`;
-  const k4=`${yr}-${String(mo+1).padStart(2,'0')}-24`;
-  S.ov={
-    [k1]:{shift:'vc',memo:'가족 여행\n숙소 예약',memoColor:'green'},
-    [k2]:{shift:'ds',memo:'오후 치과 진료',memoColor:'pink'},
-    [k3]:{memo:'차량 정기점검\n엔진오일 교체',memoColor:'amber'},
-    [k4]:{shift:'ns',memo:'야간 대근 지원',memoColor:'purple'}
-  };
-  S.events={
-    ev1:{title:'정기 안전교육',startDate:`${yr}-${String(mo+1).padStart(2,'0')}-08`,endDate:`${yr}-${String(mo+1).padStart(2,'0')}-09`,color:'sky',createdBy:'정호철',createdById:'DEMO'},
-    ev2:{title:'설비 종합점검',startDate:`${yr}-${String(mo+1).padStart(2,'0')}-21`,endDate:`${yr}-${String(mo+1).padStart(2,'0')}-21`,color:'teal',createdBy:'홍길동',createdById:'DEMO'}
-  };
-  initLocalHolidays();
-  applyCalHeaderBadge();
-  document.getElementById('splash').classList.add('h');
-  document.getElementById('login-screen').classList.add('h');
-  renderEventList(S.events);
-  renderCal();
-  showToast('미리보기 모드로 열렸어요 ✨');
-}
-function showDemoToolbar(){
-  if(document.getElementById('demo-Preview-bar'))return;
-  const bar=document.createElement('div');
-  bar.id='demo-Preview-bar';
-  bar.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:150;display:inline-flex;align-items:center;gap:6px;background:var(--pill-bg);border:1px solid var(--a);box-shadow:0 6px 20px rgba(0,0,0,.35);padding:4px 10px;border-radius:999px;font-size:.68rem;font-weight:800;color:var(--tx)';
-  bar.innerHTML=`<span style="color:var(--a)">✨ 미리보기</span>
-    <button type="button" onclick="setTheme(document.body.classList.contains('light')?'dark':'light')" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bd);padding:3px 8px;border-radius:999px;font-size:.64rem;font-weight:800;cursor:pointer">🌓 테마전환</button>
-    <button type="button" onclick="document.getElementById('demo-Preview-bar')?.remove();document.getElementById('login-screen').classList.remove('h')" style="background:transparent;color:var(--tx3);border:none;padding:2px 5px;font-size:.64rem;font-weight:700;cursor:pointer">로그인화면</button>`;
-  document.body.appendChild(bar);
-}
 
 async function initDefaultHolidays(){
   if(!isAdmin())return;
@@ -1159,7 +1110,7 @@ const uid=()=>Math.random().toString(36).slice(2,9).toUpperCase();
 const isAdmin=()=>S.isAdmin;
 const dbG=p=>FB?FB.get(p):Promise.resolve(null);
 const dbS=(p,v)=>FB?FB.set(p,v):Promise.resolve();
-const dbP=(p,v)=>FB?FB.push(p,v):Promise.resolve({key:'DEMO_'+Date.now()});
+const dbP=(p,v)=>FB?FB.push(p,v):Promise.resolve(null);
 const dbL=(p,cb)=>FB?FB.listen(p,cb):(()=>{});
 const ls={s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},g:k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},d:k=>{try{localStorage.removeItem(k)}catch{}}};
 let _modalHistoryPushed=false;
@@ -1233,7 +1184,7 @@ async function saveProfile(){
   if(!S.myId)return;
   const d={myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName,updatedAt:Date.now()};
   ls.s('prof_'+S.myId,d);
-  if(!FB||S.myId==='DEMO')return;
+  if(!FB)return;
   await FB.set('profiles/'+S.myId,d);
   if(S.topId&&S.divId) await FB.set(`teams/${S.topId}/divs/${S.divId}/members/${S.myId}/ov`,S.ov||{});
 }
@@ -1336,7 +1287,7 @@ function applyDivsToCache(divs){
 }
 
 async function refreshCal(){
-  if(S.topId && FB && S.myId!=='DEMO'){
+  if(S.topId && FB){
     const divs=await FB.get(`teams/${S.topId}/divs`);
     if(divs){
       applyDivsToCache(divs);
@@ -2511,9 +2462,7 @@ async function onFbReady(){
   }
   document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');
 }
-if(window.self!==window.top && !ls.g('sess') && !window.Android){
-  startDemoPreview();
-}else if(window._fbReady){onFbReady();}
+if(window._fbReady){onFbReady();}
 else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='⚠️ Firebase 연결 실패';e.style.display='';}},5000);}
 </script>
 </body>
