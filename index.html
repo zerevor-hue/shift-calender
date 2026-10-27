@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
 <script>
@@ -102,7 +103,7 @@ body.light{
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none}
-body{font-family:'Pretendard','Nanum Gothic',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;max-width:480px;margin:0 auto}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;max-width:480px;margin:0 auto}
 
 #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 #splash.h,#login-screen.h{display:none}
@@ -170,7 +171,7 @@ textarea{resize:vertical;min-height:65px}
 .days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%}
 
 /* 날짜 칸: 5행 고정 구조 (1·2행 좌측: 날짜 병합 / 우측 1행: 근무뱃지 / 우측 2행: 주간팀·야간팀 / 3·4·5행: 메모1·메모2·메모3) */
-.dc{position:relative;border-right:1px solid var(--bd-col);border-bottom:1px solid var(--bd);min-height:74px;padding:3px 2px 2.5px;cursor:pointer;display:grid;grid-template-rows:21.5px 39px;gap:2.5px;align-content:start;overflow:hidden;min-width:0;max-width:100%;transition:background-color .12s}
+.dc{position:relative;border-right:1px solid var(--bd-col);border-bottom:1px solid var(--bd);min-height:68px;padding:3px 2px 2px;cursor:pointer;display:grid;grid-template-rows:21.5px 33px;gap:1.5px;align-content:start;overflow:hidden;min-width:0;max-width:100%;transition:background-color .12s}
 .dc:nth-child(7n){border-right:none}
 .dc.lr{border-bottom:none}
 .dc:active{background:var(--bg3)}
@@ -203,13 +204,13 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
 .stk-n{color:var(--n);}
 
 /* 3행·4행·5행: 메모1 / 메모2 / 메모3 (글자 크기에 딱 맞춘 컴팩트 컬러 테두리 + 3줄 고정 슬롯) */
-.mid-wrap{display:grid;grid-template-rows:repeat(3,12px);gap:1.5px;width:100%;height:39px;min-width:0;margin:0;overflow:hidden}
-.m-slot{display:flex;align-items:center;width:100%;height:12px;min-width:0;overflow:hidden;padding-left:0}
-.cm,.ce,.hd{display:inline-block;font-size:.6rem;border-radius:2.5px;padding:.25px 1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:auto;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:10.5px;height:11px;letter-spacing:-.045em}
-.hd{color:var(--red);background:var(--hd-bg);font-weight:800}
+.mid-wrap{display:grid;grid-template-rows:repeat(3,11px);gap:0;width:100%;height:33px;min-width:0;margin:0;overflow:hidden}
+.m-slot{display:flex;align-items:center;width:100%;height:11px;min-width:0;overflow:hidden;padding:0;margin:0}
+.cm,.ce,.hd{display:inline-flex;align-items:center;font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;font-size:.6rem;border-radius:2.5px;padding:.5px 1.5px 0 1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:auto;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:1;height:11px;letter-spacing:-.045em;margin:0}
+.hd{color:var(--red);background:var(--hd-bg);font-weight:800;border-left:2.5px solid var(--red);border-radius:1px 2.5px 2.5px 1px;padding:.5px 2px 0 2.5px}
 .dc.hday>.dr>.dn{color:var(--red)!important}
 .dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
-.hday-sub .hd,.hd.hd-sub{color:var(--a);background:var(--a-bg)}
+.hday-sub .hd,.hd.hd-sub{color:var(--a);background:var(--a-bg);border-left-color:var(--a)}
 .hday-sub>.dr>.dn{color:var(--a)!important}
 .ce{color:var(--ev-tx);background:var(--ev-bg)}
 .cm{color:var(--mm-tx);background:var(--mm-bg)}
@@ -324,9 +325,9 @@ body.light .tag-gray{background:#f1f5f9!important;color:#334155!important}
 .shandle{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:10px auto 14px}
 .stitle-s{font-size:.98rem;font-weight:800;margin-bottom:16px}
 
-.leg{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin-top:10px;width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:999px;padding:6px 12px}
-.li{display:flex;align-items:center;gap:4.5px;font-size:.63rem;font-weight:700;color:var(--tx2)}
-.ld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.leg{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px;width:100%;padding-right:2px}
+.li{display:flex;align-items:center;gap:4px;font-size:.64rem;font-weight:700;color:var(--tx2)}
+.ld{width:8px;height:8px;border-radius:3px;flex-shrink:0}
 .no-banner{background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:26px 14px;text-align:center;margin-bottom:12px}
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--tx);color:var(--bg);padding:9px 16px;border-radius:22px;font-size:.8rem;font-weight:700;opacity:0;pointer-events:none;transition:all .18s;white-space:nowrap;z-index:300}
 .toast.sh{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -1482,7 +1483,6 @@ function mkCell(date,other){
         el.className=item.type+` tag-${pal.k}`;
         el.style.backgroundColor=pal.bg;
         el.style.color=pal.tx;
-        el.style.borderLeftColor=pal.hex;
       }
       el.textContent=item.text;
       slot.appendChild(el);
@@ -2518,3 +2518,4 @@ else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if
 </script>
 </body>
 </html>
+```
