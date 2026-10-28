@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -238,7 +238,13 @@ body.light .tag-indigo{background:#e0e7ff!important;color:#3730a3!important}
 body.light .tag-purple{background:#ede9fe!important;color:#6d28d9!important}
 body.light .tag-pink{background:#fce7f3!important;color:#be185d!important}
 body.light .tag-gray{background:#f1f5f9!important;color:#334155!important}
-#day-memo::placeholder,#ev-title::placeholder{color:currentColor;opacity:.55}
+#day-memo::placeholder,#ev-title::placeholder,#mm-text::placeholder{color:currentColor;opacity:.55}
+.cal-subtabs{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bd);padding:3px;border-radius:999px;max-width:100%;overflow:hidden}
+.cal-stab{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:.75rem;font-weight:800;color:var(--tx3);background:transparent;border:none;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.cal-stab.on{background:var(--bg2);color:var(--tx);box-shadow:0 2px 6px rgba(0,0,0,.22)}
+body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgba(15,23,42,.08)}
+.cal-stab-cnt{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:800;padding:1px 5.5px;border-radius:999px;background:var(--bd);color:var(--tx2);line-height:1.2}
+.cal-stab.on .cal-stab-cnt{background:var(--a-bg);color:var(--a)}
 .cpicker{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;align-items:center;justify-items:center;width:100%;padding:4px 0}
 .cchip{width:21px;height:21px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .14s,box-shadow .14s,border-color .14s;flex-shrink:0}
 .cchip.on{transform:scale(1.18);border-color:var(--tx);box-shadow:0 0 0 2px var(--bg2),0 2px 8px rgba(0,0,0,.32)}
@@ -441,13 +447,27 @@ body.light .tag-gray{background:#f1f5f9!important;color:#334155!important}
       </div>
     </div>
     
-    <!-- 4. 팀 이벤트 -->
+    <!-- 4. 팀 이벤트 & 메모 탭 -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="stitle" style="margin-bottom:0" id="event-section-title">📌 팀 이벤트</div>
-        <button class="btn pri sm" onclick="openEventSheet()">+ 추가</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
+        <div class="cal-subtabs">
+          <button type="button" class="cal-stab on" id="cal-stab-ev" onclick="switchCalSubTab('ev')">
+            <span id="event-section-title">📌 팀 이벤트</span>
+            <span class="cal-stab-cnt" id="ev-tab-cnt">0</span>
+          </button>
+          <button type="button" class="cal-stab" id="cal-stab-mm" onclick="switchCalSubTab('mm')">
+            <span>📝 메모</span>
+            <span class="cal-stab-cnt" id="mm-tab-cnt">0</span>
+          </button>
+        </div>
+        <button class="btn pri sm" id="cal-sub-add-btn" onclick="onCalSubAdd()" style="flex-shrink:0">+ 추가</button>
       </div>
-      <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
+      <div id="cal-panel-ev">
+        <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
+      </div>
+      <div id="cal-panel-mm" style="display:none">
+        <div id="memo-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없어요</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -859,6 +879,30 @@ body.light .tag-gray{background:#f1f5f9!important;color:#334155!important}
     <div class="fl">
       <button class="btn sec fg" onclick="cs('new-event-sov')">취소</button>
       <button class="btn pri fg" id="ev-save-btn" onclick="addEvent()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 추가/편집 시트 -->
+<div class="sov" id="memo-sov">
+  <div class="sheet">
+    <div class="shandle"></div>
+    <div class="stitle-s" id="mm-sheet-title">📝 메모 추가</div>
+    <div class="form-g">
+      <div class="lbl">날짜</div>
+      <input type="date" id="mm-date" onchange="onMemoSheetDateChange()">
+    </div>
+    <div class="form-g">
+      <div class="lbl">메모 (엔터로 3줄 입력 가능: 메모1 · 메모2 · 메모3)</div>
+      <textarea id="mm-text" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
+    </div>
+    <div class="form-g">
+      <div class="lbl">메모 색상</div>
+      <div class="cpicker" id="mm-color-picker"></div>
+    </div>
+    <div class="fl">
+      <button class="btn sec fg" onclick="cs('memo-sov')">취소</button>
+      <button class="btn pri fg" id="mm-save-btn" onclick="saveMemoSheet()">저장</button>
     </div>
   </div>
 </div>
@@ -1329,6 +1373,7 @@ function renderCal(){
   const vt=document.getElementById('s-vt');
   vt.textContent=S.vacTotal>0?S.vacTotal:'-';
   vt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
+  renderMemoList();
   
   syncToWidget();
   if(window.Android&&S.myId){
@@ -1546,14 +1591,164 @@ async function saveDaySheet(){
     if(sh&&sh!==bSh)S.ov[k].shift=sh;
     else if(sh===bSh)delete S.ov[k].shift;
     if(memo){
+      const changed=(S.ov[k].memo!==memo)||(S.ov[k].memoColor!==(pickedMemoColor||'pink'));
       S.ov[k].memo=memo;
       S.ov[k].memoColor=pickedMemoColor||'pink';
+      if(changed||!S.ov[k].memoUpdatedAt)S.ov[k].memoUpdatedAt=Date.now();
     }else{
       delete S.ov[k].memo;
       delete S.ov[k].memoColor;
+      delete S.ov[k].memoUpdatedAt;
     }
   }
   cs('day-sov');await saveProfile();refreshCal();showToast('저장됨 ✓');
+}
+
+let calSubTab='ev';
+let memoListExpanded=false;
+let pickedMmSheetColor='pink';
+let editMemoOrigKey='';
+
+function switchCalSubTab(tab){
+  calSubTab=(tab==='mm')?'mm':'ev';
+  const btnEv=document.getElementById('cal-stab-ev');
+  const btnMm=document.getElementById('cal-stab-mm');
+  const panEv=document.getElementById('cal-panel-ev');
+  const panMm=document.getElementById('cal-panel-mm');
+  if(btnEv)btnEv.classList.toggle('on',calSubTab==='ev');
+  if(btnMm)btnMm.classList.toggle('on',calSubTab==='mm');
+  if(panEv)panEv.style.display=calSubTab==='ev'?'':'none';
+  if(panMm)panMm.style.display=calSubTab==='mm'?'':'none';
+  if(calSubTab==='mm')renderMemoList();
+}
+
+function onCalSubAdd(){
+  if(calSubTab==='mm')openMemoSheet();
+  else openEventSheet();
+}
+
+function pickMmSheetColor(k){
+  pickedMmSheetColor=k;
+  renderColorPicker('mm-color-picker',pickedMmSheetColor,pickMmSheetColor);
+  applyFieldTagColor('mm-text',pickedMmSheetColor,'pink');
+}
+
+function onMemoSheetDateChange(){
+  const dVal=document.getElementById('mm-date')?.value;
+  if(!dVal)return;
+  const existing=S.ov?.[dVal];
+  if(existing?.memo){
+    document.getElementById('mm-text').value=existing.memo;
+    pickedMmSheetColor=existing.memoColor||'pink';
+    renderColorPicker('mm-color-picker',pickedMmSheetColor,pickMmSheetColor);
+    applyFieldTagColor('mm-text',pickedMmSheetColor,'pink');
+  }
+}
+
+function openMemoSheet(dateKey){
+  editMemoOrigKey=dateKey||'';
+  const targetKey=dateKey||dkey(new Date());
+  const existing=S.ov?.[targetKey];
+  const hasMemo=!!(existing?.memo&&existing.memo.trim());
+  document.getElementById('mm-sheet-title').textContent=hasMemo?'📝 메모 수정':'📝 메모 추가';
+  document.getElementById('mm-save-btn').textContent=hasMemo?'저장':'추가';
+  document.getElementById('mm-date').value=targetKey;
+  document.getElementById('mm-text').value=existing?.memo||'';
+  pickedMmSheetColor=existing?.memoColor||'pink';
+  renderColorPicker('mm-color-picker',pickedMmSheetColor,pickMmSheetColor);
+  applyFieldTagColor('mm-text',pickedMmSheetColor,'pink');
+  os('memo-sov');
+}
+
+async function saveMemoSheet(){
+  const targetKey=document.getElementById('mm-date').value;
+  const text=document.getElementById('mm-text').value.trim();
+  if(!targetKey){showToast('날짜를 선택해주세요');return;}
+  if(!text){showToast('메모 내용을 입력해주세요');return;}
+  if(editMemoOrigKey&&editMemoOrigKey!==targetKey&&S.ov?.[editMemoOrigKey]){
+    delete S.ov[editMemoOrigKey].memo;
+    delete S.ov[editMemoOrigKey].memoColor;
+    delete S.ov[editMemoOrigKey].memoUpdatedAt;
+    if(!S.ov[editMemoOrigKey].shift)delete S.ov[editMemoOrigKey];
+  }
+  if(!S.ov[targetKey])S.ov[targetKey]={};
+  S.ov[targetKey].memo=text;
+  S.ov[targetKey].memoColor=pickedMmSheetColor||'pink';
+  S.ov[targetKey].memoUpdatedAt=Date.now();
+  editMemoOrigKey='';
+  cs('memo-sov');
+  await saveProfile();
+  refreshCal();
+  showToast('메모 저장됨 ✓');
+}
+
+async function deleteMemo(dateKey){
+  if(!dateKey||!S.ov?.[dateKey]?.memo)return;
+  if(!(await askConfirm('이 메모를 삭제하시겠어요?')))return;
+  delete S.ov[dateKey].memo;
+  delete S.ov[dateKey].memoColor;
+  delete S.ov[dateKey].memoUpdatedAt;
+  if(!S.ov[dateKey].shift)delete S.ov[dateKey];
+  await saveProfile();
+  refreshCal();
+  showToast('메모 삭제됨');
+}
+
+function renderMemoList(){
+  const box=document.getElementById('memo-list');
+  if(!box)return;
+  box.innerHTML='';
+  const list=Object.entries(S.ov||{})
+    .filter(([,v])=>v&&typeof v.memo==='string'&&v.memo.trim()!=='')
+    .sort((a,b)=>{
+      const tA=a[1]?.memoUpdatedAt||0;
+      const tB=b[1]?.memoUpdatedAt||0;
+      if(tB!==tA)return tB-tA;
+      return b[0]>a[0]?1:(b[0]<a[0]?-1:0);
+    });
+  const cntEl=document.getElementById('mm-tab-cnt');
+  if(cntEl)cntEl.textContent=list.length;
+  if(!list.length){
+    box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없어요</div>';
+    return;
+  }
+  const visibleList=memoListExpanded?list:list.slice(0,3);
+  visibleList.forEach(([dateKey,ovData])=>{
+    const pal=getTagPalette(ovData.memoColor||'pink','pink');
+    const dt=new Date(dateKey+'T00:00:00');
+    const dow=['일','월','화','수','목','금','토'][dt.getDay()];
+    const sh=getShift(dt);
+    const shMeta=sh?SM[sh]:null;
+    const item=document.createElement('div');
+    item.className='event-item';
+    item.style.cursor='pointer';
+    const dot=document.createElement('div');
+    dot.className='event-dot';
+    dot.style.background=pal.hex;
+    const txt=document.createElement('div');
+    txt.style.cssText='flex:1;min-width:0;padding-right:20px';
+    const parts=ovData.memo.trim().split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    const pillsHtml=parts.map(p=>`<span class="event-title tag-${pal.k}" style="color:${pal.tx};background:${pal.bg};display:inline-block;padding:2px 8px;border-radius:6px;font-size:.82rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(p)}</span>`).join(' ');
+    const shHtml=shMeta?`<span class="cb ${sh==='of'?'cb-of':shMeta.c}" style="font-size:.55rem;height:15px;padding:0 5px;margin-left:5px;vertical-align:middle">${shMeta.i} ${shMeta.l}</span>`:'';
+    txt.innerHTML=`<div class="event-date" style="display:flex;align-items:center">${dt.getMonth()+1}월 ${dt.getDate()}일 (${dow})${shHtml}</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${pillsHtml}</div>`;
+    item.appendChild(dot);
+    item.appendChild(txt);
+    item.onclick=(e)=>{if(e.target.closest('.event-del'))return;openMemoSheet(dateKey);};
+    const del=document.createElement('button');
+    del.className='event-del';
+    del.textContent='✕';
+    del.onclick=(e)=>{e.stopPropagation();deleteMemo(dateKey);};
+    item.appendChild(del);
+    box.appendChild(item);
+  });
+  if(list.length>3){
+    const moreBtn=document.createElement('button');
+    moreBtn.className='btn sec sm fw';
+    moreBtn.style.cssText='margin-top:4px;padding:8px 12px;font-size:.75rem;color:var(--tx2);background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs)';
+    moreBtn.textContent=memoListExpanded?'접기 ▲':`나머지 ${list.length-3}개 더보기 ▼`;
+    moreBtn.onclick=()=>{memoListExpanded=!memoListExpanded;renderMemoList();};
+    box.appendChild(moreBtn);
+  }
 }
 
 function startEventListen(){
@@ -1566,11 +1761,21 @@ function startEventListen(){
     else refreshCal();
   });
 }
+let eventListExpanded=false;
 function renderEventList(events){
   const box=document.getElementById('event-list');box.innerHTML='';
-  const list=events?Object.entries(events).sort((a,b)=>a[1].startDate>b[1].startDate?1:-1):[];
+  const list=events?Object.entries(events).sort((a,b)=>{
+    const tA=a[1]?.createdAt||0;
+    const tB=b[1]?.createdAt||0;
+    if(tB!==tA)return tB-tA;
+    if(b[0]!==a[0])return b[0]>a[0]?1:-1;
+    return (b[1]?.startDate||'')>(a[1]?.startDate||'')?1:-1;
+  }):[];
+  const cntEl=document.getElementById('ev-tab-cnt');
+  if(cntEl)cntEl.textContent=list.length;
   if(!list.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div>';return;}
-  list.forEach(([evId,ev])=>{
+  const visibleList=eventListExpanded?list:list.slice(0,3);
+  visibleList.forEach(([evId,ev])=>{
     const pal=getTagPalette(ev.color||'sky','sky');
     const item=document.createElement('div');item.className='event-item';
     const dot=document.createElement('div');dot.className='event-dot';
@@ -1586,6 +1791,14 @@ function renderEventList(events){
     }
     box.appendChild(item);
   });
+  if(list.length>3){
+    const moreBtn=document.createElement('button');
+    moreBtn.className='btn sec sm fw';
+    moreBtn.style.cssText='margin-top:4px;padding:8px 12px;font-size:.75rem;color:var(--tx2);background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs)';
+    moreBtn.textContent=eventListExpanded?'접기 ▲':`나머지 ${list.length-3}개 더보기 ▼`;
+    moreBtn.onclick=()=>{eventListExpanded=!eventListExpanded;renderEventList(S.events);};
+    box.appendChild(moreBtn);
+  }
 }
 function formatDateRange(s,e){
   if(!s)return '';
@@ -1778,7 +1991,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -2003,6 +2216,7 @@ function startDgRecruitListen(){
   });
 }
 
+let dgRecruitExpanded=false;
 function renderDgRecruitList(allPosts){
   const box=document.getElementById('dg-recruit-list');box.innerHTML='';
   const entries=[];
@@ -2014,11 +2228,18 @@ function renderDgRecruitList(allPosts){
       });
     });
   }
-  entries.sort((a,b)=>a.dateKey>b.dateKey?1:-1);
+  entries.sort((a,b)=>{
+    const tA=a.post?.createdAt||0;
+    const tB=b.post?.createdAt||0;
+    if(tB!==tA)return tB-tA;
+    if(b.postId!==a.postId)return b.postId>a.postId?1:-1;
+    return b.dateKey>a.dateKey?1:-1;
+  });
   if(!entries.length){
     box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div>';return;
   }
-  entries.forEach(({dateKey,postId,post})=>{
+  const visibleEntries=dgRecruitExpanded?entries:entries.slice(0,3);
+  visibleEntries.forEach(({dateKey,postId,post})=>{
     const dt=new Date(dateKey+'T00:00:00');
     const bMeta=SM[post.baseShift]||null;
     const applCount=Object.keys(post.applicants||{}).length;
@@ -2044,6 +2265,14 @@ function renderDgRecruitList(allPosts){
     row.onclick=()=>openDgDetailSheet(dateKey,postId,post);
     box.appendChild(row);
   });
+  if(entries.length>3){
+    const moreBtn=document.createElement('button');
+    moreBtn.className='btn sec sm fw';
+    moreBtn.style.cssText='margin-top:4px;padding:8px 12px;font-size:.75rem;color:var(--tx2);background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs)';
+    moreBtn.textContent=dgRecruitExpanded?'접기 ▲':`나머지 ${entries.length-3}개 더보기 ▼`;
+    moreBtn.onclick=()=>{dgRecruitExpanded=!dgRecruitExpanded;renderDgRecruitList(dgPostCache);};
+    box.appendChild(moreBtn);
+  }
 }
 
 function openDgDetailSheet(dateKey,postId,post){
@@ -2375,7 +2604,7 @@ function renderSettings(){
   const hdCard=document.getElementById('holiday-mgr-card');
   if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
 }
-function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();if(S.events)renderEventList(S.events);if(S.topId&&S.divId)renderCal();syncToWidget();}
+function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();if(S.events)renderEventList(S.events);renderMemoList();if(S.topId&&S.divId)renderCal();syncToWidget();}
 function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
 async function saveVac(){S.vacTotal=parseInt(document.getElementById('vac-inp').value)||0;refreshCal();updateVacSum();await saveProfile();}
 function updateVacSum(){
