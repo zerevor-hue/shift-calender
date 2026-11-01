@@ -1033,8 +1033,8 @@ let hdEditKey='';
 
 const DEFAULT_HOLIDAYS={
   "2025":{"2025-01-01":{name:"신정",type:"public"},"2025-01-28":{name:"설날 연휴",type:"public"},"2025-01-29":{name:"설날",type:"public"},"2025-01-30":{name:"설날 연휴",type:"public"},"2025-03-01":{name:"삼일절",type:"public"},"2025-05-05":{name:"어린이날·석가탄신일",type:"public"},"2025-05-06":{name:"대체공휴일",type:"substitute"},"2025-06-06":{name:"현충일",type:"public"},"2025-08-15":{name:"광복절",type:"public"},"2025-10-03":{name:"개천절",type:"public"},"2025-10-05":{name:"추석 연휴",type:"public"},"2025-10-06":{name:"추석",type:"public"},"2025-10-07":{name:"추석 연휴",type:"public"},"2025-10-08":{name:"대체공휴일",type:"substitute"},"2025-10-09":{name:"한글날",type:"public"},"2025-12-25":{name:"성탄절",type:"public"}},
-  "2026":{"2026-01-01":{name:"신정",type:"public"},"2026-02-16":{name:"설날 연휴",type:"public"},"2026-02-17":{name:"설날",type:"public"},"2026-02-18":{name:"설날 연휴",type:"public"},"2026-03-01":{name:"삼일절",type:"public"},"2026-03-02":{name:"대체공휴일",type:"substitute"},"2026-05-05":{name:"어린이날",type:"public"},"2026-05-24":{name:"석가탄신일",type:"public"},"2026-06-06":{name:"현충일",type:"public"},"2026-08-15":{name:"광복절",type:"public"},"2026-09-24":{name:"추석 연휴",type:"public"},"2026-09-25":{name:"추석",type:"public"},"2026-09-26":{name:"추석 연휴",type:"public"},"2026-10-03":{name:"개천절",type:"public"},"2026-10-09":{name:"한글날",type:"public"},"2026-12-25":{name:"성탄절",type:"public"}},
-  "2027":{"2027-01-01":{name:"신정",type:"public"},"2027-02-06":{name:"설날 연휴",type:"public"},"2027-02-07":{name:"설날",type:"public"},"2027-02-08":{name:"설날 연휴",type:"public"},"2027-03-01":{name:"삼일절",type:"public"},"2027-05-05":{name:"어린이날",type:"public"},"2027-05-13":{name:"석가탄신일",type:"public"},"2027-06-06":{name:"현충일",type:"public"},"2027-08-15":{name:"광복절",type:"public"},"2027-10-03":{name:"개천절",type:"public"},"2027-10-09":{name:"한글날",type:"public"},"2027-10-14":{name:"추석 연휴",type:"public"},"2027-10-15":{name:"추석",type:"public"},"2027-10-16":{name:"추석 연휴",type:"public"},"2027-12-25":{name:"성탄절",type:"public"}}
+  "2026":{"2026-01-01":{name:"신정",type:"public"},"2026-02-16":{name:"설날 연휴",type:"public"},"2026-02-17":{name:"설날",type:"public"},"2026-02-18":{name:"설날 연휴",type:"public"},"2026-03-01":{name:"삼일절",type:"public"},"2026-03-02":{name:"대체공휴일",type:"substitute"},"2026-05-05":{name:"어린이날",type:"public"},"2026-05-24":{name:"석가탄신일",type:"public"},"2026-05-25":{name:"대체공휴일",type:"substitute"},"2026-06-06":{name:"현충일",type:"public"},"2026-08-15":{name:"광복절",type:"public"},"2026-08-17":{name:"대체공휴일",type:"substitute"},"2026-09-24":{name:"추석 연휴",type:"public"},"2026-09-25":{name:"추석",type:"public"},"2026-09-26":{name:"추석 연휴",type:"public"},"2026-10-03":{name:"개천절",type:"public"},"2026-10-05":{name:"대체공휴일",type:"substitute"},"2026-10-09":{name:"한글날",type:"public"},"2026-12-25":{name:"성탄절",type:"public"}},
+  "2027":{"2027-01-01":{name:"신정",type:"public"},"2027-02-06":{name:"설날 연휴",type:"public"},"2027-02-07":{name:"설날",type:"public"},"2027-02-08":{name:"설날 연휴",type:"public"},"2027-02-09":{name:"대체공휴일",type:"substitute"},"2027-03-01":{name:"삼일절",type:"public"},"2027-05-05":{name:"어린이날",type:"public"},"2027-05-13":{name:"석가탄신일",type:"public"},"2027-06-06":{name:"현충일",type:"public"},"2027-08-15":{name:"광복절",type:"public"},"2027-08-16":{name:"대체공휴일",type:"substitute"},"2027-10-03":{name:"개천절",type:"public"},"2027-10-04":{name:"대체공휴일",type:"substitute"},"2027-10-09":{name:"한글날",type:"public"},"2027-10-11":{name:"대체공휴일",type:"substitute"},"2027-10-14":{name:"추석 연휴",type:"public"},"2027-10-15":{name:"추석",type:"public"},"2027-10-16":{name:"추석 연휴",type:"public"},"2027-12-25":{name:"성탄절",type:"public"},"2027-12-27":{name:"대체공휴일",type:"substitute"}}
 };
 
 function initLocalHolidays(){
@@ -1071,6 +1071,7 @@ async function initDefaultHolidays(){
     await dbS('holidays/'+yr,data);
     Object.assign(holidays,data);
   }
+  ls.s('holidays_cache',holidays);
   showToast('공휴일 초기화 완료 ✓');
   refreshCal();renderHolidayList();
 }
@@ -1101,6 +1102,7 @@ async function saveHoliday(){
   const yr=date.slice(0,4);
   await dbS(`holidays/${yr}/${date}`,{name,type});
   holidays[date]={name,type};
+  ls.s('holidays_cache',holidays);
   cs('holiday-sov');refreshCal();renderHolidayList();
   showToast('저장됨 ✓');
 }
@@ -1110,6 +1112,7 @@ async function deleteHoliday(){
   const yr=hdEditKey.slice(0,4);
   await dbS(`holidays/${yr}/${hdEditKey}`,null);
   delete holidays[hdEditKey];
+  ls.s('holidays_cache',holidays);
   cs('holiday-sov');refreshCal();renderHolidayList();
   showToast('삭제됨');
 }
@@ -1163,18 +1166,6 @@ function _pushHashState(hashName){
     return true;
   }catch(e){}
   try{
-    let a=document.getElementById('_nav-hash-anchor');
-    if(!a){
-      a=document.createElement('a');
-      a.id='_nav-hash-anchor';
-      a.style.display='none';
-      document.body.appendChild(a);
-    }
-    a.setAttribute('href','#'+hashName);
-    a.click();
-    if(location.hash==='#'+hashName)return true;
-  }catch(e){}
-  try{
     location.hash=hashName;
     if(location.hash==='#'+hashName)return true;
   }catch(e){}
@@ -1199,12 +1190,22 @@ const os=id=>{
   }
 };
 
+function toMidMs(v){
+  if(v instanceof Date)return new Date(v.getFullYear(),v.getMonth(),v.getDate()).getTime();
+  const s=String(v||'');
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    const p=s.split('-');
+    return new Date(+p[0],+p[1]-1,+p[2]).getTime();
+  }
+  const d=new Date(s);
+  return isNaN(d.getTime())?0:new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+}
 function getDivPat(topId,divId){return S.patCache[`${topId}_${divId}`]||null;}
 function getBaseShift(date,topId,divId){
   const tp=getDivPat(topId||S.topId,divId||S.divId);
   if(!tp||!Array.isArray(tp.pattern)||!tp.pattern.length||!tp.patternStart)return null;
-  if(!tp._startMs)tp._startMs=new Date(tp.patternStart).getTime();
-  const diff=Math.floor((date.getTime()-tp._startMs)/86400000);
+  if(!tp._startMs)tp._startMs=toMidMs(tp.patternStart);
+  const diff=Math.round((toMidMs(date)-tp._startMs)/86400000);
   return diff<0?null:tp.pattern[diff%tp.pattern.length];
 }
 function getShift(date){return S.ov[dkey(date)]?.shift||getBaseShift(date);}
@@ -1318,7 +1319,7 @@ function applyDivsToCache(divs){
         };
         parsedPats.push({
           name:dName.length>=2?dName.substring(0,2):dName,
-          startMs:new Date(patStart).getTime(),
+          startMs:toMidMs(patStart),
           pat:patArr,
           len:patArr.length
         });
@@ -1375,19 +1376,6 @@ function renderCal(){
   renderMemoList();
   
   syncToWidget();
-  if(window.Android&&S.myId){
-    try{
-      const todaySh=getShift(new Date());
-      window.Android.updateShift(JSON.stringify({
-        shift:todaySh||'none',
-        shiftLabel:todaySh?SM[todaySh].l:'없음',
-        name:S.myName||'',
-        topName:S.topName||'',
-        divName:S.divName||'',
-        date:dkey(new Date()) 
-      }));
-    }catch(e){}
-  }
 }
 
 function mkCell(date,other){
@@ -1417,7 +1405,7 @@ function mkCell(date,other){
     let dayTeam='', nightTeam='';
     if(window._parsedPats){
       for(let p of window._parsedPats){
-        let diff = Math.floor((dtMs - p.startMs)/86400000);
+        let diff = Math.round((dtMs - p.startMs)/86400000);
         if(diff>=0 && p.len>0){
           let s = p.pat[diff % p.len];
           if(s==='dr'||s==='ds') dayTeam = p.name;
@@ -1497,6 +1485,11 @@ function mkDgCell(date,other){
   if(dow===0)c.classList.add('sun');if(dow===6)c.classList.add('sat');
   if(date.toDateString()===new Date().toDateString())c.classList.add('td');
   const k=dkey(date);
+  const hd=holidays[k];
+  if(hd){
+    c.classList.add('hday');
+    if(hd.type==='substitute')c.classList.add('hday-sub');
+  }
   const sh=getShift(date),isOv=!!S.ov[k]?.shift;
   const row=document.createElement('div');row.className='dr';
   const dnEl=document.createElement('div');dnEl.className='dn'+(date.getDate()>=10?' d2':'');
@@ -1513,7 +1506,7 @@ function mkDgCell(date,other){
   let dayTeam='', nightTeam='';
   if(window._parsedPats){
     for(let p of window._parsedPats){
-      let diff = Math.floor((dtMs - p.startMs)/86400000);
+      let diff = Math.round((dtMs - p.startMs)/86400000);
       if(diff>=0 && p.len>0){
         let s = p.pat[diff % p.len];
         if(s==='dr'||s==='ds') dayTeam = p.name;
@@ -1599,6 +1592,7 @@ async function saveDaySheet(){
       delete S.ov[k].memoColor;
       delete S.ov[k].memoUpdatedAt;
     }
+    if(!S.ov[k].shift&&!S.ov[k].memo)delete S.ov[k];
   }
   cs('day-sov');await saveProfile();refreshCal();showToast('저장됨 ✓');
 }
@@ -1641,6 +1635,8 @@ function onMemoSheetDateChange(){
     pickedMmSheetColor=existing.memoColor||'pink';
     renderColorPicker('mm-color-picker',pickedMmSheetColor,pickMmSheetColor);
     applyFieldTagColor('mm-text',pickedMmSheetColor,'pink');
+  }else if(!editMemoOrigKey){
+    document.getElementById('mm-text').value='';
   }
 }
 
@@ -1822,10 +1818,11 @@ function openEventSheet(evId){
 }
 async function addEvent(){
   const title=document.getElementById('ev-title').value.trim();
-  const startDate=document.getElementById('ev-start').value;
-  const endDate=document.getElementById('ev-end').value;
+  let startDate=document.getElementById('ev-start').value;
+  let endDate=document.getElementById('ev-end').value;
   if(!title){showToast('제목을 입력해주세요');return;}
   if(!startDate){showToast('시작일을 입력해주세요');return;}
+  if(endDate&&endDate<startDate){const tmp=startDate;startDate=endDate;endDate=tmp;}
   if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
   const color=pickedEventColor||'sky';
   if(editEventId&&S.events&&S.events[editEventId]){
@@ -1927,8 +1924,14 @@ async function deleteTopTeam(topId){
   if(!isAdmin())return;
   const info=await dbG('teamIndex/'+topId);
   if(!(await askConfirm(`"${info?.name||'이 팀'}" 및 모든 하위팀 삭제?`)))return;
-  await dbS('teams/'+topId,null);await dbS('teamIndex/'+topId,null);
-  if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
+  await Promise.all([
+    dbS('teams/'+topId,null),
+    dbS('teamIndex/'+topId,null),
+    dbS('events/'+topId,null),
+    dbS('recruits/'+topId,null),
+    dbS('chats/'+topId,null)
+  ]);
+  if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();startEventListen();startDgRecruitListen();}
   renderAllTeams();refreshCal();showToast('팀 삭제됨');
 }
 
@@ -2001,7 +2004,8 @@ async function toggleJoin(){
     if(!(await askConfirm('팀을 나가시겠어요?')))return;
     await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
     S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';
-    await saveProfile();cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
+    await saveProfile();startEventListen();startDgRecruitListen();
+    cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
   } else {
     if(S.topId&&S.divId){
       if(!(await askConfirm('현재 팀을 나가고 새 팀에 참여할까요?\n(1개 팀만 참여 가능)')))return;
@@ -2015,8 +2019,9 @@ async function toggleJoin(){
     const divNames=topInfo?.divNames||[];
     const found=divNames.find(d=>d.id===divId);
     S.divName=found?.name||div?.name||'';
-    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:{},updatedAt:Date.now()});
-    await saveProfile();cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
+    await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:S.ov||{},updatedAt:Date.now()});
+    await saveProfile();startEventListen();startDgRecruitListen();
+    cs('div-info-sov');refreshCal();renderAllTeams();showToast('팀에 참여했어요 👋');
   }
 }
 
@@ -2057,7 +2062,7 @@ function renderTodayWorkers(divs){
   const box=document.getElementById('today-workers');box.innerHTML='';
   if(!day.length&&!night.length&&!other.length){box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">등록된 팀원이 없어요</div>';return;}
   const grid=document.createElement('div');
-  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px';
+  grid.className='workers-grid';
   function makeCol(list,icon,label,clr,bg,subClr){
     const col=document.createElement('div');
     col.innerHTML=`<div class="wcolhdr"><span style="font-size:.75rem;font-weight:800;color:${clr}">${icon} ${label}</span><span class="wcnt" style="background:${bg};color:${clr}">${list.length}명</span></div>`;
@@ -2157,7 +2162,9 @@ function renderDgCal(){
   for(let i=tot-7;i<tot;i++)if(cells[i])cells[i].classList.add('lr');
   ['dr','ds','nr','ns'].forEach(k=>document.getElementById('dg-'+k).textContent=stats[k]);
   document.getElementById('dg-vc').textContent=countUsedVac();
-  document.getElementById('dg-vt').textContent=S.vacTotal>0?S.vacTotal:'-';
+  const dgVt=document.getElementById('dg-vt');
+  dgVt.textContent=S.vacTotal>0?S.vacTotal:'-';
+  dgVt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
 }
 
 function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;dgYr--;}renderDgCal();}
@@ -2176,19 +2183,31 @@ async function saveDgMyShift(){
   if(!dgEditDate)return;
   const k=dkey(dgEditDate),sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
   const bSh=getBaseShift(dgEditDate);
-  if(sh===bSh){delete S.ov[k];}
-  else{if(!S.ov[k])S.ov[k]={};if(sh)S.ov[k].shift=sh;}
+  if(sh===bSh){
+    if(S.ov[k]){
+      delete S.ov[k].shift;
+      if(!S.ov[k].memo)delete S.ov[k];
+    }
+  }else{
+    if(!S.ov[k])S.ov[k]={};
+    if(sh)S.ov[k].shift=sh;
+  }
   cs('dg-sov');await saveProfile();renderDgCal();refreshCal();showToast('저장됨 ✓');
 }
 
 async function confirmDgRequest(){
   if(!dgEditDate||!S.topId){showToast('팀에 참여해야 합니다');return;}
+  const k=dkey(dgEditDate);
+  const existingPosts=dgPostCache[k];
+  if(existingPosts&&Object.values(existingPosts).some(p=>p&&p.uid===S.myId&&!p.closed)){
+    showToast('이미 해당 날짜에 진행 중인 대근 요청이 있어요');
+    return;
+  }
   const sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
   if(!sh){showToast('근무 유형을 선택해주세요');return;}
   const m=SM[sh];
   const dateStr=`${dgEditDate.getMonth()+1}월 ${dgEditDate.getDate()}일`;
   if(!(await askConfirm(`대근 공고를 올리겠습니까?\n\n📅 ${dateStr} ${m.i} ${m.l} 대근요청`)))return;
-  const k=dkey(dgEditDate);
   if(!S.ov[k])S.ov[k]={};
   S.ov[k].shift='vc';
   await saveProfile();
@@ -2338,12 +2357,13 @@ async function dgRespond(uid,status){
   if(status==='accepted'){
     await dbS(`${postPath}/applicants/${uid}/status`,'accepted');
     const baseShift=dgDetailPost?.baseShift;
-    if(baseShift){
+    const subShift=baseShift==='dr'?'ds':(baseShift==='nr'?'ns':baseShift);
+    if(subShift){
       const prof=await dbG('profiles/'+uid);
       if(prof){
         const ov=prof.ov||{};
         if(!ov[dgDetailKey])ov[dgDetailKey]={};
-        ov[dgDetailKey].shift=baseShift;
+        ov[dgDetailKey].shift=subShift;
         await dbS('profiles/'+uid+'/ov',ov);
       }
       const divs=await dbG('teams/'+S.topId+'/divs');
@@ -2352,7 +2372,7 @@ async function dgRespond(uid,status){
           if(div&&div.members&&div.members[uid]){
             const memOv=div.members[uid].ov||{};
             if(!memOv[dgDetailKey])memOv[dgDetailKey]={};
-            memOv[dgDetailKey].shift=baseShift;
+            memOv[dgDetailKey].shift=subShift;
             await dbS(`teams/${S.topId}/divs/${divId}/members/${uid}/ov`,memOv);
             break;
           }
@@ -2360,7 +2380,7 @@ async function dgRespond(uid,status){
       }
       if(uid===S.myId){
         if(!S.ov[dgDetailKey])S.ov[dgDetailKey]={};
-        S.ov[dgDetailKey].shift=baseShift;
+        S.ov[dgDetailKey].shift=subShift;
         refreshCal();renderDgCal();
       }
     }
@@ -2695,4 +2715,3 @@ else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if
 </script>
 </body>
 </html>
-```
