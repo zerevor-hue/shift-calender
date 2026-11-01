@@ -185,11 +185,17 @@ async function doLogin(){
   }
 }
 
+function localDateKey(d=new Date()){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 function enterApp(){
   document.getElementById('login-section').style.display='none';
   document.getElementById('upload-section').style.display='';
   document.getElementById('user-badge').textContent=myName;
-  document.getElementById('menu-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('menu-date').value=localDateKey();
   loadMenuList();
 }
 
@@ -220,11 +226,13 @@ function compressImage(file,maxPx=1400,quality=0.82){
   });
 }
 
+let _previewBlobUrl='';
 function onImageSelect(inp){
   const file=inp.files[0];if(!file)return;
   selectedFile=file;
-  const url=URL.createObjectURL(file);
-  document.getElementById('preview-img').src=url;
+  if(_previewBlobUrl){try{URL.revokeObjectURL(_previewBlobUrl);}catch(e){}}
+  _previewBlobUrl=URL.createObjectURL(file);
+  document.getElementById('preview-img').src=_previewBlobUrl;
   document.getElementById('preview-img').style.display='';
   hideErr('upload-err');
   document.getElementById('upload-suc').style.display='none';
@@ -287,6 +295,7 @@ async function uploadMenu(){
 
 function clearForm(){
   selectedFile=null;
+  if(_previewBlobUrl){try{URL.revokeObjectURL(_previewBlobUrl);}catch(e){}_previewBlobUrl='';}
   document.getElementById('preview-img').src='';
   document.getElementById('preview-img').style.display='none';
   
@@ -320,30 +329,55 @@ async function loadMenuList(){
       const dt=new Date(item.dateKey+'T00:00:00');
       const dateStr=`${dt.getMonth()+1}월 ${dt.getDate()}일 (${['일','월','화','수','목','금','토'][dt.getDay()]})`;
       const div=document.createElement('div');div.className='menu-item';
-      div.innerHTML=`
-        <img src="${item.url}" loading="lazy"
-          onclick="document.getElementById('lb-img').src='${item.url}';document.getElementById('lightbox').style.display='flex'"
-          onerror="this.style.display='none'">
-        <div class="menu-info">
-          <div style="flex:1;min-width:0">
-            <div class="menu-date">${dateStr}</div>
-            ${item.desc?`<div class="menu-desc">${item.desc}</div>`:''}
-            <div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${item.uploadedBy||''}${item.sizeMB?' · '+item.sizeMB+'MB':''}</div>
-          </div>
-          <button class="del-btn" onclick="deleteMenu('${item.dateKey}','${item.id}')">삭제</button>
+      const imgEl=document.createElement('img');
+      imgEl.src=item.url;
+      imgEl.loading='lazy';
+      imgEl.onclick=()=>{document.getElementById('lb-img').src=item.url;document.getElementById('lightbox').style.display='flex';};
+      imgEl.onerror=function(){this.style.display='none';};
+      div.appendChild(imgEl);
+
+      const info=document.createElement('div');
+      info.className='menu-info';
+      info.innerHTML=`
+        <div style="flex:1;min-width:0">
+          <div class="menu-date">${dateStr}</div>
+          ${item.desc?`<div class="menu-desc">${escHtml(item.desc)}</div>`:''}
+          <div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${escHtml(item.uploadedBy||'')}${item.sizeMB?' · '+escHtml(item.sizeMB)+'MB':''}</div>
         </div>`;
+      const delBtn=document.createElement('button');
+      delBtn.className='del-btn';
+      delBtn.textContent='삭제';
+      delBtn.onclick=()=>deleteMenu(item.dateKey,item.id,item.url);
+      info.appendChild(delBtn);
+      div.appendChild(info);
       box.appendChild(div);
     });
   }catch(e){
-    box.innerHTML=`<div style="text-align:center;padding:16px;color:var(--ng);font-size:.8rem">불러오기 실패: ${e.message}</div>`;
+    box.innerHTML=`<div style="text-align:center;padding:16px;color:var(--ng);font-size:.8rem">불러오기 실패: ${escHtml(e.message)}</div>`;
   }
 }
 
-async function deleteMenu(dateKey,id){
+async function deleteMenu(dateKey,id,url){
   if(!confirm('삭제하시겠어요?'))return;
-  await db.ref(`menus/${dateKey}/${id}`).remove();
-  showToast('삭제됨');loadMenuList();
+  try{
+    if(url){
+      await storage.refFromURL(url).delete().catch(()=>{});
+    }
+    await db.ref(`menus/${dateKey}/${id}`).remove();
+    showToast('삭제됨');loadMenuList();
+  }catch(e){
+    showToast('삭제 실패: '+e.message);
+  }
 }
+
+window.handleBackPress=function(){
+  const lb=document.getElementById('lightbox');
+  if(lb&&lb.style.display==='flex'){
+    lb.style.display='none';
+    return true;
+  }
+  return false;
+};
 
 (function init(){
   if(!tryAutoLogin()){
