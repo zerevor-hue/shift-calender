@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -160,6 +159,10 @@ textarea{resize:vertical;min-height:65px}
 .sstrip.has-qsub .schip{padding:10px 4px 9px}
 .sstrip.has-qsub .scb{gap:4px}
 .sstrip.has-qsub .scn{font-size:1.14rem}
+.schip.qsub-warn .sct,.schip.qsub-warn .scn,.schip.qsub-warn .scs,.schip.qsub-warn .scsep{color:var(--red)!important}
+.schip.qsub-full{background:rgba(248,113,113,.18)!important;border-color:rgba(248,113,113,.38)!important}
+body.light .schip.qsub-full{background:#ffe4e6!important;border-color:#fda4af!important}
+.schip.qsub-full .sct,.schip.qsub-full .scn,.schip.qsub-full .scs,.schip.qsub-full .scsep{color:var(--red)!important}
 .sct{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;line-height:1;white-space:nowrap}
 .scb{display:flex;align-items:center;justify-content:center;gap:6px}
 .scc{display:flex;flex-direction:column;align-items:center;gap:1.5px}
@@ -1257,21 +1260,21 @@ function countQuarterSub(){
 function updateQuarterSubUI(){
   const {cnt,max}=countQuarterSub();
   const hasSub=cnt>0;
+  const isWarn=hasSub&&cnt===max-1;
+  const isFull=hasSub&&cnt>=max;
   ['s','dg'].forEach(prefix=>{
     const strip=document.getElementById(prefix+'-strip');
     const chip=document.getElementById(prefix+'-qsub-chip');
     const numEl=document.getElementById(prefix+'-qsub');
     const maxEl=document.getElementById(prefix+'-qmax');
     if(strip)strip.classList.toggle('has-qsub',hasSub);
-    if(chip)chip.style.display=hasSub?'flex':'none';
-    if(numEl){
-      numEl.textContent=cnt;
-      numEl.style.color=cnt>=max?'var(--red)':'var(--ev-tx)';
+    if(chip){
+      chip.style.display=hasSub?'flex':'none';
+      chip.classList.toggle('qsub-warn',isWarn);
+      chip.classList.toggle('qsub-full',isFull);
     }
-    if(maxEl){
-      maxEl.textContent=max;
-      maxEl.style.color='var(--ev-tx)';
-    }
+    if(numEl)numEl.textContent=cnt;
+    if(maxEl)maxEl.textContent=max;
   });
 }
 
@@ -2860,4 +2863,3 @@ else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if
 </script>
 </body>
 </html>
-```
