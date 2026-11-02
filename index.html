@@ -153,8 +153,12 @@ textarea{resize:vertical;min-height:65px}
 .tbadge-name{font-size:.7rem;font-weight:700;color:var(--tx2)}
 
 /* 통계 바 (달력 하단, 이벤트 창 위로 배치 & 모던 카드 스타일) */
-.sstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;margin-bottom:14px}
-.schip{background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);border-radius:16px;padding:10px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;overflow:hidden}
+.sstrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;margin-bottom:14px}
+.sstrip.has-qsub{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.schip{background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);border-radius:16px;padding:10px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;overflow:hidden;min-width:0}
+.sstrip.has-qsub .schip{padding:10px 4px 9px}
+.sstrip.has-qsub .scb{gap:4px}
+.sstrip.has-qsub .scn{font-size:1.14rem}
 .sct{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;line-height:1;white-space:nowrap}
 .scb{display:flex;align-items:center;justify-content:center;gap:6px}
 .scc{display:flex;flex-direction:column;align-items:center;gap:1.5px}
@@ -418,8 +422,8 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
 
-    <!-- 3. 달력과 팀 이벤트 사이로 이동한 주간/야간/연차 통계 바 -->
-    <div class="sstrip">
+    <!-- 3. 달력과 팀 이벤트 사이로 이동한 주간/야간/연차/분기대근 통계 바 -->
+    <div class="sstrip" id="s-strip">
       <div class="schip">
         <div class="sct" style="color:var(--a)">☀️ 주간</div>
         <div class="scb">
@@ -442,6 +446,14 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
           <div class="scc"><span class="scs">사용</span><span class="scn" id="s-vc" style="color:var(--vac)">0</span></div>
           <span class="scsep">/</span>
           <div class="scc"><span class="scs">연차</span><span class="scn" id="s-vt" style="color:var(--tx3)">-</span></div>
+        </div>
+      </div>
+      <div class="schip" id="s-qsub-chip" style="display:none">
+        <div class="sct" id="s-qsub-title" style="color:var(--ev-tx)">🔄 대근</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="s-qsub" style="color:var(--ev-tx)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">최대</span><span class="scn" id="s-qmax" style="color:var(--ev-tx)">10</span></div>
         </div>
       </div>
     </div>
@@ -520,7 +532,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       <div class="li"><div class="ld" style="background:var(--red)"></div>휴무</div>
       <div class="li"><div class="ld" style="background:var(--vac)"></div>연차</div>
     </div>
-    <div class="sstrip">
+    <div class="sstrip" id="dg-strip">
       <div class="schip">
         <div class="sct" style="color:var(--a)">☀️ 주간</div>
         <div class="scb">
@@ -543,6 +555,14 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
           <div class="scc"><span class="scs">사용</span><span class="scn" id="dg-vc" style="color:var(--vac)">0</span></div>
           <span class="scsep">/</span>
           <div class="scc"><span class="scs">연차</span><span class="scn" id="dg-vt" style="color:var(--tx3)">-</span></div>
+        </div>
+      </div>
+      <div class="schip" id="dg-qsub-chip" style="display:none">
+        <div class="sct" id="dg-qsub-title" style="color:var(--ev-tx)">🔄 대근</div>
+        <div class="scb">
+          <div class="scc"><span class="scs">대근</span><span class="scn" id="dg-qsub" style="color:var(--ev-tx)">0</span></div>
+          <span class="scsep">/</span>
+          <div class="scc"><span class="scs">최대</span><span class="scn" id="dg-qmax" style="color:var(--ev-tx)">10</span></div>
         </div>
       </div>
     </div>
@@ -1211,12 +1231,47 @@ function getBaseShift(date,topId,divId){
 function getShift(date){return S.ov[dkey(date)]?.shift||getBaseShift(date);}
 function getMemberShift(date,memberOv,topId,divId){return memberOv?.[dkey(date)]?.shift||getBaseShift(date,topId,divId);}
 function countUsedVac(){
-  const now=new Date(),yrPrefix=now.getFullYear()+'-',todayStr=dkey(now);
+  const now=new Date(),yrPrefix=now.getFullYear()+'-';
   let uv=0;
   for(const [k,v] of Object.entries(S.ov||{})){
-    if(k.startsWith(yrPrefix)&&k<=todayStr&&v?.shift==='vc')uv++;
+    if(k.startsWith(yrPrefix)&&v?.shift==='vc')uv++;
   }
   return uv;
+}
+function countQuarterSub(){
+  const now=new Date();
+  const yr=now.getFullYear();
+  const qIdx=Math.floor(now.getMonth()/3);
+  const qStartKey=dkey(new Date(yr,qIdx*3,1));
+  const qEndKey=dkey(new Date(yr,qIdx*3+3,0));
+  let cnt=0,qVac=0;
+  for(const [k,v] of Object.entries(S.ov||{})){
+    if(k>=qStartKey&&k<=qEndKey){
+      if(v?.shift==='ds'||v?.shift==='ns')cnt++;
+      else if(v?.shift==='vc')qVac++;
+    }
+  }
+  return {cnt,max:10+qVac,qVac,qNum:qIdx+1};
+}
+function updateQuarterSubUI(){
+  const {cnt,max}=countQuarterSub();
+  const hasSub=cnt>0;
+  ['s','dg'].forEach(prefix=>{
+    const strip=document.getElementById(prefix+'-strip');
+    const chip=document.getElementById(prefix+'-qsub-chip');
+    const numEl=document.getElementById(prefix+'-qsub');
+    const maxEl=document.getElementById(prefix+'-qmax');
+    if(strip)strip.classList.toggle('has-qsub',hasSub);
+    if(chip)chip.style.display=hasSub?'flex':'none';
+    if(numEl){
+      numEl.textContent=cnt;
+      numEl.style.color=cnt>=max?'var(--red)':'var(--ev-tx)';
+    }
+    if(maxEl){
+      maxEl.textContent=max;
+      maxEl.style.color='var(--ev-tx)';
+    }
+  });
 }
 
 async function hashPw(pw){
@@ -1304,6 +1359,7 @@ function applyCalHeaderBadge(){
 function applyDivsToCache(divs){
   const parsedPats=[];
   window._allPatsCache={};
+  window._divsRawCache=divs||{};
   if(divs){
     Object.entries(divs).forEach(([dId,dData])=>{
       if(!dData)return;
@@ -1373,6 +1429,7 @@ function renderCal(){
   const vt=document.getElementById('s-vt');
   vt.textContent=S.vacTotal>0?S.vacTotal:'-';
   vt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
+  updateQuarterSubUI();
   renderMemoList();
   
   syncToWidget();
@@ -1580,8 +1637,8 @@ async function saveDaySheet(){
   if(sh===bSh&&!memo){delete S.ov[k];}
   else{
     if(!S.ov[k])S.ov[k]={};
-    if(sh&&sh!==bSh)S.ov[k].shift=sh;
-    else if(sh===bSh)delete S.ov[k].shift;
+    if(sh&&sh!==bSh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
+    else if(sh===bSh){delete S.ov[k].shift;delete S.ov[k].manualShift;delete S.ov[k].fromRecruit;}
     if(memo){
       const changed=(S.ov[k].memo!==memo)||(S.ov[k].memoColor!==(pickedMemoColor||'pink'));
       S.ov[k].memo=memo;
@@ -1594,7 +1651,7 @@ async function saveDaySheet(){
     }
     if(!S.ov[k].shift&&!S.ov[k].memo)delete S.ov[k];
   }
-  cs('day-sov');await saveProfile();refreshCal();showToast('저장됨 ✓');
+  cs('day-sov');await saveProfile();refreshCal();renderDgCal();updateVacSum();showToast('저장됨 ✓');
 }
 
 let calSubTab='ev';
@@ -2165,6 +2222,7 @@ function renderDgCal(){
   const dgVt=document.getElementById('dg-vt');
   dgVt.textContent=S.vacTotal>0?S.vacTotal:'-';
   dgVt.style.color=S.vacTotal>0?'var(--vac)':'var(--tx3)';
+  updateQuarterSubUI();
 }
 
 function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;dgYr--;}renderDgCal();}
@@ -2186,13 +2244,45 @@ async function saveDgMyShift(){
   if(sh===bSh){
     if(S.ov[k]){
       delete S.ov[k].shift;
+      delete S.ov[k].manualShift;
+      delete S.ov[k].fromRecruit;
       if(!S.ov[k].memo)delete S.ov[k];
     }
   }else{
     if(!S.ov[k])S.ov[k]={};
-    if(sh)S.ov[k].shift=sh;
+    if(sh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
   }
-  cs('dg-sov');await saveProfile();renderDgCal();refreshCal();showToast('저장됨 ✓');
+  cs('dg-sov');await saveProfile();renderDgCal();refreshCal();updateVacSum();showToast('저장됨 ✓');
+}
+
+function resolveRequesterBaseShift(baseShift,reqUid,dateKey,divsMap){
+  if(baseShift==='dr'||baseShift==='ds')return 'dr';
+  if(baseShift==='nr'||baseShift==='ns')return 'nr';
+  const dt=new Date(dateKey+'T00:00:00');
+  const divs=divsMap||window._divsRawCache||(S.topId?ls.g('divs_cache_'+S.topId):null);
+  if(divs&&reqUid){
+    for(const [dId,dData] of Object.entries(divs)){
+      if(dData?.members?.[reqUid]){
+        if(dData.pattern)S.patCache[`${S.topId}_${dId}`]=dData.pattern;
+        const bSh=getBaseShift(dt,S.topId,dId);
+        if(bSh==='dr'||bSh==='ds')return 'dr';
+        if(bSh==='nr'||bSh==='ns')return 'nr';
+      }
+    }
+  }
+  if(reqUid===S.myId&&S.divId){
+    const bSh=getBaseShift(dt,S.topId,S.divId);
+    if(bSh==='dr'||bSh==='ds')return 'dr';
+    if(bSh==='nr'||bSh==='ns')return 'nr';
+  }
+  return baseShift||'';
+}
+
+function resolveSubWorkerShift(baseShift,reqUid,dateKey,divsMap){
+  const reqBase=resolveRequesterBaseShift(baseShift,reqUid,dateKey,divsMap);
+  if(reqBase==='dr'||reqBase==='ds')return 'ds';
+  if(reqBase==='nr'||reqBase==='ns')return 'ns';
+  return '';
 }
 
 async function confirmDgRequest(){
@@ -2203,9 +2293,23 @@ async function confirmDgRequest(){
     showToast('이미 해당 날짜에 진행 중인 대근 요청이 있어요');
     return;
   }
-  const sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
-  if(!sh){showToast('근무 유형을 선택해주세요');return;}
-  const m=SM[sh];
+  const pickedSh=document.querySelector('input[name="dg-sh"]:checked')?.value;
+  const savedSh=S.ov[k]?.shift;
+  const bSh=getBaseShift(dgEditDate);
+  // 연차(vc)를 먼저 등록한 상태에서 대근요청을 눌러도 요청자의 원래 주간/야간 근무로 정확히 인식
+  let reqShift='';
+  if(pickedSh==='dr'||pickedSh==='ds')reqShift='dr';
+  else if(pickedSh==='nr'||pickedSh==='ns')reqShift='nr';
+  else if(savedSh==='dr'||savedSh==='ds')reqShift='dr';
+  else if(savedSh==='nr'||savedSh==='ns')reqShift='nr';
+  else if(bSh==='dr'||bSh==='ds')reqShift='dr';
+  else if(bSh==='nr'||bSh==='ns')reqShift='nr';
+
+  if(!reqShift){
+    showToast('주간 또는 야간 근무일에만 대근 요청을 올릴 수 있어요');
+    return;
+  }
+  const m=SM[reqShift];
   const dateStr=`${dgEditDate.getMonth()+1}월 ${dgEditDate.getDate()}일`;
   if(!(await askConfirm(`대근 공고를 올리겠습니까?\n\n📅 ${dateStr} ${m.i} ${m.l} 대근요청`)))return;
   if(!S.ov[k])S.ov[k]={};
@@ -2213,7 +2317,7 @@ async function confirmDgRequest(){
   await saveProfile();
   await dbP(`recruits/${S.topId}/${k}`,{
     uid:S.myId,name:S.myName,color:S.myColor,
-    baseShift:sh,closed:false,applicants:{},createdAt:Date.now(),
+    baseShift:reqShift,closed:false,applicants:{},createdAt:Date.now(),
   });
   cs('dg-sov');renderDgCal();refreshCal();
   showToast(`${dateStr} ${m.l} 대근요청 등록됨 🔄`);
@@ -2222,12 +2326,43 @@ async function confirmDgRequest(){
 function startDgRecruitListen(){
   if(dgRecruitListUnsub){dgRecruitListUnsub();dgRecruitListUnsub=null;}
   if(!S.topId)return;
-  dgRecruitListUnsub=dbL(`recruits/${S.topId}`,allPosts=>{
+  dgRecruitListUnsub=dbL(`recruits/${S.topId}`,async allPosts=>{
     dgPostCache={};
+    let myOvChanged=false;
     if(allPosts){
       Object.entries(allPosts).forEach(([dateKey,posts])=>{
-        if(posts)dgPostCache[dateKey]=posts;
+        if(!posts)return;
+        dgPostCache[dateKey]=posts;
+        if(!S.myId)return;
+        Object.entries(posts).forEach(([postId,post])=>{
+          if(!post)return;
+          const myApp=post.applicants?.[S.myId];
+          if(myApp?.status==='accepted'){
+            const targetSub=resolveSubWorkerShift(post.baseShift,post.uid,dateKey);
+            if(targetSub==='ds'||targetSub==='ns'){
+              const syncedMap=ls.g('dg_synced_'+S.myId)||{};
+              const curSh=S.ov[dateKey]?.shift;
+              const isManual=!!S.ov[dateKey]?.manualShift;
+              // 아직 동기화되지 않은 대근 확정 건이거나 구버전 버그로 연차(vc)로 들어간 확정 건만 자동 반영 (수동 편집은 보존)
+              if(!syncedMap[postId]&&(!isManual||(curSh==='vc'&&!S.ov[dateKey]?.fromRecruit))){
+                if(curSh!==targetSub||S.ov[dateKey]?.fromRecruit!==postId){
+                  if(!S.ov[dateKey])S.ov[dateKey]={};
+                  S.ov[dateKey].shift=targetSub;
+                  S.ov[dateKey].fromRecruit=postId;
+                  delete S.ov[dateKey].manualShift;
+                  myOvChanged=true;
+                }
+                syncedMap[postId]=true;
+                ls.s('dg_synced_'+S.myId,syncedMap);
+              }
+            }
+          }
+        });
       });
+    }
+    if(myOvChanged){
+      await saveProfile();
+      renderCal();
     }
     renderDgRecruitList(allPosts);
     renderDgCal();
@@ -2259,7 +2394,7 @@ function renderDgRecruitList(allPosts){
   const visibleEntries=dgRecruitExpanded?entries:entries.slice(0,3);
   visibleEntries.forEach(({dateKey,postId,post})=>{
     const dt=new Date(dateKey+'T00:00:00');
-    const bMeta=SM[post.baseShift]||null;
+    const resolvedBase=resolveRequesterBaseShift(post.baseShift,post.uid,dateKey);const bMeta=SM[resolvedBase]||SM[post.baseShift]||null;
     const applCount=Object.keys(post.applicants||{}).length;
     const isOwner=post.uid===S.myId;
     const isClosed=!!post.closed;
@@ -2296,7 +2431,7 @@ function renderDgRecruitList(allPosts){
 function openDgDetailSheet(dateKey,postId,post){
   dgDetailKey=dateKey;dgDetailPostId=postId;dgDetailPost=post;
   const dt=new Date(dateKey+'T00:00:00');
-  const bMeta=SM[post.baseShift]||null;
+  const resolvedBase=resolveRequesterBaseShift(post.baseShift,post.uid,dateKey);const bMeta=SM[resolvedBase]||SM[post.baseShift]||null;
   const isOwner=post.uid===S.myId;
   const isClosed=!!post.closed;
   document.getElementById('dgd-title').textContent=`${dt.getMonth()+1}월 ${dt.getDate()}일 대근요청`;
@@ -2356,23 +2491,29 @@ async function dgRespond(uid,status){
   const postPath=`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`;
   if(status==='accepted'){
     await dbS(`${postPath}/applicants/${uid}/status`,'accepted');
-    const baseShift=dgDetailPost?.baseShift;
-    const subShift=baseShift==='dr'?'ds':(baseShift==='nr'?'ns':baseShift);
-    if(subShift){
+    const divs=await dbG('teams/'+S.topId+'/divs');
+    if(divs)applyDivsToCache(divs);
+    const subShift=resolveSubWorkerShift(dgDetailPost?.baseShift,dgDetailPost?.uid,dgDetailKey,divs);
+    const fixedBase=resolveRequesterBaseShift(dgDetailPost?.baseShift,dgDetailPost?.uid,dgDetailKey,divs);
+    if((fixedBase==='dr'||fixedBase==='nr')&&dgDetailPost?.baseShift!==fixedBase){
+      await dbS(`${postPath}/baseShift`,fixedBase);
+    }
+    if(subShift==='ds'||subShift==='ns'){
       const prof=await dbG('profiles/'+uid);
       if(prof){
         const ov=prof.ov||{};
         if(!ov[dgDetailKey])ov[dgDetailKey]={};
         ov[dgDetailKey].shift=subShift;
+        ov[dgDetailKey].fromRecruit=dgDetailPostId;
         await dbS('profiles/'+uid+'/ov',ov);
       }
-      const divs=await dbG('teams/'+S.topId+'/divs');
       if(divs){
         for(const [divId,div] of Object.entries(divs)){
           if(div&&div.members&&div.members[uid]){
             const memOv=div.members[uid].ov||{};
             if(!memOv[dgDetailKey])memOv[dgDetailKey]={};
             memOv[dgDetailKey].shift=subShift;
+            memOv[dgDetailKey].fromRecruit=dgDetailPostId;
             await dbS(`teams/${S.topId}/divs/${divId}/members/${uid}/ov`,memOv);
             break;
           }
@@ -2381,6 +2522,8 @@ async function dgRespond(uid,status){
       if(uid===S.myId){
         if(!S.ov[dgDetailKey])S.ov[dgDetailKey]={};
         S.ov[dgDetailKey].shift=subShift;
+        S.ov[dgDetailKey].fromRecruit=dgDetailPostId;
+        await saveProfile();
         refreshCal();renderDgCal();
       }
     }
@@ -2684,6 +2827,7 @@ async function boot(){
   }
   startEventListen();
   await Promise.all([loadHolidays(), refreshCal()]);
+  startDgRecruitListen();
 }
 
 async function onFbReady(){
