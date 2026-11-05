@@ -309,7 +309,7 @@ async function loadMenuList(){
   const box=document.getElementById('menu-list');
   box.innerHTML='<div style="text-align:center;padding:16px;color:var(--tx3)"><div class="sp"></div></div>';
   try{
-    const snap=await db.ref('menus').once('value');
+    const snap=await db.ref('menus').limitToLast(30).once('value');
     box.innerHTML='';
     if(!snap.exists()){
       box.innerHTML='<div style="text-align:center;padding:16px;color:var(--tx3);font-size:.8rem">업로드된 식단표가 없어요</div>';
