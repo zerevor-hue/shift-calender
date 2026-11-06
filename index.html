@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0f1117">
 <title>교대근무 달력</title>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;request-id=13964"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
@@ -1047,7 +1048,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.63rem;color:var(--a)">월 기본급 (원)</div>
-          <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="금액 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
+          <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="기본급 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
         </div>
         <div>
           <div class="lbl" style="font-size:.63rem">통상시급 (원)</div>
@@ -1198,6 +1199,8 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <button class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
   </div>
 </div>
+
+<!-- 확인 모달 시트 -->
 <div class="sov" id="confirm-sov" style="align-items:center;padding:20px">
   <div class="sheet" style="border-radius:20px;max-width:320px;padding:20px 18px 16px;border:1px solid var(--bd2)">
     <div id="confirm-msg" style="font-size:.9rem;font-weight:700;line-height:1.5;text-align:center;margin-bottom:16px;white-space:pre-line"></div>
@@ -2480,11 +2483,10 @@ function _salCfgKey(){return 'sal_cfg_v5_'+(S.myId||'local');}
 function _salHistKey(yr){return `sal_hist_v5_${S.myId||'local'}_${yr}`;}
 
 // 근무형태별 기본 프리셋 (4조2교대 157h / 일근제 209h / 4조3교대 194h)
-// - 4조2교대: 기본연장 38h, 기본휴일 0h, 기본야간 49h, 대근 10.5h, 공휴일 8h(또는 6h/10.5h 조정 가능), 야간가산 6.5h(또는 8h)
 const SAL_MODE_PRESETS={
-  shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:8,nightH:6.5},
+  shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:10.5,nightH:8},
   day209:{divH:209,baseOtRawH:13,baseHdRawH:12,baseNtRawH:8,subH:10.5,hdH:6,nightH:6.5},
-  shift194:{divH:194,baseOtRawH:8,baseHdRawH:16,baseNtRawH:53,subH:8,hdH:8,nightH:6.5}
+  shift194:{divH:194,baseOtRawH:8,baseHdRawH:16,baseNtRawH:53,subH:8,hdH:8,nightH:8}
 };
 
 function calcOrdinaryWageMonthly(basePay,techPay,posPay,mealPay){
@@ -2567,8 +2569,8 @@ function computeSalaryAmounts(cfg,moData){
   const hourly=exactHourly;
 
   const subH=Math.max(0,parseFloat(cfg.subH)??10.5);
-  const hdH=Math.max(0,parseFloat(cfg.hdH)??8);
-  const nightH=Math.max(0,parseFloat(cfg.nightH)??6.5);
+  const hdH=Math.max(0,parseFloat(cfg.hdH)??10.5);
+  const nightH=Math.max(0,parseFloat(cfg.nightH)??8);
   const baseOtRawH=Math.max(0,parseFloat(cfg.baseOtH)??38);
   const baseHdRawH=Math.max(0,parseFloat(cfg.baseHdH)??0);
   const baseNtRawH=Math.max(0,parseFloat(cfg.baseNtH)??49);
@@ -2679,8 +2681,8 @@ function openSalaryCalc(){
     document.getElementById('sal-hourly').value=cfg.hourly||'';
   }
   document.getElementById('sal-sub-h').value=cfg.subH??10.5;
-  document.getElementById('sal-hd-h').value=cfg.hdH??8;
-  document.getElementById('sal-night-h').value=cfg.nightH??6.5;
+  document.getElementById('sal-hd-h').value=cfg.hdH??10.5;
+  document.getElementById('sal-night-h').value=cfg.nightH??8;
   document.getElementById('sal-base-ot-h').value=cfg.baseOtH??38;
   document.getElementById('sal-base-hd-h').value=cfg.baseHdH??0;
   document.getElementById('sal-base-nt-h').value=cfg.baseNtH??49;
@@ -3025,6 +3027,65 @@ function calcSalary(shouldSaveCfg){
 
   renderSalHistoryList(cfg);
 }
+
+async function openDgSheet(date){
+  dgEditDate=date;
+  const bSh=getBaseShift(date),sh=getShift(date)||bSh||'dr';
+  document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
+  document.getElementById('dg-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
+  document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
+  os('dg-sov');
+}
+
+async function saveDgMyShift(){
+  if(!dgEditDate)return;
+  const k=dkey(dgEditDate),sh=document.querySelector('input[name="dg-sh"]:checked')?.value;
+  const bSh=getBaseShift(dgEditDate);
+  if(sh===bSh){
+    if(S.ov[k]){
+      delete S.ov[k].shift;
+      delete S.ov[k].manualShift;
+      delete S.ov[k].fromRecruit;
+      if(!S.ov[k].memo)delete S.ov[k];
+    }
+  }else{
+    if(!S.ov[k])S.ov[k]={};
+    if(sh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
+  }
+  cs('dg-sov');await saveProfile();renderDgCal();refreshCal();updateVacSum();showToast('저장됨 ✓');
+}
+
+function resolveRequesterBaseShift(baseShift,reqUid,dateKey,divsMap){
+  if(baseShift==='dr'||baseShift==='ds')return 'dr';
+  if(baseShift==='nr'||baseShift==='ns')return 'nr';
+  const dt=new Date(dateKey+'T00:00:00');
+  const divs=divsMap||window._divsRawCache||(S.topId?ls.g('divs_cache_'+S.topId):null);
+  if(divs&&reqUid){
+    for(const [dId,dData] of Object.entries(divs)){
+      if(dData?.members?.[reqUid]){
+        if(dData.pattern)S.patCache[`${S.topId}_${dId}`]=dData.pattern;
+        const bSh=getBaseShift(dt,S.topId,dId);
+        if(bSh==='dr'||bSh==='ds')return 'dr';
+        if(bSh==='nr'||bSh==='ns')return 'nr';
+      }
+    }
+  }
+  if(reqUid===S.myId&&S.divId){
+    const bSh=getBaseShift(dt,S.topId,S.divId);
+    if(bSh==='dr'||bSh==='ds')return 'dr';
+    if(bSh==='nr'||bSh==='ns')return 'nr';
+  }
+  return baseShift||'';
+}
+
+function resolveSubWorkerShift(baseShift,reqUid,dateKey,divsMap){
+  const reqBase=resolveRequesterBaseShift(baseShift,reqUid,dateKey,divsMap);
+  if(reqBase==='dr'||reqBase==='ds')return 'ds';
+  if(reqBase==='nr'||reqBase==='ns')return 'ns';
+  return '';
+}
+
+async function confirmDgRequest(){
   if(!dgEditDate||!S.topId){showToast('팀에 참여해야 합니다');return;}
   const k=dkey(dgEditDate);
   const existingPosts=dgPostCache[k];
