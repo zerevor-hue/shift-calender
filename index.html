@@ -991,12 +991,12 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
   </div>
 </div>
 
-<!-- 교대·일근 맞춤형 월급 계산기 시트 (4조2교대 시트 + 단협 + 실제 명세서 1:1 통합) -->
+<!-- 교대·일근 맞춤형 월급 계산기 시트 -->
 <div class="sov" id="sal-sov">
   <div class="sheet" style="max-height:90vh;overflow-y:auto">
     <div class="shandle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="stitle-s" style="margin-bottom:0">💰 월급 계산기 <span style="font-size:.62rem;color:var(--tx3);font-weight:700">(25년 임협·단협 반영)</span></div>
+      <div class="stitle-s" style="margin-bottom:0">💰 월급 계산기 <span style="font-size:.62rem;color:var(--tx3);font-weight:700">(임협·단협 기준)</span></div>
       <div style="display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bd);border-radius:999px;padding:2px 6px">
         <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(-1)">◀</button>
         <span id="sal-ym-lbl" style="font-size:.75rem;font-weight:800;padding:0 4px">2026년 11월</span>
@@ -1028,10 +1028,10 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <!-- 근무형태 프리셋 탭 (4조2교대 157h / 일근제 209h / 4조3교대 194h) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-        <span style="font-size:.72rem;font-weight:800;color:var(--tx2)">🏢 근무형태 기준 선택 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(단협 제48조·시트 수식 연동)</span></span>
+        <span style="font-size:.72rem;font-weight:800;color:var(--tx2)">🏢 근무형태 기준 선택</span>
         <select id="sal-work-mode" onchange="onSalModeChange(true)" style="background:var(--bg2);color:var(--a);border:1px solid var(--a);border-radius:8px;padding:4px 8px;font-size:.68rem;font-weight:800">
           <option value="shift157">4조 2교대 (157h · 연장38/야간49)</option>
-          <option value="day209">일근제 포괄 (209h · 명세서 10·8 기준)</option>
+          <option value="day209">일근제 포괄 (209h · 연장13/휴일12/야간8)</option>
           <option value="shift194">4조 3교대 (194h · 연장8/휴일16/야간53)</option>
         </select>
       </div>
@@ -1041,51 +1041,51 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
     </div>
 
-    <!-- 1. 기본급 및 통상임금 산입 수당 (주황색 입력란 대응 · 기기 캐시 저장) -->
+    <!-- 1. 기본급 및 통상임금 산입 수당 (한번 입력 시 모든 달에 유지 · 기기 캐시 저장) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">⚙️ 기본급 · 고정수당 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(기기 캐시 자동저장)</span></div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">⚙️ 기본급 · 고정수당 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(모든 달 공통 유지 · 기기 캐시 저장)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.63rem;color:var(--a)">월 기본급 (원)</div>
-          <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="예: 1000000" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
+          <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="금액 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.63rem">통상시급 (자동산정·원)</div>
+          <div class="lbl" style="font-size:.63rem">통상시급 (원)</div>
           <input type="number" id="sal-hourly" step="1" min="0" placeholder="자동계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange()">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.6rem">기술수당 (통상산입)</div>
-          <input type="number" id="sal-tech-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="number" id="sal-tech-pay" step="1000" min="0" placeholder="금액 입력" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">직책수당 (통상산입)</div>
-          <input type="number" id="sal-pos-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="number" id="sal-pos-pay" step="1000" min="0" placeholder="금액 입력" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">식대 (통상·비과세)</div>
-          <input type="number" id="sal-meal-pay" step="10000" min="0" placeholder="200000" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="number" id="sal-meal-pay" step="10000" min="0" placeholder="금액 입력" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.61rem">복지수당 (고정·원)</div>
-          <input type="number" id="sal-welfare-pay" step="10000" min="0" placeholder="370000" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
+          <div class="lbl" style="font-size:.61rem">복지수당 (월 고정·원)</div>
+          <input type="number" id="sal-welfare-pay" step="10000" min="0" placeholder="금액 입력" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.61rem">육아수당 (월 고정·원)</div>
-          <input type="number" id="sal-child-pay" step="10000" min="0" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="number" id="sal-child-pay" step="10000" min="0" placeholder="금액 입력" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
           <div class="lbl" style="font-size:.61rem;color:var(--vac)">이번 달 휴가비·기타 (원)</div>
-          <input type="number" id="sal-extra-pay" step="10000" min="0" placeholder="예: 100000" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
+          <input type="number" id="sal-extra-pay" step="10000" min="0" placeholder="금액 입력" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
         </div>
         <div>
           <div class="lbl" style="font-size:.61rem;color:var(--ev-tx)">이번 달 상품권 (지급·공제)</div>
-          <input type="number" id="sal-gift-pay" step="1000" min="0" placeholder="예: 0000" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
+          <input type="number" id="sal-gift-pay" step="1000" min="0" placeholder="금액 입력" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
         </div>
       </div>
     </div>
@@ -1096,7 +1096,6 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">📅 대근 · 공휴일 · 연차 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(달력 자동연동)</span></span>
         <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.63rem" onclick="resetSalCountsFromCal()">달력에서 다시 불러오기 ↺</button>
       </div>
-      <!-- 일반 대근(주/야) & 공휴일(주/야) 개수 -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.58rem;color:var(--as)">🌤 일반대근(주)</div>
@@ -1115,7 +1114,6 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
           <input type="number" id="sal-cnt-hdn" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
         </div>
       </div>
-      <!-- 1회당 적용 시간 및 미사용 연차 -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.55rem">대근1개(h·1.5배)</div>
@@ -1131,10 +1129,9 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
         <div>
           <div class="lbl" style="font-size:.55rem;color:var(--vac)">미사용연차(개)</div>
-          <input type="number" id="sal-vac-pay-days" step="0.5" min="0" placeholder="0" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(false)">
+          <input type="number" id="sal-vac-pay-days" step="0.5" min="0" placeholder="개수" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(false)">
         </div>
       </div>
-      <!-- 월 기본(고정) 교대/포괄 시간 (원래 근무시간 기준: 연장 ×1.5배 / 휴일 ×1.5배 / 야간 ×0.5배) -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-top:7px;border-top:1px dashed var(--bd)">
         <div>
           <div class="lbl" style="font-size:.56rem;color:var(--tx3)">기본 연장시간(h·×1.5)</div>
@@ -1151,26 +1148,26 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
     </div>
 
-    <!-- 3. 공제 설정 (4대보험 · 노조비 1.2% · 세금, 기기 캐시 저장) -->
+    <!-- 3. 공제 설정 (비워두면 법정요율 자동계산, 입력 시 고정 유지) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">🧾 공제 내역 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(고용보험 0.9%·노조비 1.2% 자동계산)</span></div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">🧾 공제 내역 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(비워두면 법정요율 자동계산)</span></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
           <div class="lbl" style="font-size:.6rem">국민연금 (원)</div>
-          <input type="number" id="sal-ded-pen" step="10" min="0" placeholder="예: 0000" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="number" id="sal-ded-pen" step="10" min="0" placeholder="자동계산" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">건강보험 (원)</div>
-          <input type="number" id="sal-ded-hlth" step="10" min="0" placeholder="예: 0000" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="number" id="sal-ded-hlth" step="10" min="0" placeholder="자동계산" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">장기요양 (원)</div>
-          <input type="number" id="sal-ded-care" step="10" min="0" placeholder="예: 0000" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="number" id="sal-ded-care" step="10" min="0" placeholder="자동계산" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div>
-          <div class="lbl" style="font-size:.6rem">소득세 (비워두면 자동추정)</div>
+          <div class="lbl" style="font-size:.6rem">소득세 (원)</div>
           <input type="number" id="sal-ded-tax" step="10" min="0" placeholder="자동추정" style="padding:6px;font-size:.78rem" oninput="calcSalary(false)">
         </div>
         <div>
@@ -1180,7 +1177,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
     </div>
 
-    <!-- 4. 명세서 1:1 지급/공제 상세 내역표 -->
+    <!-- 4. 명세서 상세 내역표 -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">📋 급여명세서 상세 내역</span>
@@ -1201,8 +1198,6 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <button class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
   </div>
 </div>
-
-<!-- 확인 모달 시트 -->
 <div class="sov" id="confirm-sov" style="align-items:center;padding:20px">
   <div class="sheet" style="border-radius:20px;max-width:320px;padding:20px 18px 16px;border:1px solid var(--bd2)">
     <div id="confirm-msg" style="font-size:.9rem;font-weight:700;line-height:1.5;text-align:center;margin-bottom:16px;white-space:pre-line"></div>
