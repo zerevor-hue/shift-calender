@@ -4806,11 +4806,16 @@ async function rerunMuOcr(){
 2. 금요일 저녁 등 석식을 운영하지 않고 응원 문구나 그림이 있는 칸은 "dinnerOff": true, "dinner": null, "dinnerNote": "문구 내용"으로 반환할 것.
 3. 오타 없이 이미지에 적힌 한글 메뉴명을 그대로 정확히 옮길 것.`;
 
-  const models=['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'];
+  const models=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash'];
+  const triedModels=new Set();
   let parsed=null,lastErr='';
-  for(const model of models){
+
+  async function _tryCallModel(modelName){
+    const cleanModel=String(modelName||'').replace(/^models\//,'').trim();
+    if(!cleanModel||triedModels.has(cleanModel))return false;
+    triedModels.add(cleanModel);
     try{
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,{
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${encodeURIComponent(apiKey)}`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
@@ -4828,8 +4833,14 @@ async function rerunMuOcr(){
       });
       if(!r.ok){
         const errJson=await r.json().catch(()=>({}));
-        if(!lastErr)lastErr=errJson?.error?.message||`HTTP ${r.status}`;
-        continue;
+        const msg=errJson?.error?.message||`HTTP ${r.status}`;
+        lastErr=msg;
+        // 에러 메시지에서 권장 모델명(예: use models/gemini-3.8-flash)을 안내하면 즉시队列에 추가
+        const mRec=msg.match(/use\s+models\/([a-zA-Z0-9._-]+)/i);
+        if(mRec&&mRec[1]&&!triedModels.has(mRec[1])){
+          models.push(mRec[1]);
+        }
+        return false;
       }
       const resData=await r.json();
       const parts=resData?.candidates?.[0]?.content?.parts||[];
@@ -4842,14 +4853,35 @@ async function rerunMuOcr(){
           const candidateObj=JSON.parse(mJson?mJson[0]:cleaned);
           if(candidateObj&&Array.isArray(candidateObj.days)&&candidateObj.days.length){
             parsed=candidateObj;
-            break;
+            return true;
           }
         }catch(e){}
       }
-      if(parsed)break;
     }catch(e){
-      if(!lastErr)lastErr=e.message||'네트워크 오류';
+      lastErr=e.message||'네트워크 오류';
     }
+    return false;
+  }
+
+  for(let mi=0;mi<models.length;mi++){
+    if(await _tryCallModel(models[mi]))break;
+  }
+
+  // 만약 기본 모델명이 모두 변경되었을 경우 API에서 사용 가능한 최신 flash 모델 목록을 조회해 자동 재시도
+  if(!parsed){
+    try{
+      const mRes=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+      if(mRes.ok){
+        const mData=await mRes.json();
+        const avail=(mData?.models||[])
+          .filter(m=>Array.isArray(m.supportedGenerationMethods)&&m.supportedGenerationMethods.includes('generateContent')&&/flash/i.test(m.name||''))
+          .map(m=>String(m.name).replace(/^models\//,''))
+          .reverse();
+        for(const dynModel of avail){
+          if(await _tryCallModel(dynModel))break;
+        }
+      }
+    }catch(e){}
   }
 
   if(!parsed||!Array.isArray(parsed.days)){
