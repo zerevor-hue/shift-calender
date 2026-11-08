@@ -7,8 +7,8 @@
 <title>교대근무 달력</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
 <script>
@@ -347,6 +347,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 .pcell .pi{font-size:.9rem;line-height:1}.pcell .pn{font-size:.48rem;opacity:.7}
 
 .sov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#confirm-sov{z-index:350}
 .sov.op{opacity:1;pointer-events:all}
 .sheet{width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--bd2);border-radius:22px 22px 0 0;padding:0 16px calc(18px + env(safe-area-inset-bottom,0));transform:translateY(110%);transition:transform .26s cubic-bezier(.32,.72,0,1);max-height:92vh;overflow-y:auto}
 .sov.op .sheet{transform:translateY(0)}
@@ -705,7 +706,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <!-- 2. 하단 접기/펼치기: 선호(⭐) · 불호(🚫) 메뉴 키워드 설정 -->
   <div class="mboard-card" style="padding:11px 13px">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">제육 추적자 설정</div>
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">선호 · 기피 메뉴 설정</div>
       <button type="button" class="btn sec sm" id="fav-kw-toggle-btn" onclick="toggleFavKwCard()">펼치기 ▼</button>
     </div>
     <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
@@ -1848,7 +1849,14 @@ const dbP=(p,v)=>FB?FB.push(p,v):Promise.resolve(null);
 const dbL=(p,cb)=>FB?FB.listen(p,cb):(()=>{});
 const ls={s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},g:k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}},d:k=>{try{localStorage.removeItem(k)}catch{}}};
 let _modalHistoryPushed=false;
+function _getTopOpenSov(){
+  const confirmEl=document.getElementById('confirm-sov');
+  if(confirmEl&&confirmEl.classList.contains('op'))return confirmEl;
+  const list=document.querySelectorAll('.sov.op');
+  return list.length?list[list.length-1]:null;
+}
 function _pushHashState(hashName){
+  if(window.Android)return false;
   try{
     history.pushState({hash:hashName},'','#'+hashName);
     return true;
@@ -1866,7 +1874,7 @@ const cs=(id,fromHistory)=>{
   if(id==='confirm-sov'&&_confirmResolve){const r=_confirmResolve;_confirmResolve=null;r(false);}
   const wasOpen=el.classList.contains('op');
   el.classList.remove('op');
-  if(!fromHistory&&wasOpen&&_modalHistoryPushed&&!document.querySelector('.sov.op')&&location.hash==='#modal'){
+  if(!window.Android&&!fromHistory&&wasOpen&&_modalHistoryPushed&&!_getTopOpenSov()&&location.hash==='#modal'){
     _modalHistoryPushed=false;
     try{history.back();}catch(e){}
   }
@@ -1875,7 +1883,7 @@ const os=id=>{
   const el=document.getElementById(id);
   if(!el)return;
   el.classList.add('op');
-  if(location.hash!=='#modal'&&location.hash!=='#lightbox'){
+  if(!window.Android&&location.hash!=='#modal'&&location.hash!=='#lightbox'){
     _modalHistoryPushed=_pushHashState('modal');
   }
 };
@@ -2002,16 +2010,17 @@ function openTeamMgr(){renderAllTeams();os('team-mgr-sov');}
 
 // 위젯에 전체 데이터 전달 (연속 렌더링 시 디바운스로 메인스레드 병목 방지)
 let _widgetSyncTimer=null;
+let _lastSyncedWidgetJson='';
 function syncToWidget(){
   if(!window.Android||!S.myId)return;
   clearTimeout(_widgetSyncTimer);
-  _widgetSyncTimer=setTimeout(_doSyncToWidget,100);
+  _widgetSyncTimer=setTimeout(_doSyncToWidget,120);
 }
 function _doSyncToWidget(){
   if(!window.Android||!S.myId)return;
   try{
     const tp=S.patCache[`${S.topId}_${S.divId}`];
-    window.Android.savePattern(JSON.stringify({
+    const payload=JSON.stringify({
       patternStartKey: tp?.patternStart ? dkey(new Date(tp.patternStart)) : "",
       pattern: Array.isArray(tp?.pattern) ? tp.pattern : [],
       ov: S.ov || {},
@@ -2023,7 +2032,10 @@ function _doSyncToWidget(){
       events: S.events || {},
       holidays: holidays || {},
       theme: document.body.classList.contains("light") ? "light" : "dark"
-    }));
+    });
+    if(payload===_lastSyncedWidgetJson)return;
+    _lastSyncedWidgetJson=payload;
+    window.Android.savePattern(payload);
   }catch(e){}
 }
 
@@ -2757,7 +2769,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov','meal-upload-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov','meal-upload-sov','confirm-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -3986,12 +3998,14 @@ function _loadCachedMealBoards(){
     });
     if(dirty)ls.s('meal_boards_cache_v1',saved);
   }
-  // 구버전 이미지 캐시(IndexedDB 및 localStorage meal_ls_) 정리
   try{
-    if(window.indexedDB)indexedDB.deleteDatabase('sc_meal_cache_v1');
-    for(let i=localStorage.length-1;i>=0;i--){
-      const k=localStorage.key(i);
-      if(k&&k.startsWith('meal_ls_'))localStorage.removeItem(k);
+    if(!localStorage.getItem('sc_meal_migrated_v2')){
+      if(window.indexedDB)indexedDB.deleteDatabase('sc_meal_cache_v1');
+      for(let i=localStorage.length-1;i>=0;i--){
+        const k=localStorage.key(i);
+        if(k&&k.startsWith('meal_ls_'))localStorage.removeItem(k);
+      }
+      localStorage.setItem('sc_meal_migrated_v2','1');
     }
   }catch(e){}
 }
@@ -4000,7 +4014,6 @@ _loadCachedMealBoards();
 function _saveCachedMealBoard(mondayKey,boardData){
   _mealBoardsMem[mondayKey]=boardData;
   const saved=ls.g('meal_boards_cache_v1')||{};
-  // 로컬스토리지 용량 절약을 위해 로컬 캐시에는 최근 2주 이내만 origImg 보관
   const clone={...boardData};
   if(_isMealImageExpired(clone,mondayKey)){
     delete clone.origImg;
@@ -4010,31 +4023,27 @@ function _saveCachedMealBoard(mondayKey,boardData){
   ls.s('meal_boards_cache_v1',saved);
 }
 
-// 백그라운드에서 7일(1주일)이 지난 원본 식단표 이미지를 Firebase DB에서 자동 삭제 (텍스트 식단표는 보존, 구버전 menus/ 이미지는 삭제)
+// 백그라운드에서 7일이 지난 식단표 원본 이미지를 다운로드 없이 즉시 삭제 (데이터 트래픽 0바이트)
 let _expiredMealImgCleaned=false;
 async function cleanupExpiredMealImages(){
   if(_expiredMealImgCleaned||!FB)return;
   _expiredMealImgCleaned=true;
-  const now=Date.now();
-  const cutoffDateKey=_addDaysToKey(dkey(new Date()),-7);
+  const todayStr=dkey(new Date());
+  if(ls.g('meal_img_cleanup_day')===todayStr)return;
+  ls.s('meal_img_cleanup_day',todayStr);
   try{
-    // 1) 구버전 menus/ 노드에 남아있는 7일 경과 원본 이미지 자동 삭제
-    const oldMenus=await dbG('menus');
-    if(oldMenus&&typeof oldMenus==='object'){
-      const delJobs=[];
-      Object.entries(oldMenus).forEach(([dateKey,items])=>{
-        if(dateKey<=cutoffDateKey){
-          delJobs.push(dbS('menus/'+dateKey,null));
-        }else if(items&&typeof items==='object'){
-          Object.entries(items).forEach(([id,item])=>{
-            if(item&&item.uploadedAt&&(now-item.uploadedAt>MEAL_IMG_TTL_MS)){
-              delJobs.push(dbS(`menus/${dateKey}/${id}`,null));
-            }
-          });
-        }
-      });
-      if(delJobs.length)await Promise.all(delJobs);
+    const curMon=_getMondayOfDate(new Date());
+    const jobs=[];
+    [-14,-21].forEach(offset=>{
+      const oldMon=_addDaysToKey(curMon,offset);
+      jobs.push(dbS(`mealBoards/${oldMon}/origImg`,null));
+      jobs.push(dbS(`mealBoards/${oldMon}/imgUploadedAt`,null));
+    });
+    if(!ls.g('legacy_menus_cleared_v1')){
+      jobs.push(dbS('menus',null));
+      ls.s('legacy_menus_cleared_v1',1);
     }
+    await Promise.all(jobs);
   }catch(e){}
 }
 
@@ -4894,13 +4903,13 @@ function closeLightbox(fromHistory){
 }
 window.addEventListener('popstate',()=>{
   if(_lightboxOpen){closeLightbox(true);return;}
-  const openSov=document.querySelector('.sov.op');
+  const openSov=_getTopOpenSov();
   if(openSov){_modalHistoryPushed=false;cs(openSov.id,true);}
 });
 window.addEventListener('hashchange',()=>{
   if(_lightboxOpen&&location.hash!=='#lightbox'){closeLightbox(true);return;}
-  if(location.hash!=='#modal'){
-    const openSov=document.querySelector('.sov.op');
+  if(location.hash!=='#modal'&&location.hash!=='#lightbox'&&!_lightboxOpen){
+    const openSov=_getTopOpenSov();
     if(openSov){_modalHistoryPushed=false;cs(openSov.id,true);}
   }
 });
@@ -4915,7 +4924,7 @@ window.handleBackPress=function(){
   const lb=document.getElementById('img-lightbox');
   const isLbVisible=_lightboxOpen||(lb&&(lb.classList.contains('op')||lb.style.opacity==='1'));
   if(isLbVisible){closeLightbox(true);return true;}
-  const openSov=document.querySelector('.sov.op');
+  const openSov=_getTopOpenSov();
   if(openSov){cs(openSov.id,true);return true;}
   const activePage=document.querySelector('.page.on');
   if(activePage&&activePage.id&&activePage.id!=='page-cal'){
@@ -5038,6 +5047,7 @@ function renderSavedAccts(){
 
 function cleanupStaleLocalStorage(){
   try{
+    if(localStorage.getItem('sc_sal_cleaned_v4'))return;
     const toRemove=[];
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
@@ -5047,6 +5057,7 @@ function cleanupStaleLocalStorage(){
       }
     }
     toRemove.forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('sc_sal_cleaned_v4','1');
   }catch(e){}
 }
 cleanupStaleLocalStorage();
@@ -5126,14 +5137,20 @@ async function onFbReady(){
       document.getElementById('login-screen').classList.add('h');
       await boot();
       return;
-    }catch(e){console.error(e);}
+    }catch(e){
+      console.error(e);
+      if(_instantBooted)return;
+    }
   }
-  document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');
+  if(!_instantBooted){
+    document.getElementById('splash').classList.add('h');
+    document.getElementById('login-screen').classList.remove('h');
+  }
 }
 // Firebase 네트워크 연결 전이라도 로컬 캐시가 있으면 0.05초 만에 즉시 달력 화면 표시
 instantBootFromCache();
 if(window._fbReady){onFbReady();}
-else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='서버 연결 실패';e.style.display='';}},5000);}
+else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady&&!_instantBooted){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='서버 연결 실패';e.style.display='';}},5000);}
 </script>
 </body>
 </html>
