@@ -362,6 +362,26 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 .sp{width:17px;height:17px;border:2px solid var(--bd2);border-top-color:var(--a);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{display:none}
+
+/* 디지털 전용 주간식단표 & 선호/불호 메뉴 하이라이트 스타일 */
+.mboard-card{background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.fav-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;font-size:.7rem;font-weight:800;background:var(--a-bg);color:var(--a);border:1px solid rgba(245,158,11,.38);cursor:pointer}
+.hate-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;font-size:.7rem;font-weight:800;background:rgba(244,63,94,.16);color:#fb7185;border:1px solid rgba(244,63,94,.38);cursor:pointer}
+body.light .hate-chip{background:#ffe4e6;color:#be123c;border-color:#fda4af}
+#digital-meal-board .mboard-card{margin:0 -8px 12px;padding:10px 4px;border-radius:14px}
+.md-wk-table{width:100%;border-collapse:collapse;font-size:.71rem;table-layout:fixed}
+.md-wk-table th,.md-wk-table td{border:1px solid var(--bd);padding:7px 2px;text-align:center;vertical-align:top;word-break:break-all;overflow-wrap:anywhere;line-height:1.36;letter-spacing:-.035em}
+.md-wk-table th{background:var(--bg3);font-weight:800;color:var(--tx);padding:7px 1px;letter-spacing:-.02em}
+.md-wk-sec{width:19px;background:var(--bg3);color:var(--tx2);font-weight:800;font-size:.53rem;line-height:1.15;padding:4px 1px!important;vertical-align:middle!important;letter-spacing:0}
+.wk-item{padding:2.5px 1px;border-radius:4px;margin-bottom:2.5px;line-height:1.28;word-break:break-all;overflow-wrap:anywhere}
+.wk-item.main1{color:#fb7185;font-weight:800}
+body.light .wk-item.main1{color:#be123c}
+.wk-item.main2{color:#38bdf8;font-weight:800}
+body.light .wk-item.main2{color:#1d4ed8}
+.wk-item.fav-hit{background:rgba(245,158,11,.26)!important;color:var(--as)!important;font-weight:900!important;border:1px solid var(--a);box-shadow:0 1px 5px rgba(245,158,11,.18)}
+body.light .wk-item.fav-hit{background:#fef3c7!important;color:#b45309!important;border:1px solid #d97706}
+.wk-item.hate-hit{background:rgba(244,63,94,.20)!important;color:#fb7185!important;font-weight:800!important;border:1px dashed #f43f5e;text-decoration:line-through}
+body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!important;border:1px dashed #e11d48}
 </style>
 </head>
 <body>
@@ -386,7 +406,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     </div>
     <div id="lerr" style="font-size:.7rem;color:var(--red);text-align:center;display:none;margin-top:2px"></div>
     <button class="btn pri fw" id="lbtn" onclick="doLogin()" style="margin-top:5px">로그인 / 가입</button>
-    <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">처음이면 자동 가입</div>
+    <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">첫 로그인 시 자동으로 가입됩니다</div>
   </div>
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
 </div>
@@ -403,7 +423,6 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         <button class="ibtn" onclick="gotoToday()" style="font-size:.72rem">오늘</button>
         <button class="ibtn" onclick="changeMonth(-1)">◀</button>
         <button class="ibtn" onclick="changeMonth(1)">▶</button>
-        <button class="ibtn" onclick="openEventSheet()" style="font-size:1.05rem;font-weight:600">＋</button>
       </div>
     </div>
     <div class="cnav-btm">
@@ -416,10 +435,9 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
   </div>
 
   <div id="no-team-banner" class="no-banner" style="display:none">
-    <div style="font-size:1.4rem;margin-bottom:8px">👥</div>
-    <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
-    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 팀 패턴이 달력에 적용됩니다</div>
-    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
+    <div style="font-weight:800;margin-bottom:4px">소속된 팀이 없습니다</div>
+    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 근무표가 달력에 표시됩니다</div>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 설정</button>
   </div>
 
   <div id="cal-body" style="display:none">
@@ -445,7 +463,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <!-- 3. 달력과 팀 이벤트 사이로 이동한 주간/야간/연차/분기대근 통계 바 -->
     <div class="sstrip" id="s-strip">
       <div class="schip">
-        <div class="sct" style="color:var(--a)">☀️ 주간</div>
+        <div class="sct" style="color:var(--a)">주간</div>
         <div class="scb">
           <div class="scc"><span class="scs">정규</span><span class="scn" id="s-dr" style="color:var(--a)">0</span></div>
           <span class="scsep">/</span>
@@ -453,7 +471,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip">
-        <div class="sct" style="color:var(--n)">🌙 야간</div>
+        <div class="sct" style="color:var(--n)">야간</div>
         <div class="scb">
           <div class="scc"><span class="scs">정규</span><span class="scn" id="s-nr" style="color:var(--n)">0</span></div>
           <span class="scsep">/</span>
@@ -461,7 +479,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip">
-        <div class="sct" style="color:var(--vac)">🌴 연차</div>
+        <div class="sct" style="color:var(--vac)">연차</div>
         <div class="scb">
           <div class="scc"><span class="scs">사용</span><span class="scn" id="s-vc" style="color:var(--vac)">0</span></div>
           <span class="scsep">/</span>
@@ -469,7 +487,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip" id="s-qsub-chip" style="display:none">
-        <div class="sct" id="s-qsub-title" style="color:var(--ev-tx)">🔄 대근</div>
+        <div class="sct" id="s-qsub-title" style="color:var(--ev-tx)">대근</div>
         <div class="scb">
           <div class="scc"><span class="scs">대근</span><span class="scn" id="s-qsub" style="color:var(--ev-tx)">0</span></div>
           <span class="scsep">/</span>
@@ -483,21 +501,21 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
         <div class="cal-subtabs">
           <button type="button" class="cal-stab on" id="cal-stab-ev" onclick="switchCalSubTab('ev')">
-            <span id="event-section-title">📌 팀 이벤트</span>
+            <span id="event-section-title">팀 일정</span>
             <span class="cal-stab-cnt" id="ev-tab-cnt">0</span>
           </button>
           <button type="button" class="cal-stab" id="cal-stab-mm" onclick="switchCalSubTab('mm')">
-            <span>📝 메모</span>
+            <span>메모</span>
             <span class="cal-stab-cnt" id="mm-tab-cnt">0</span>
           </button>
         </div>
         <button class="btn pri sm" id="cal-sub-add-btn" onclick="onCalSubAdd()" style="flex-shrink:0">+ 추가</button>
       </div>
       <div id="cal-panel-ev">
-        <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div></div>
+        <div id="event-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 일정이 없습니다</div></div>
       </div>
       <div id="cal-panel-mm" style="display:none">
-        <div id="memo-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없어요</div></div>
+        <div id="memo-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없습니다</div></div>
       </div>
     </div>
   </div>
@@ -520,7 +538,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <div class="cnav-btm">
       <div style="display:flex;align-items:center;gap:10px">
         <div class="ctitle" id="dg-month"></div>
-        <button type="button" class="ibtn" onclick="openSalaryCalc()" style="height:30px;padding:0 11px;border-radius:999px;font-size:.73rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;background:var(--pill-bg);border:1px solid var(--bd);box-shadow:var(--pill-sh);color:var(--a)">💰 월급 계산기</button>
+        <button type="button" class="ibtn" onclick="openSalaryCalc()" style="height:30px;padding:0 11px;border-radius:999px;font-size:.73rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;background:var(--pill-bg);border:1px solid var(--bd);box-shadow:var(--pill-sh);color:var(--a)">급여 계산기</button>
       </div>
       <div class="tbadge" id="dg-badge">
         <div class="tbadge-dot" id="dg-badge-dot"></div>
@@ -530,15 +548,14 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
   </div>
 
   <div id="no-dg-banner" class="no-banner" style="display:none">
-    <div style="font-size:1.4rem;margin-bottom:8px">👥</div>
-    <div style="font-weight:800;margin-bottom:4px">팀에 참여하세요</div>
+    <div style="font-weight:800;margin-bottom:4px">소속된 팀이 없습니다</div>
     <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀에 참여하면 대근 달력을 사용할 수 있습니다</div>
-    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 설정</button>
   </div>
 
   <div id="dg-body" style="display:none">
     <div style="font-size:.75rem;color:var(--tx2);margin-bottom:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);line-height:1.6">
-      📌 날짜를 클릭해 <b style="color:var(--a)">연차 등록</b>을 하거나, 연차 등록 후 <b style="color:var(--n)">대근 요청</b>을 올릴 수 있어요
+      날짜를 선택해 <b style="color:var(--a)">연차 등록</b> 또는 <b style="color:var(--n)">대근 요청</b>을 할 수 있습니다
     </div>
     <div class="cal-grid">
       <div class="dow-row">
@@ -557,7 +574,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     </div>
     <div class="sstrip" id="dg-strip">
       <div class="schip">
-        <div class="sct" style="color:var(--a)">☀️ 주간</div>
+        <div class="sct" style="color:var(--a)">주간</div>
         <div class="scb">
           <div class="scc"><span class="scs">정규</span><span class="scn" id="dg-dr" style="color:var(--a)">0</span></div>
           <span class="scsep">/</span>
@@ -565,7 +582,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip">
-        <div class="sct" style="color:var(--n)">🌙 야간</div>
+        <div class="sct" style="color:var(--n)">야간</div>
         <div class="scb">
           <div class="scc"><span class="scs">정규</span><span class="scn" id="dg-nr" style="color:var(--n)">0</span></div>
           <span class="scsep">/</span>
@@ -573,7 +590,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip">
-        <div class="sct" style="color:var(--vac)">🌴 연차</div>
+        <div class="sct" style="color:var(--vac)">연차</div>
         <div class="scb">
           <div class="scc"><span class="scs">사용</span><span class="scn" id="dg-vc" style="color:var(--vac)">0</span></div>
           <span class="scsep">/</span>
@@ -581,7 +598,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         </div>
       </div>
       <div class="schip" id="dg-qsub-chip" style="display:none">
-        <div class="sct" id="dg-qsub-title" style="color:var(--ev-tx)">🔄 대근</div>
+        <div class="sct" id="dg-qsub-title" style="color:var(--ev-tx)">대근</div>
         <div class="scb">
           <div class="scc"><span class="scs">대근</span><span class="scn" id="dg-qsub" style="color:var(--ev-tx)">0</span></div>
           <span class="scsep">/</span>
@@ -590,9 +607,8 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
     </div>
     <div class="card">
-      <div class="stitle">🔄 대근 요청 현황</div>
-      <div style="font-size:.73rem;color:var(--tx3);margin-bottom:10px">달력에서 날짜를 클릭 → 대근요청 버튼으로 공고를 올릴 수 있어요</div>
-      <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div></div>
+      <div class="stitle">대근 요청 현황</div>
+      <div id="dg-recruit-list"><div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">진행 중인 대근 요청이 없습니다</div></div>
     </div>
   </div>
 </div>
@@ -600,14 +616,13 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <!-- PAGE: 팀 달력 -->
 <div class="page" id="page-tcal">
   <div style="margin-bottom:12px">
-    <div class="ph" style="margin-bottom:0">📋 팀 달력</div>
+    <div class="ph" style="margin-bottom:0">팀 달력</div>
   </div>
   <div class="dtabs" id="top-tabs"></div>
   <div id="no-tcal" class="no-banner">
-    <div style="font-size:1.8rem;margin-bottom:8px">👥</div>
-    <div style="font-weight:800;margin-bottom:4px">참여 중인 팀 없음</div>
-    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀 관리에서 팀에 참여하세요</div>
-    <button class="btn pri sm" onclick="openTeamMgr()">팀 관리로 →</button>
+    <div style="font-weight:800;margin-bottom:4px">소속된 팀이 없습니다</div>
+    <div style="font-size:.74rem;color:var(--tx3);margin-bottom:12px">팀 관리에서 소속 팀을 선택해 주세요</div>
+    <button class="btn pri sm" onclick="openTeamMgr()">팀 설정</button>
   </div>
   <div id="tcal-body" style="display:none">
     <div class="card">
@@ -632,7 +647,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
     </div>
     <div class="card" style="padding:12px">
-      <div class="stitle">💬 팀 채팅</div>
+      <div class="stitle">팀 채팅</div>
       <div class="cbox" id="chat-box"></div>
       <div class="cinrow">
         <textarea id="chat-in" placeholder="메시지..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
@@ -647,7 +662,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
   <div class="sheet">
     <div class="shandle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div class="stitle-s" style="margin-bottom:0">👥 팀 관리</div>
+      <div class="stitle-s" style="margin-bottom:0">팀 관리</div>
       <button id="btn-new-team" class="btn pri sm" onclick="openNewTopSheet()" style="display:none">+ 새 팀</button>
     </div>
     <div id="all-teams-list"><div style="text-align:center;padding:20px;color:var(--tx3)"><div class="sp"></div></div></div>
@@ -658,24 +673,68 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 
 <!-- PAGE: 급식 -->
 <div class="page" id="page-meal">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-    <div class="ph" style="margin-bottom:0">🍽 급식</div>
-    <button type="button" onclick="location.assign('menu-upload.html')"
-      style="font-size:.75rem;font-weight:700;color:var(--a);text-decoration:none;
-             background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);padding:6px 12px;border-radius:999px">
-      + 업로드
-    </button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <div class="ph" style="margin-bottom:2px">급식</div>
+      <div style="font-size:.68rem;color:var(--tx3);font-weight:600">영흥화력발전소 주간식단표</div>
+    </div>
+    <div class="fl" style="gap:6px">
+      <button type="button" onclick="openMealUploadModal(true)"
+        style="font-size:.7rem;font-weight:800;color:var(--tx2);background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);padding:6px 10px;border-radius:999px;cursor:pointer">
+        식단 수정
+      </button>
+      <button type="button" onclick="openMealUploadModal(false)"
+        style="font-size:.73rem;font-weight:800;color:var(--a);background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);padding:6px 12px;border-radius:999px;cursor:pointer">
+        식단표 등록
+      </button>
+    </div>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
-    <button class="ibtn" onclick="mealMonth(-1)">◀</button>
-    <span id="meal-month-label"
-      style="flex:1;text-align:center;font-size:.88rem;font-weight:700;font-family:'JetBrains Mono',monospace"></span>
-    <button class="ibtn" onclick="mealMonth(1)">▶</button>
-    <button class="ibtn" onclick="mealGotoToday()" style="font-size:.68rem;font-weight:800">오늘</button>
+
+  <!-- 주간 이동 바 (이전주 / 이번주 / 다음주) -->
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+    <button class="ibtn" onclick="changeMealWeek(-1)">◀</button>
+    <span id="meal-week-label"
+      style="flex:1;text-align:center;font-size:.82rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--tx)"></span>
+    <button class="ibtn" onclick="changeMealWeek(1)">▶</button>
+    <button class="ibtn" onclick="mealWeekGotoCurrent()" style="font-size:.68rem;font-weight:800">이번주</button>
   </div>
-  <div id="meal-list">
-    <div style="text-align:center;padding:30px;color:var(--tx3)"><div class="sp"></div></div>
+
+  <!-- 1. 최상단: 급식 탭 진입 즉시 보이는 주간 식단표 -->
+  <div id="digital-meal-board"></div>
+
+  <!-- 2. 하단 접기/펼치기: 선호(⭐) · 불호(🚫) 메뉴 키워드 설정 -->
+  <div class="mboard-card" style="padding:11px 13px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">선호 · 기피 메뉴 설정</div>
+      <button type="button" class="btn sec sm" id="fav-kw-toggle-btn" onclick="toggleFavKwCard()">펼치기 ▼</button>
+    </div>
+    <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
+      <!-- 선호 메뉴 입력 -->
+      <div style="margin-bottom:10px">
+        <div class="lbl" style="font-size:.65rem;color:var(--a);margin-bottom:4px">선호 메뉴</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input type="text" id="fav-meal-inp" placeholder="예: 돈육, 까스, 떡갈비, 국밥" maxlength="12"
+            style="flex:1;padding:6px 10px;font-size:.76rem"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addFavMealKeyword();}">
+          <button type="button" class="btn pri sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addFavMealKeyword()">+ 추가</button>
+        </div>
+        <div id="fav-meal-tags" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+      </div>
+      <!-- 싫어하는 메뉴 입력 -->
+      <div>
+        <div class="lbl" style="font-size:.65rem;color:var(--red);margin-bottom:4px">기피 메뉴</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 오복지, 오징어" maxlength="12"
+            style="flex:1;padding:6px 10px;font-size:.76rem"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addHateMealKeyword();}">
+          <button type="button" class="btn dan sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addHateMealKeyword()">+ 추가</button>
+        </div>
+        <div id="hate-meal-tags" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+      </div>
+    </div>
   </div>
+
+
 </div>
 
 <div id="img-lightbox" onclick="onLightboxBgClick(event)"
@@ -698,20 +757,20 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 
 <!-- PAGE: 설정 -->
 <div class="page" id="page-settings">
-  <div class="ph">⚙️ 설정</div>
+  <div class="ph">설정</div>
   <div class="card">
     <div class="stitle">계정</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div id="av" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#000;flex-shrink:0"></div>
-      <div style="flex:1"><span id="av-name" style="font-size:.95rem;font-weight:700"></span><span id="av-admin" class="abadge" style="display:none">👑 관리자</span></div>
-      <button class="btn sec sm" onclick="openTeamMgr()" style="flex-shrink:0">👥 팀 관리</button>
+      <div style="flex:1"><span id="av-name" style="font-size:.95rem;font-weight:700"></span><span id="av-admin" class="abadge" style="display:none">관리자</span></div>
+      <button class="btn sec sm" onclick="openTeamMgr()" style="flex-shrink:0">팀 관리</button>
     </div>
   </div>
   <div class="card">
     <div class="stitle">화면 모드</div>
     <div class="fl">
-      <button id="btn-dark" class="btn fg" onclick="setTheme('dark')">🌙 다크</button>
-      <button id="btn-light" class="btn fg" onclick="setTheme('light')">☀️ 라이트</button>
+      <button id="btn-dark" class="btn fg" onclick="setTheme('dark')">다크 모드</button>
+      <button id="btn-light" class="btn fg" onclick="setTheme('light')">라이트 모드</button>
     </div>
   </div>
   <div class="card">
@@ -728,32 +787,58 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     </div>
   </div>
   <div id="admin-card" class="card" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="stitle" style="margin-bottom:0">👑 가입된 계정 관리</div>
-      <button class="btn sec sm" onclick="loadAcctList()">새로고침</button>
-    </div>
-    <div id="acct-list"><div style="text-align:center;padding:10px;color:var(--tx3)"><div class="sp"></div></div></div>
-  </div>
-  <div id="holiday-mgr-card" class="card" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="stitle" style="margin-bottom:0">🗓 공휴일 관리</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="stitle" style="margin-bottom:0">가입 계정 관리</div>
       <div class="fl" style="gap:6px">
-        <button class="btn sec sm" onclick="initDefaultHolidays()">🔄 3년치 자동갱신</button>
-        <button class="btn pri sm" onclick="openHolidayAddSheet()">+ 추가</button>
+        <button id="acct-refresh-btn" class="btn sec sm" onclick="loadAcctList()" style="display:none">새로고침</button>
+        <button id="acct-toggle-btn" class="btn sec sm" onclick="toggleAcctList()">펼치기 ▼</button>
       </div>
     </div>
-    <div id="holiday-year-tabs" class="dtabs" style="margin-bottom:8px"></div>
-    <div id="holiday-list"></div>
+    <div id="acct-list-wrap" style="display:none;margin-top:10px">
+      <div id="acct-list"><div style="text-align:center;padding:10px;color:var(--tx3)"><div class="sp"></div></div></div>
+    </div>
+  </div>
+  <div id="holiday-mgr-card" class="card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="stitle" style="margin-bottom:0">공휴일 관리</div>
+      <button id="hd-toggle-btn" class="btn sec sm" onclick="toggleHolidayMgr()">펼치기 ▼</button>
+    </div>
+    <div id="holiday-mgr-wrap" style="display:none;margin-top:10px">
+      <div class="fl" style="gap:6px;margin-bottom:10px;justify-content:flex-end">
+        <button class="btn sec sm" onclick="initDefaultHolidays()">3년치 공휴일 갱신</button>
+        <button class="btn pri sm" onclick="openHolidayAddSheet()">+ 추가</button>
+      </div>
+      <div id="holiday-year-tabs" class="dtabs" style="margin-bottom:8px"></div>
+      <div id="holiday-list"></div>
+    </div>
+  </div>
+  <div id="ocr-key-card" class="card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="stitle" style="margin-bottom:0">식단표 인식 키 설정</div>
+      <button id="ocr-key-toggle-btn" class="btn sec sm" onclick="toggleOcrKeyMgr()">펼치기 ▼</button>
+    </div>
+    <div id="ocr-key-mgr-wrap" style="display:none;margin-top:10px">
+      <div style="font-size:.66rem;color:var(--tx3);line-height:1.45;margin-bottom:8px">
+        API 키를 한 번 등록해 두면 모든 팀원이 식단표 사진 등록 기능을 사용할 수 있습니다.
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input type="password" id="ocr-api-key-inp" placeholder="API 키 입력" style="flex:1;padding:7px 10px;font-size:.76rem;font-family:'JetBrains Mono',monospace">
+        <button type="button" class="btn sec sm" onclick="toggleOcrKeyVis()" id="ocr-key-vis-btn" style="flex-shrink:0">보기</button>
+      </div>
+      <div class="fl" style="gap:6px">
+        <button type="button" class="btn pri fg" onclick="saveOcrApiKey()">키 저장</button>
+      </div>
+    </div>
   </div>
   <button class="btn dan fw" onclick="doLogout()">로그아웃</button>
 </div>
 
 <nav class="bnav">
-  <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico">📅</span>내 달력</button>
-  <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico">📋</span>팀 달력</button>
-  <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico">🔄</span>대근</button>
-  <button class="ni"    id="ni-meal"     onclick="goTab('meal')">     <span class="ni-ico">🍽</span>급식</button>
-  <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico">⚙️</span>설정</button>
+  <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>내 달력</button>
+  <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>팀 달력</button>
+  <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>대근</button>
+  <button class="ni"    id="ni-meal"     onclick="goTab('meal')">     <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></span>급식</button>
+  <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>설정</button>
 </nav>
 
 <!-- 날짜 클릭 시트 -->
@@ -762,21 +847,21 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <div class="shandle"></div>
     <div class="stitle-s" id="day-st"></div>
     <div style="font-size:.72rem;color:var(--tx3);margin-bottom:10px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
-      팀 패턴: <span id="day-base" style="color:var(--a);font-weight:700"></span> → 변경 시 개인 수정으로 저장
+      기본 근무: <span id="day-base" style="color:var(--a);font-weight:700"></span>
     </div>
     <div class="form-g">
       <div class="lbl">근무 유형</div>
       <div class="spicker">
-        <input type="radio" name="sh" id="sh-dr" value="dr" class="sopt"><label for="sh-dr" class="slbl sl-dr"><span class="si">☀️</span>주간<br>정규</label>
-        <input type="radio" name="sh" id="sh-ds" value="ds" class="sopt"><label for="sh-ds" class="slbl sl-ds"><span class="si">🌤</span>주간<br>대근</label>
-        <input type="radio" name="sh" id="sh-nr" value="nr" class="sopt"><label for="sh-nr" class="slbl sl-nr"><span class="si">🌙</span>야간<br>정규</label>
-        <input type="radio" name="sh" id="sh-ns" value="ns" class="sopt"><label for="sh-ns" class="slbl sl-ns"><span class="si">🌛</span>야간<br>대근</label>
-        <input type="radio" name="sh" id="sh-of" value="of" class="sopt"><label for="sh-of" class="slbl sl-of"><span class="si">🏠</span>휴무</label>
-        <input type="radio" name="sh" id="sh-vc" value="vc" class="sopt"><label for="sh-vc" class="slbl sl-vc"><span class="si">🌴</span>연차</label>
+        <input type="radio" name="sh" id="sh-dr" value="dr" class="sopt"><label for="sh-dr" class="slbl sl-dr">주간<br>정규</label>
+        <input type="radio" name="sh" id="sh-ds" value="ds" class="sopt"><label for="sh-ds" class="slbl sl-ds">주간<br>대근</label>
+        <input type="radio" name="sh" id="sh-nr" value="nr" class="sopt"><label for="sh-nr" class="slbl sl-nr">야간<br>정규</label>
+        <input type="radio" name="sh" id="sh-ns" value="ns" class="sopt"><label for="sh-ns" class="slbl sl-ns">야간<br>대근</label>
+        <input type="radio" name="sh" id="sh-of" value="of" class="sopt"><label for="sh-of" class="slbl sl-of">휴무</label>
+        <input type="radio" name="sh" id="sh-vc" value="vc" class="sopt"><label for="sh-vc" class="slbl sl-vc">연차</label>
       </div>
     </div>
     <div class="form-g">
-      <div class="lbl">메모 (엔터로 3줄 입력 가능: 메모1 · 메모2 · 메모3)</div>
+      <div class="lbl">메모 (줄바꿈으로 최대 3줄)</div>
       <textarea id="day-memo" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
     </div>
     <div class="form-g">
@@ -794,7 +879,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <div class="sov" id="new-top-sov">
   <div class="sheet">
     <div class="shandle"></div>
-    <div class="stitle-s">새 팀 만들기 <span class="abadge">👑 관리자</span></div>
+    <div class="stitle-s">새 팀 만들기 <span class="abadge">관리자</span></div>
     <div class="form-g">
       <div class="lbl">팀 이름</div>
       <input type="text" id="nt-name" placeholder="예: 환경팀, 생산팀" maxlength="15">
@@ -810,7 +895,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <div class="sov" id="new-div-sov">
   <div class="sheet">
     <div class="shandle"></div>
-    <div class="stitle-s">새 하위팀 만들기 <span class="abadge">👑 관리자</span></div>
+    <div class="stitle-s">새 하위팀 만들기 <span class="abadge">관리자</span></div>
     <div class="form-g">
       <div class="lbl">하위팀 이름</div>
       <input type="text" id="nd-name" placeholder="예: 1과, 통상근무" maxlength="15">
@@ -831,9 +916,9 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <div class="form-g">
       <div class="lbl">근무 선택 후 셀 클릭 편집</div>
       <div class="pstrip">
-        <button class="pbtn p-dr on" id="nd-pb-dr" onclick="ndPick('dr')">☀️ 주간</button>
-        <button class="pbtn p-nr"    id="nd-pb-nr" onclick="ndPick('nr')">🌙 야간</button>
-        <button class="pbtn p-of"    id="nd-pb-of" onclick="ndPick('of')">🏠 휴무</button>
+        <button class="pbtn p-dr on" id="nd-pb-dr" onclick="ndPick('dr')">주간</button>
+        <button class="pbtn p-nr"    id="nd-pb-nr" onclick="ndPick('nr')">야간</button>
+        <button class="pbtn p-of"    id="nd-pb-of" onclick="ndPick('of')">휴무</button>
       </div>
       <div class="pcells" id="nd-cells"></div>
     </div>
@@ -882,6 +967,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       <select id="hd-type">
         <option value="public">공휴일</option>
         <option value="substitute">대체공휴일</option>
+        <option value="company">회사·노조 기념일</option>
         <option value="custom">기타</option>
       </select>
     </div>
@@ -899,9 +985,9 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <div class="sov" id="new-event-sov">
   <div class="sheet">
     <div class="shandle"></div>
-    <div class="stitle-s" id="ev-sheet-title">📌 이벤트 추가</div>
+    <div class="stitle-s" id="ev-sheet-title">일정 추가</div>
     <div class="form-g">
-      <div class="lbl">이벤트 제목</div>
+      <div class="lbl">일정 제목</div>
       <input type="text" id="ev-title" placeholder="예: 안전교육, 설비점검" maxlength="30">
     </div>
     <div class="fl" style="margin-bottom:12px">
@@ -910,12 +996,12 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         <input type="date" id="ev-start">
       </div>
       <div class="fg form-g" style="margin-bottom:0">
-        <div class="lbl">종료일 (단일이면 비워두기)</div>
+        <div class="lbl">종료일 (하루면 비워두기)</div>
         <input type="date" id="ev-end">
       </div>
     </div>
     <div class="form-g">
-      <div class="lbl">이벤트 색상</div>
+      <div class="lbl">표시 색상</div>
       <div class="cpicker" id="ev-color-picker"></div>
     </div>
     <div class="fl">
@@ -929,13 +1015,13 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <div class="sov" id="memo-sov">
   <div class="sheet">
     <div class="shandle"></div>
-    <div class="stitle-s" id="mm-sheet-title">📝 메모 추가</div>
+    <div class="stitle-s" id="mm-sheet-title">메모 추가</div>
     <div class="form-g">
       <div class="lbl">날짜</div>
       <input type="date" id="mm-date" onchange="onMemoSheetDateChange()">
     </div>
     <div class="form-g">
-      <div class="lbl">메모 (엔터로 3줄 입력 가능: 메모1 · 메모2 · 메모3)</div>
+      <div class="lbl">메모 (줄바꿈으로 최대 3줄)</div>
       <textarea id="mm-text" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
     </div>
     <div class="form-g">
@@ -955,22 +1041,22 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <div class="shandle"></div>
     <div class="stitle-s" id="dg-st"></div>
     <div style="font-size:.72rem;color:var(--tx3);margin-bottom:12px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
-      팀 패턴: <span id="dg-base" style="color:var(--a);font-weight:700"></span>
+      기본 근무: <span id="dg-base" style="color:var(--a);font-weight:700"></span>
     </div>
     <div class="form-g">
       <div class="lbl">근무 유형</div>
       <div class="spicker">
-        <input type="radio" name="dg-sh" id="dg-sh-dr" value="dr" class="sopt"><label for="dg-sh-dr" class="slbl sl-dr"><span class="si">☀️</span>주간<br>정규</label>
-        <input type="radio" name="dg-sh" id="dg-sh-ds" value="ds" class="sopt"><label for="dg-sh-ds" class="slbl sl-ds"><span class="si">🌤</span>주간<br>대근</label>
-        <input type="radio" name="dg-sh" id="dg-sh-nr" value="nr" class="sopt"><label for="dg-sh-nr" class="slbl sl-nr"><span class="si">🌙</span>야간<br>정규</label>
-        <input type="radio" name="dg-sh" id="dg-sh-ns" value="ns" class="sopt"><label for="dg-sh-ns" class="slbl sl-ns"><span class="si">🌛</span>야간<br>대근</label>
-        <input type="radio" name="dg-sh" id="dg-sh-of" value="of" class="sopt"><label for="dg-sh-of" class="slbl sl-of"><span class="si">🏠</span>휴무</label>
-        <input type="radio" name="dg-sh" id="dg-sh-vc" value="vc" class="sopt"><label for="dg-sh-vc" class="slbl sl-vc"><span class="si">🌴</span>연차</label>
+        <input type="radio" name="dg-sh" id="dg-sh-dr" value="dr" class="sopt"><label for="dg-sh-dr" class="slbl sl-dr">주간<br>정규</label>
+        <input type="radio" name="dg-sh" id="dg-sh-ds" value="ds" class="sopt"><label for="dg-sh-ds" class="slbl sl-ds">주간<br>대근</label>
+        <input type="radio" name="dg-sh" id="dg-sh-nr" value="nr" class="sopt"><label for="dg-sh-nr" class="slbl sl-nr">야간<br>정규</label>
+        <input type="radio" name="dg-sh" id="dg-sh-ns" value="ns" class="sopt"><label for="dg-sh-ns" class="slbl sl-ns">야간<br>대근</label>
+        <input type="radio" name="dg-sh" id="dg-sh-of" value="of" class="sopt"><label for="dg-sh-of" class="slbl sl-of">휴무</label>
+        <input type="radio" name="dg-sh" id="dg-sh-vc" value="vc" class="sopt"><label for="dg-sh-vc" class="slbl sl-vc">연차</label>
       </div>
     </div>
     <button class="btn fw" onclick="confirmDgRequest()"
       style="margin-bottom:10px;background:var(--n-bg);color:var(--n);border-color:var(--n);font-weight:800">
-      🔄 대근요청
+      대근 요청 등록
     </button>
     <div class="fl">
       <button class="btn sec fg" onclick="cs('dg-sov')">취소</button>
@@ -997,7 +1083,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
   <div class="sheet" style="max-height:90vh;overflow-y:auto">
     <div class="shandle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="stitle-s" style="margin-bottom:0">💰 월급 계산기 <span style="font-size:.62rem;color:var(--tx3);font-weight:700">(25년 임협·단협 반영)</span></div>
+      <div class="stitle-s" style="margin-bottom:0">급여 계산기</div>
       <div style="display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bd);border-radius:999px;padding:2px 6px">
         <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(-1)">◀</button>
         <span id="sal-ym-lbl" style="font-size:.75rem;font-weight:800;padding:0 4px">2026년 11월</span>
@@ -1020,16 +1106,16 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
         <span id="sal-net-total" style="font-family:'JetBrains Mono',monospace;font-size:1.22rem;font-weight:900;color:var(--vac)">0원</span>
       </div>
       <div id="sal-per-sub-info" style="margin-top:8px;padding:6px 9px;background:var(--bg2);border-radius:10px;font-size:.65rem;color:var(--tx2);display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap">
-        <span>⚡ 통상시급: <b id="sal-unit-hourly" style="color:var(--tx)">0원</b></span>
-        <span>🌤 주간대근 1개: <b id="sal-unit-ds" style="color:var(--as)">+0원</b></span>
-        <span>🌛 야간대근 1개: <b id="sal-unit-ns" style="color:var(--ns)">+0원</b></span>
+        <span>통상시급 <b id="sal-unit-hourly" style="color:var(--tx)">0원</b></span>
+        <span>주간대근 1회 <b id="sal-unit-ds" style="color:var(--as)">+0원</b></span>
+        <span>야간대근 1회 <b id="sal-unit-ns" style="color:var(--ns)">+0원</b></span>
       </div>
     </div>
 
     <!-- 근무형태 프리셋 탭 (4조2교대 157h / 일근제 209h / 4조3교대 194h) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-        <span style="font-size:.72rem;font-weight:800;color:var(--tx2)">🏢 근무형태 기준 선택 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(단협 제48조·시트 수식 연동)</span></span>
+        <span style="font-size:.72rem;font-weight:800;color:var(--tx2)">근무 형태</span>
         <select id="sal-work-mode" onchange="onSalModeChange(true)" style="background:var(--bg2);color:var(--a);border:1px solid var(--a);border-radius:8px;padding:4px 8px;font-size:.68rem;font-weight:800">
           <option value="shift157">4조 2교대 (157h · 연장38/야간49)</option>
           <option value="day209">일근제 포괄 (209h · 연장13/휴일12/야간8)</option>
@@ -1044,38 +1130,38 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 
     <!-- 1. 기본급 및 통상임금 산입 수당 (주황색 입력란 대응 · 기기 캐시 저장) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">⚙️ 기본급 · 고정수당 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(기기 캐시 자동저장)</span></div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">기본급 · 고정수당</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.63rem;color:var(--a)">월 기본급 (원)</div>
           <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="기본급 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.63rem">통상시급 (자동산정·원)</div>
-          <input type="number" id="sal-hourly" step="1" min="0" placeholder="자동계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange()">
+          <div class="lbl" style="font-size:.63rem">통상시급 (원)</div>
+          <input type="number" id="sal-hourly" step="1" min="0" placeholder="자동 계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange()">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.6rem">기술수당 (통상산입)</div>
+          <div class="lbl" style="font-size:.6rem">기술수당</div>
           <input type="number" id="sal-tech-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">직책수당 (통상산입)</div>
+          <div class="lbl" style="font-size:.6rem">직책수당</div>
           <input type="number" id="sal-pos-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">식대 (통상·비과세)</div>
+          <div class="lbl" style="font-size:.6rem">식대</div>
           <input type="number" id="sal-meal-pay" step="10000" min="0" placeholder="200000" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.61rem">복지수당 (고정·원)</div>
+          <div class="lbl" style="font-size:.61rem">복지수당</div>
           <input type="number" id="sal-welfare-pay" step="10000" min="0" placeholder="370000" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.61rem">육아수당 (월 고정·원)</div>
+          <div class="lbl" style="font-size:.61rem">육아수당</div>
           <input type="number" id="sal-child-pay" step="10000" min="0" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
         </div>
       </div>
@@ -1094,25 +1180,25 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <!-- 2. 일반 대근 · 공휴일 근무 · 미사용 연차 (시트 구조 + 달력 자동 연동) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">📅 대근 · 공휴일 · 연차 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(달력 자동연동)</span></span>
-        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.63rem" onclick="resetSalCountsFromCal()">달력에서 다시 불러오기 ↺</button>
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">대근 · 공휴일 · 연차</span>
+        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.63rem" onclick="resetSalCountsFromCal()">달력 기준 불러오기</button>
       </div>
       <!-- 일반 대근(주/야) & 공휴일(주/야) 개수 -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--as)">🌤 일반대근(주)</div>
+          <div class="lbl" style="font-size:.58rem;color:var(--as)">주간대근</div>
           <input type="number" id="sal-cnt-ds" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--ns)">🌛 일반대근(야)</div>
+          <div class="lbl" style="font-size:.58rem;color:var(--ns)">야간대근</div>
           <input type="number" id="sal-cnt-ns" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--red)">🚩 공휴일(주)</div>
+          <div class="lbl" style="font-size:.58rem;color:var(--red)">공휴일(주)</div>
           <input type="number" id="sal-cnt-hd" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--red)">🚩 공휴일(야)</div>
+          <div class="lbl" style="font-size:.58rem;color:var(--red)">공휴일(야)</div>
           <input type="number" id="sal-cnt-hdn" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
         </div>
       </div>
@@ -1154,7 +1240,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 
     <!-- 3. 공제 설정 (4대보험 · 노조비 1.2% · 세금, 기기 캐시 저장) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">🧾 공제 내역 설정 <span style="font-size:.6rem;color:var(--tx3);font-weight:600">(고용보험 0.9%·노조비 1.2% 자동계산)</span></div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 내역</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
           <div class="lbl" style="font-size:.6rem">국민연금 (원)</div>
@@ -1171,12 +1257,12 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div>
-          <div class="lbl" style="font-size:.6rem">소득세 (비워두면 자동추정)</div>
-          <input type="number" id="sal-ded-tax" step="10" min="0" placeholder="자동추정" style="padding:6px;font-size:.78rem" oninput="calcSalary(false)">
+          <div class="lbl" style="font-size:.6rem">소득세</div>
+          <input type="number" id="sal-ded-tax" step="10" min="0" placeholder="자동 계산" style="padding:6px;font-size:.78rem" oninput="calcSalary(false)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">지방소득세 (소득세 10%)</div>
-          <input type="number" id="sal-ded-ltax" step="10" min="0" placeholder="자동계산" style="padding:6px;font-size:.78rem" readonly>
+          <input type="number" id="sal-ded-ltax" step="10" min="0" placeholder="자동 계산" style="padding:6px;font-size:.78rem" readonly>
         </div>
       </div>
     </div>
@@ -1184,8 +1270,8 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <!-- 4. 명세서 1:1 지급/공제 상세 내역표 -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">📋 급여명세서 상세 내역</span>
-        <button type="button" class="btn pri sm" style="padding:4px 9px;font-size:.65rem" onclick="saveCurrentMonthSalary()">💾 이 달 급여 캐시 저장</button>
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">급여 상세 내역</span>
+        <button type="button" class="btn pri sm" style="padding:4px 9px;font-size:.65rem" onclick="saveCurrentMonthSalary()">이 달 내역 저장</button>
       </div>
       <div id="sal-breakdown" style="display:flex;flex-direction:column;gap:5px;font-size:.73rem"></div>
     </div>
@@ -1193,13 +1279,168 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
     <!-- 5. 최하단: 1월 ~ 현재까지 저장된 월별 급여 내역 (기기 캐시) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span id="sal-hist-title" style="font-size:.73rem;font-weight:800;color:var(--tx2)">📊 1월 ~ 현재 월별 급여 내역 (캐시)</span>
-        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.62rem" onclick="syncAllMonthsSalaryToCache()">1월~현재 일괄계산 ↺</button>
+        <span id="sal-hist-title" style="font-size:.73rem;font-weight:800;color:var(--tx2)">월별 급여 내역</span>
+        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.62rem" onclick="syncAllMonthsSalaryToCache()">전체 월 갱신 ↺</button>
       </div>
       <div id="sal-history-list" style="display:flex;flex-direction:column;gap:5px;font-size:.74rem"></div>
     </div>
 
     <button class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
+  </div>
+</div>
+
+<!-- 주간 식단표 AI OCR 업로드 · 편집 시트 -->
+<div class="sov" id="meal-upload-sov">
+  <div class="sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="shandle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="stitle-s" style="margin-bottom:0" id="mu-modal-title">식단표 등록</div>
+      <button type="button" class="ibtn" style="width:28px;height:28px;font-size:.8rem" onclick="cs('meal-upload-sov')">✕</button>
+    </div>
+
+    <!-- Step 1: 주간 기준일(월요일) 및 사진 업로드 / OCR 실행 -->
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px">
+        <div>
+          <div class="lbl" style="font-size:.63rem;color:var(--a)">기준 월요일</div>
+          <input type="date" id="mu-monday-date" onchange="onMuMondayChange()" style="padding:6px 9px;font-size:.8rem;font-weight:800">
+        </div>
+        <div>
+          <input type="file" id="mu-file-inp" accept="image/*" style="display:none" onchange="onMuFileSelected(event)">
+          <button type="button" class="btn pri" style="padding:8px 12px;font-size:.75rem;font-weight:800;white-space:nowrap" onclick="document.getElementById('mu-file-inp').click()">
+            식단표 사진 선택
+          </button>
+        </div>
+      </div>
+
+      <!-- API 키 미등록 시 임시 입력 안내창 -->
+      <div id="mu-inline-key-box" style="display:none;margin-top:6px;padding:8px 10px;background:var(--bg2);border:1px dashed var(--a);border-radius:10px">
+        <div style="font-size:.64rem;color:var(--a);font-weight:800;margin-bottom:4px">최초 1회 API 키 등록이 필요합니다 (등록 후 팀 전체 공유)</div>
+        <div style="display:flex;gap:6px">
+          <input type="password" id="mu-inline-key-inp" placeholder="API 키 입력" style="flex:1;padding:6px 8px;font-size:.74rem;font-family:'JetBrains Mono',monospace">
+          <button type="button" class="btn pri sm" onclick="saveInlineOcrKey()" style="flex-shrink:0">키 저장</button>
+        </div>
+      </div>
+
+      <!-- OCR 진행 상태 및 원본 미리보기 -->
+      <div id="mu-ocr-status" style="display:none;margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--bg2);font-size:.73rem;font-weight:700;text-align:center"></div>
+      <div id="mu-preview-wrap" style="display:none;margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:.62rem;color:var(--tx3)">선택된 식단표 사진 (눌러서 확대)</span>
+          <button type="button" class="btn sec sm" style="padding:2px 8px;font-size:.6rem" onclick="rerunMuOcr()">사진 다시 읽기</button>
+        </div>
+        <img id="mu-preview-img" style="width:100%;max-height:130px;object-fit:contain;border-radius:8px;background:var(--bg2);cursor:zoom-in" onclick="if(this.src)openLightbox(this.src)">
+      </div>
+    </div>
+
+    <!-- Step 2: 요일별 추출 결과 확인 및 수동 편집 -->
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">요일별 메뉴 확인 · 수정</span>
+        <span id="mu-edit-day-lbl" style="font-size:.68rem;font-weight:800;color:var(--a)"></span>
+      </div>
+      <div class="dtabs" id="mu-day-tabs" style="margin-bottom:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px"></div>
+
+      <!-- 점심 입력 영역 -->
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:9px 10px;margin-bottom:8px">
+        <div style="font-size:.7rem;font-weight:800;color:var(--a);margin-bottom:6px">점심</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+          <div>
+            <div class="lbl" style="font-size:.58rem">밥</div>
+            <input type="text" id="mu-l-rice" placeholder="예: 잡곡밥&쌀밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+          </div>
+          <div>
+            <div class="lbl" style="font-size:.58rem">국 / 탕 / 찌개</div>
+            <input type="text" id="mu-l-soup" placeholder="예: 건새우두부탕" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+          <div>
+            <div class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</div>
+            <input type="text" id="mu-l-main1" placeholder="예: 꽈리고추돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+          </div>
+          <div>
+            <div class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</div>
+            <input type="text" id="mu-l-main2" placeholder="예: 청포묵김가루무침" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+          </div>
+        </div>
+        <div style="margin-bottom:6px">
+          <div class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</div>
+          <input type="text" id="mu-l-sides" placeholder="예: 샐러드, 양배추쌈&씨앗쌈장, 배추김치" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+          <div>
+            <div class="lbl" style="font-size:.56rem;color:#e879f9">플러스코너</div>
+            <input type="text" id="mu-l-plus" placeholder="비빔밥/잔치국수" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+          </div>
+          <div>
+            <div class="lbl" style="font-size:.56rem;color:var(--as)">후식음료</div>
+            <input type="text" id="mu-l-drink" placeholder="매실차/요구르트" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+          </div>
+          <div>
+            <div class="lbl" style="font-size:.56rem;color:var(--vac)">포장샐러드</div>
+            <input type="text" id="mu-l-salad" placeholder="참치마요샐러드" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+          </div>
+        </div>
+      </div>
+
+      <!-- 저녁 입력 영역 -->
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:9px 10px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:.7rem;font-weight:800;color:var(--n)">저녁</span>
+          <label style="font-size:.63rem;color:var(--tx3);display:inline-flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="mu-d-off" onchange="syncMuDayFromInputs()"> 저녁 미운영
+          </label>
+        </div>
+        <div id="mu-d-fields">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <div>
+              <div class="lbl" style="font-size:.58rem">밥</div>
+              <input type="text" id="mu-d-rice" placeholder="예: 잡곡밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+            </div>
+            <div>
+              <div class="lbl" style="font-size:.58rem">국 / 탕 / 무침</div>
+              <input type="text" id="mu-d-soup" placeholder="예: 사골우거지국" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <div>
+              <div class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</div>
+              <input type="text" id="mu-d-main1" placeholder="예: 추어탕 / 돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+            </div>
+            <div>
+              <div class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</div>
+              <input type="text" id="mu-d-main2" placeholder="예: 콘게맛너겟&소스" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px">
+            <div>
+              <div class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</div>
+              <input type="text" id="mu-d-sides" placeholder="예: 아삭이양파무침, 봄동겉절이" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+            </div>
+            <div>
+              <div class="lbl" style="font-size:.58rem;color:#a3e635">플러스코너</div>
+              <input type="text" id="mu-d-plus" placeholder="셀프계란후라이" style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+            </div>
+          </div>
+        </div>
+        <div id="mu-d-note-wrap" style="display:none">
+          <div class="lbl" style="font-size:.58rem">미운영 안내 문구</div>
+          <input type="text" id="mu-d-note" placeholder="참 멋진 당신의 오늘을 응원합니다" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+        </div>
+      </div>
+
+      <!-- 원산지 표기 -->
+      <div>
+        <div class="lbl" style="font-size:.58rem">원산지 표기</div>
+        <input type="text" id="mu-origin" placeholder="쌀,흑미,현미:국내산 / 포기김치:국내산..." style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+      </div>
+    </div>
+
+    <div class="fl" style="gap:8px">
+      <button type="button" class="btn sec fg" onclick="cs('meal-upload-sov')">취소</button>
+      <button type="button" class="btn pri fg" id="mu-save-btn" onclick="saveUploadedMealBoard()">식단표 저장</button>
+    </div>
   </div>
 </div>
 
@@ -1218,12 +1459,12 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 <script>
 const ADMIN_NAME='정호철';
 const SM={
-  dr:{l:'주간정규',i:'☀️',c:'cb-dr',tc:'tc-dr',s:'주'},
-  ds:{l:'주간대근',i:'🌤',c:'cb-ds',tc:'tc-ds',s:'주대'},
-  nr:{l:'야간정규',i:'🌙',c:'cb-nr',tc:'tc-nr',s:'야'},
-  ns:{l:'야간대근',i:'🌛',c:'cb-ns',tc:'tc-ns',s:'야대'},
-  of:{l:'휴무',i:'🏠',c:'cb-of',tc:'tc-of',s:'휴'},
-  vc:{l:'연차',i:'🌴',c:'cb-vc',tc:'tc-vc',s:'연'},
+  dr:{l:'주간정규',i:'',c:'cb-dr',tc:'tc-dr',s:'주'},
+  ds:{l:'주간대근',i:'',c:'cb-ds',tc:'tc-ds',s:'주대'},
+  nr:{l:'야간정규',i:'',c:'cb-nr',tc:'tc-nr',s:'야'},
+  ns:{l:'야간대근',i:'',c:'cb-ns',tc:'tc-ns',s:'야대'},
+  of:{l:'휴무',i:'',c:'cb-of',tc:'tc-of',s:'휴'},
+  vc:{l:'연차',i:'',c:'cb-vc',tc:'tc-vc',s:'연'},
 };
 const CL={dr:'주',ds:'주(대)',nr:'야',ns:'야(대)',of:'휴',vc:'연'};
 const TL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연'};
@@ -1509,7 +1750,7 @@ async function initDefaultHolidays(){
   if(!isAdmin())return;
   const yr=new Date().getFullYear();
   const targetYears=[yr,yr+1,yr+2];
-  if(!(await askConfirm(`${yr}년 ~ ${yr+2}년(3년치) 대한민국 공휴일과 사창립일(2/10)·근로자의 날(5/1)·노조창립일(12/3)을 자동으로 가져와 동기화할까요?`)))return;
+  if(!(await askConfirm(`${yr}년 ~ ${yr+2}년 공휴일 및 회사 기념일을 불러올까요?`)))return;
   const fetched=await Promise.all(targetYears.map(y=>fetchExternalHolidaysForYear(y)));
   await Promise.all(targetYears.map((y,idx)=>{
     const data=fetched[idx];
@@ -1518,7 +1759,7 @@ async function initDefaultHolidays(){
     return dbS('holidays/'+y,data);
   }));
   ls.s('holidays_cache',holidays);
-  showToast(`${yr}~${yr+2}년 3년치 공휴일 자동 동기화 완료 ✓`);
+  showToast(`${yr}~${yr+2}년 공휴일이 반영되었습니다`);
   refreshCal();renderHolidayList();
 }
 
@@ -1550,7 +1791,7 @@ async function saveHoliday(){
   holidays[date]={name,type};
   ls.s('holidays_cache',holidays);
   cs('holiday-sov');refreshCal();renderHolidayList();
-  showToast('저장됨 ✓');
+  showToast('저장되었습니다');
 }
 
 async function deleteHoliday(){
@@ -1580,7 +1821,7 @@ function renderHolidayList(){
   });
   list.innerHTML='';
   const entries=Object.entries(holidays).filter(([k])=>k.startsWith(yr+'')).sort((a,b)=>a[0]>b[0]?1:-1);
-  if(!entries.length){list.innerHTML='<div style="font-size:.78rem;color:var(--tx3);padding:8px 0">공휴일이 없어요</div>';return;}
+  if(!entries.length){list.innerHTML='<div style="font-size:.78rem;color:var(--tx3);padding:8px 0">등록된 공휴일이 없습니다</div>';return;}
   entries.forEach(([k,hd])=>{
     const dt=new Date(k+'T00:00:00');
     const dow=['일','월','화','수','목','금','토'][dt.getDay()];
@@ -1710,7 +1951,7 @@ async function hashPw(pw){
 
 async function saveProfile(){
   if(!S.myId)return;
-  const d={myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName,updatedAt:Date.now()};
+  const d={myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName,favMeals:Array.isArray(S.favMeals)?S.favMeals:[],hateMeals:Array.isArray(S.hateMeals)?S.hateMeals:[],updatedAt:Date.now()};
   ls.s('prof_'+S.myId,d);
   if(!FB)return;
   const jobs=[FB.set('profiles/'+S.myId,d)];
@@ -1792,7 +2033,7 @@ function applyCalHeaderBadge(){
     document.getElementById('cal-badge-name').textContent=`${S.topName}${S.divName?' · '+S.divName:''}`;
     document.getElementById('cal-badge').style.display='flex';
     const evTitle=document.getElementById('event-section-title');
-    if(evTitle)evTitle.textContent=`📌 ${S.topName} 이벤트`;
+    if(evTitle)evTitle.textContent=`${S.topName} 일정`;
   }
 }
 
@@ -2051,7 +2292,7 @@ function mkDgCell(date,other,todayKey){
       tag.className='ce';
       tag.style.cssText='color:var(--n);background:var(--n-bg);font-weight:800';
       const bMeta=SM[Object.values(posts)[0]?.baseShift];
-      tag.textContent=`🔄 ${bMeta?bMeta.s:''}대근요청`;
+      tag.textContent=`${bMeta?bMeta.s:''}대근요청`;
       slot.appendChild(tag);
     }
     mw.appendChild(slot);
@@ -2081,7 +2322,7 @@ function openDaySheet(date){
   const k=dkey(date),bSh=getBaseShift(date),sh=getShift(date)||'of',memo=S.ov[k]?.memo||'';
   pickedMemoColor=S.ov[k]?.memoColor||'pink';
   document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
-  document.getElementById('day-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
+  document.getElementById('day-base').textContent=bSh?SM[bSh].l:'미설정';
   document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
   document.getElementById('day-memo').value=memo;
   renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
@@ -2109,7 +2350,7 @@ async function saveDaySheet(){
     }
     if(!S.ov[k].shift&&!S.ov[k].memo)delete S.ov[k];
   }
-  cs('day-sov');refreshCal();if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();updateVacSum();showToast('저장됨 ✓');await saveProfile();
+  cs('day-sov');refreshCal();if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();updateVacSum();showToast('저장되었습니다');await saveProfile();
 }
 
 let calSubTab='ev';
@@ -2160,7 +2401,7 @@ function openMemoSheet(dateKey){
   const targetKey=dateKey||dkey(new Date());
   const existing=S.ov?.[targetKey];
   const hasMemo=!!(existing?.memo&&existing.memo.trim());
-  document.getElementById('mm-sheet-title').textContent=hasMemo?'📝 메모 수정':'📝 메모 추가';
+  document.getElementById('mm-sheet-title').textContent=hasMemo?'메모 수정':'메모 추가';
   document.getElementById('mm-save-btn').textContent=hasMemo?'저장':'추가';
   document.getElementById('mm-date').value=targetKey;
   document.getElementById('mm-text').value=existing?.memo||'';
@@ -2188,7 +2429,7 @@ async function saveMemoSheet(){
   editMemoOrigKey='';
   cs('memo-sov');
   refreshCal();
-  showToast('메모 저장됨 ✓');
+  showToast('메모가 저장되었습니다');
   await saveProfile();
 }
 
@@ -2219,7 +2460,7 @@ function renderMemoList(){
   const cntEl=document.getElementById('mm-tab-cnt');
   if(cntEl)cntEl.textContent=list.length;
   if(!list.length){
-    box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없어요</div>';
+    box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 메모가 없습니다</div>';
     return;
   }
   const visibleList=memoListExpanded?list:list.slice(0,3);
@@ -2289,7 +2530,7 @@ function renderEventList(events){
   }):[];
   const cntEl=document.getElementById('ev-tab-cnt');
   if(cntEl)cntEl.textContent=list.length;
-  if(!list.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">이벤트가 없어요</div>';return;}
+  if(!list.length){box.innerHTML='<div style="text-align:center;padding:10px;color:var(--tx3);font-size:.78rem">등록된 일정이 없습니다</div>';return;}
   const visibleList=eventListExpanded?list:list.slice(0,3);
   visibleList.forEach(([evId,ev])=>{
     const pal=getTagPalette(ev.color||'sky','sky');
@@ -2324,10 +2565,10 @@ function formatDateRange(s,e){
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function openEventSheet(evId){
-  if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
+  if(!S.topId){showToast('팀에 참여한 후 일정을 추가할 수 있습니다');return;}
   editEventId=evId||'';
   const ev=editEventId&&S.events?S.events[editEventId]:null;
-  document.getElementById('ev-sheet-title').textContent=ev?'📌 이벤트 수정':'📌 이벤트 추가';
+  document.getElementById('ev-sheet-title').textContent=ev?'일정 수정':'일정 추가';
   document.getElementById('ev-save-btn').textContent=ev?'저장':'추가';
   document.getElementById('ev-title').value=ev?(ev.title||''):'';
   document.getElementById('ev-start').value=ev?(ev.startDate||''):dkey(new Date());
@@ -2344,7 +2585,7 @@ async function addEvent(){
   if(!title){showToast('제목을 입력해주세요');return;}
   if(!startDate){showToast('시작일을 입력해주세요');return;}
   if(endDate&&endDate<startDate){const tmp=startDate;startDate=endDate;endDate=tmp;}
-  if(!S.topId){showToast('팀에 참여해야 이벤트를 추가할 수 있어요');return;}
+  if(!S.topId){showToast('팀에 참여한 후 일정을 추가할 수 있습니다');return;}
   const color=pickedEventColor||'sky';
   if(editEventId&&S.events&&S.events[editEventId]){
     const prev=S.events[editEventId];
@@ -2353,14 +2594,14 @@ async function addEvent(){
     await dbS('events/'+S.topId+'/'+editEventId,updated);
     editEventId='';
     renderEventList(S.events);renderCal();
-    cs('new-event-sov');showToast('이벤트 수정됨 ✓');
+    cs('new-event-sov');showToast('일정이 수정되었습니다');
   }else{
     const newObj={title,startDate,endDate:endDate||startDate,color,createdBy:S.myName,createdById:S.myId,createdAt:Date.now()};
     const res=await dbP('events/'+S.topId,newObj);
     if(!S.events)S.events={};
     S.events[res?.key||('ev_'+Date.now())]=newObj;
     renderEventList(S.events);renderCal();
-    cs('new-event-sov');showToast('이벤트 추가됨 ✓');
+    cs('new-event-sov');showToast('일정이 추가되었습니다');
   }
 }
 async function deleteEvent(evId){
@@ -2381,7 +2622,7 @@ async function createTopTeam(){
     dbS('teams/'+id,{id,name,color,createdBy:S.myId,createdAt:Date.now(),divs:{}}),
     dbS('teamIndex/'+id,{name,color,createdBy:S.myId,divNames:[],createdAt:Date.now()})
   ]);
-  cs('new-top-sov');showToast(`"${name}" 팀 생성됨 🎉`);
+  cs('new-top-sov');showToast(`"${name}" 팀이 생성되었습니다`);
 }
 function openNewDivSheet(topId){
   if(!isAdmin()){showToast('관리자만 가능합니다');return;}
@@ -2398,7 +2639,7 @@ function ndRender(){
   ND.pat.forEach((sh,i)=>{
     const m=SM[sh]||SM.of,c=document.createElement('div');
     c.className=`pcell pc-${sh==='dr'?'dr':sh==='nr'?'nr':'of'}`;
-    c.innerHTML=`<span class="pi">${m.i}</span><span>${m.s}</span><span class="pn">${i+1}일</span>`;
+    c.innerHTML=`<span style="font-size:.82rem;font-weight:800">${m.s}</span><span class="pn">${i+1}일</span>`;
     c.onclick=()=>{ND.pat[i]=ND.pick;ndRender();ndPreview();};
     g.appendChild(c);
   });
@@ -2415,7 +2656,7 @@ function ndPreview(){
     const row=document.createElement('div');
     row.style.cssText=`display:flex;align-items:center;justify-content:space-between;padding:5px 9px;border-radius:7px;background:var(--bg3);border:1px solid ${isT?'var(--a)':'var(--bd)'}`;
     const dow=['일','월','화','수','목','금','토'][dt.getDay()];
-    row.innerHTML=`<span style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--tx2)">${dt.getMonth()+1}/${dt.getDate()} (${dow})${isT?' <b style="color:var(--a)">오늘</b>':''}</span>${m?`<span class="cb ${m.c}" style="font-size:.67rem;padding:2px 7px">${m.i} ${m.l}</span>`:''}`;
+    row.innerHTML=`<span style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--tx2)">${dt.getMonth()+1}/${dt.getDate()} (${dow})${isT?' <b style="color:var(--a)">오늘</b>':''}</span>${m?`<span class="cb ${m.c}" style="font-size:.67rem;padding:2px 7px">${m.l}</span>`:''}`;
     list.appendChild(row);
   }
 }
@@ -2430,7 +2671,7 @@ async function createDivision(){
   await dbS(`teams/${ND.topId}/divs/${divId}`,{id:divId,name,pattern:{pattern:ND.pat,patternStart},members:{},createdBy:S.myId,createdAt:Date.now()});
   const idx=await dbG('teamIndex/'+ND.topId)||{};
   await dbS('teamIndex/'+ND.topId,{...idx,divNames:[...(idx.divNames||[]),{id:divId,name}]});
-  cs('new-div-sov');showToast(`"${name}" 하위팀 생성됨 ✓`);
+  cs('new-div-sov');showToast(`"${name}" 하위팀이 생성되었습니다`);
 }
 async function deleteDivision(){
   if(!isAdmin())return;
@@ -2477,7 +2718,7 @@ function renderAllTeams(){
       const divs=info.divNames||[];
       if(!divs.length){
         const em=document.createElement('div');em.style.cssText='font-size:.74rem;color:var(--tx3);padding:6px 0';
-        em.textContent=isAdmin()?'하위팀을 추가해주세요.':'하위팀이 없어요.';card.appendChild(em);
+        em.textContent=isAdmin()?'하위팀을 추가해주세요.':'등록된 하위팀이 없습니다.';card.appendChild(em);
       } else {
         divs.forEach(({id:divId,name:divName})=>{
           const isMine=S.topId===topId&&S.divId===divId;
@@ -2499,11 +2740,11 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-title').textContent=`${topName} · ${divName}`;
   const tp=div?.pattern;
   const patEl=document.getElementById('di-pattern');
-  if(tp&&tp.patternStart){const st=new Date(tp.patternStart);patEl.innerHTML=`📅 시작: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b> 🔄 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.i||s).join('→')} 반복`;}
+  if(tp&&tp.patternStart){const st=new Date(tp.patternStart);patEl.innerHTML=`시작일: <b>${st.getFullYear()}.${st.getMonth()+1}.${st.getDate()}</b> · 패턴: ${(tp.pattern||[]).map(s=>SM[s]?.s||s).join('→')} 반복`;}
   else patEl.textContent='패턴 없음';
   const mEl=document.getElementById('di-members');mEl.innerHTML='<div class="stitle">팀원</div>';
   const members=div?.members||{};
-  if(!Object.keys(members).length){mEl.innerHTML+='<div style="font-size:.75rem;color:var(--tx3);padding:6px 0">아직 팀원이 없어요</div>';}
+  if(!Object.keys(members).length){mEl.innerHTML+='<div style="font-size:.75rem;color:var(--tx3);padding:6px 0">소속된 팀원이 없습니다</div>';}
   else{Object.entries(members).forEach(([id,m])=>{
     const r=document.createElement('div');r.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)';
     r.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${m.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:#000;flex-shrink:0">${(m.name||'?')[0]}</div>
@@ -2516,7 +2757,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov','meal-upload-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -2528,7 +2769,7 @@ async function toggleJoin(){
     await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,null);
     S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';
     await saveProfile();startEventListen();startDgRecruitListen();
-    cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀을 나갔어요');
+    cs('div-info-sov');renderAllTeams();refreshCal();showToast('팀에서 나왔습니다');
   } else {
     if(S.topId&&S.divId){
       if(!(await askConfirm('현재 팀을 나가고 새 팀에 참여할까요?\n(1개 팀만 참여 가능)')))return;
@@ -2544,7 +2785,7 @@ async function toggleJoin(){
     S.divName=found?.name||div?.name||'';
     await dbS(`teams/${topId}/divs/${divId}/members/${S.myId}`,{name:S.myName,color:S.myColor,ov:S.ov||{},updatedAt:Date.now()});
     await saveProfile();startEventListen();startDgRecruitListen();
-    cs('div-info-sov');refreshCal(true);renderAllTeams();showToast('팀에 참여했어요 👋');
+    cs('div-info-sov');refreshCal(true);renderAllTeams();showToast('팀에 참여했습니다');
   }
 }
 
@@ -2588,7 +2829,7 @@ function renderTodayWorkers(divs){
   grid.className='workers-grid';
   function makeCol(list,icon,label,clr,bg,subClr){
     const col=document.createElement('div');
-    col.innerHTML=`<div class="wcolhdr"><span style="font-size:.75rem;font-weight:800;color:${clr}">${icon} ${label}</span><span class="wcnt" style="background:${bg};color:${clr}">${list.length}명</span></div>`;
+    col.innerHTML=`<div class="wcolhdr"><span style="font-size:.75rem;font-weight:800;color:${clr}">${label}</span><span class="wcnt" style="background:${bg};color:${clr}">${list.length}명</span></div>`;
     if(list.length){
       list.forEach(w=>{
         const r=document.createElement('div');r.className='wrow';
@@ -2599,8 +2840,8 @@ function renderTodayWorkers(divs){
     } else {col.innerHTML+='<div style="font-size:.72rem;color:var(--tx3);padding:5px 0">없음</div>';}
     return col;
   }
-  grid.appendChild(makeCol(day,'☀️','주간','var(--a)','var(--a-bg)','var(--as)'));
-  grid.appendChild(makeCol(night,'🌙','야간','var(--n)','var(--n-bg)','var(--ns)'));
+  grid.appendChild(makeCol(day,'','주간','var(--a)','var(--a-bg)','var(--as)'));
+  grid.appendChild(makeCol(night,'','야간','var(--n)','var(--n-bg)','var(--ns)'));
   box.appendChild(grid);
   if(other.length){
     const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid var(--bd)';
@@ -2608,7 +2849,7 @@ function renderTodayWorkers(divs){
     other.forEach(w=>{
       const chip=document.createElement('div');
       chip.style.cssText='display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:var(--vac-bg);color:var(--vac)';
-      chip.textContent=`🌴 ${w.name}`;row.appendChild(chip);
+      chip.textContent=w.name;row.appendChild(chip);
     });
     box.appendChild(row);
   }
@@ -3087,7 +3328,7 @@ function saveCurrentMonthSalary(){
   };
   saveSalHist(salYr,hist);
   renderSalHistoryList(cfg);
-  showToast(`${salYr}년 ${salMo+1}월 급여가 기기 캐시에 저장됨 ✓`);
+  showToast(`${salYr}년 ${salMo+1}월 급여 내역이 저장되었습니다`);
 }
 
 function syncAllMonthsSalaryToCache(){
@@ -3112,6 +3353,7 @@ function syncAllMonthsSalaryToCache(){
       grossTotal:res.grossTotal,
       netTotal:res.netTotal,
       totalDeduct:res.totalDeduct,
+      workMode:cfg.workMode,
       counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0},
       vacPayDays:st.vacPayDays||0,
       extraPay:st.extraPay||0,
@@ -3122,7 +3364,7 @@ function syncAllMonthsSalaryToCache(){
   }
   saveSalHist(salYr,hist);
   renderSalHistoryList(cfg);
-  showToast(`1월~${maxMo}월 급여가 캐시에 갱신됨 ✓`);
+  showToast(`1월~${maxMo}월 급여 내역이 갱신되었습니다`);
 }
 
 function renderSalHistoryList(cfg){
@@ -3131,7 +3373,7 @@ function renderSalHistoryList(cfg){
   if(!listEl)return;
   const now=new Date();
   const maxMo=(salYr===now.getFullYear())?(now.getMonth()+1):(salYr<now.getFullYear()?12:(salMo+1));
-  if(titleEl)titleEl.textContent=`📊 ${salYr}년 1월 ~ ${maxMo}월 급여 내역 (기기 캐시)`;
+  if(titleEl)titleEl.textContent=`${salYr}년 1월 ~ ${maxMo}월 급여 내역`;
 
   const hist=getSalHist(salYr);
   const hasWage=(parseFloat(cfg.basePay)>0||parseFloat(cfg.hourly)>0);
@@ -3141,7 +3383,7 @@ function renderSalHistoryList(cfg){
   for(let m=1;m<=maxMo;m++){
     const saved=hist[String(m)];
     let gross=0,net=0,st=null;
-    if(saved&&typeof saved.grossTotal==='number'&&saved.grossTotal>0){
+    if(saved&&(!saved.workMode||saved.workMode===cfg.workMode)&&typeof saved.grossTotal==='number'&&saved.grossTotal>0){
       gross=saved.grossTotal;
       net=saved.netTotal;
       st=saved.counts||getCalMonthShiftStats(salYr,m-1,cfg.workMode);
@@ -3150,7 +3392,7 @@ function renderSalHistoryList(cfg){
       const calc=computeSalaryAmounts(cfg,st);
       gross=calc.grossTotal;
       net=calc.netTotal;
-      hist[String(m)]={basePay:cfg.basePay,grossTotal:gross,netTotal:net,totalDeduct:calc.totalDeduct,counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0},updatedAt:Date.now()};
+      hist[String(m)]={basePay:cfg.basePay,grossTotal:gross,netTotal:net,totalDeduct:calc.totalDeduct,workMode:cfg.workMode,counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0},updatedAt:Date.now()};
     }else{
       st=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
     }
@@ -3274,7 +3516,7 @@ async function openDgSheet(date){
   dgEditDate=date;
   const bSh=getBaseShift(date),sh=getShift(date)||bSh||'dr';
   document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
-  document.getElementById('dg-base').textContent=bSh?`${SM[bSh].i} ${SM[bSh].l}`:'미설정';
+  document.getElementById('dg-base').textContent=bSh?SM[bSh].l:'미설정';
   document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
   os('dg-sov');
 }
@@ -3294,7 +3536,7 @@ async function saveDgMyShift(){
     if(!S.ov[k])S.ov[k]={};
     if(sh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
   }
-  cs('dg-sov');renderDgCal();refreshCal();updateVacSum();showToast('저장됨 ✓');await saveProfile();
+  cs('dg-sov');renderDgCal();refreshCal();updateVacSum();showToast('저장되었습니다');await saveProfile();
 }
 
 function resolveRequesterBaseShift(baseShift,reqUid,dateKey,divsMap){
@@ -3332,7 +3574,7 @@ async function confirmDgRequest(){
   const k=dkey(dgEditDate);
   const existingPosts=dgPostCache[k];
   if(existingPosts&&Object.values(existingPosts).some(p=>p&&p.uid===S.myId&&!p.closed)){
-    showToast('이미 해당 날짜에 진행 중인 대근 요청이 있어요');
+    showToast('이미 해당 날짜에 진행 중인 대근 요청이 있습니다');
     return;
   }
   const pickedSh=document.querySelector('input[name="dg-sh"]:checked')?.value;
@@ -3348,12 +3590,12 @@ async function confirmDgRequest(){
   else if(bSh==='nr'||bSh==='ns')reqShift='nr';
 
   if(!reqShift){
-    showToast('주간 또는 야간 근무일에만 대근 요청을 올릴 수 있어요');
+    showToast('주간 또는 야간 근무일에만 대근을 요청할 수 있습니다');
     return;
   }
   const m=SM[reqShift];
   const dateStr=`${dgEditDate.getMonth()+1}월 ${dgEditDate.getDate()}일`;
-  if(!(await askConfirm(`대근 공고를 올리겠습니까?\n\n📅 ${dateStr} ${m.i} ${m.l} 대근요청`)))return;
+  if(!(await askConfirm(`${dateStr} ${m.l} 대근 요청을 등록할까요?`)))return;
   if(!S.ov[k])S.ov[k]={};
   S.ov[k].shift='vc';
   await saveProfile();
@@ -3362,7 +3604,7 @@ async function confirmDgRequest(){
     baseShift:reqShift,closed:false,applicants:{},createdAt:Date.now(),
   });
   cs('dg-sov');renderDgCal();refreshCal();
-  showToast(`${dateStr} ${m.l} 대근요청 등록됨 🔄`);
+  showToast(`${dateStr} ${m.l} 대근 요청이 등록되었습니다`);
 }
 
 function startDgRecruitListen(){
@@ -3435,7 +3677,7 @@ function renderDgRecruitList(allPosts){
     return b.dateKey>a.dateKey?1:-1;
   });
   if(!entries.length){
-    box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">대근 요청이 없어요</div>';return;
+    box.innerHTML='<div style="text-align:center;padding:14px;color:var(--tx3);font-size:.78rem">진행 중인 대근 요청이 없습니다</div>';return;
   }
   const visibleEntries=dgRecruitExpanded?entries:entries.slice(0,3);
   visibleEntries.forEach(({dateKey,postId,post})=>{
@@ -3452,7 +3694,7 @@ function renderDgRecruitList(allPosts){
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
           <div style="width:22px;height:22px;border-radius:50%;background:${post.color||'#f59e0b'};display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
           <span style="font-size:.85rem;font-weight:700">${post.name||'?'}</span>
-          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.i} ${bMeta.l}</span>`:''}
+          ${bMeta?`<span class="cb ${bMeta.c}" style="font-size:.62rem">${bMeta.l}</span>`:''}
           ${isOwner?'<span style="font-size:.6rem;color:var(--a);font-weight:700">내 요청</span>':''}
           ${isClosed?'<span style="font-size:.6rem;color:var(--vac);font-weight:800">✓ 종결</span>':''}
         </div>
@@ -3486,14 +3728,14 @@ function openDgDetailSheet(dateKey,postId,post){
       <div style="width:30px;height:30px;border-radius:50%;background:${post.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0">${(post.name||'?')[0]}</div>
       <div>
         <div style="font-size:.88rem;font-weight:800">${post.name||'?'} <span style="font-size:.65rem;color:var(--tx3)">연차</span></div>
-        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.i} ${bMeta.l} 대근 필요</span></div>`:''}
-        ${isClosed?`<div style="margin-top:4px;font-size:.65rem;color:var(--vac);font-weight:800">✅ 대근 확정 완료</div>`:''}
+        ${bMeta?`<div style="margin-top:3px"><span class="cb ${bMeta.c}" style="font-size:.7rem;padding:3px 9px">${bMeta.l} 대근 필요</span></div>`:''}
+        ${isClosed?`<div style="margin-top:4px;font-size:.65rem;color:var(--vac);font-weight:800">대근 확정 완료</div>`:''}
       </div>
     </div>`;
   const applBox=document.getElementById('dgd-applicants');applBox.innerHTML='';
   const applicants=post.applicants||{};
   if(!Object.keys(applicants).length){
-    applBox.innerHTML='<div style="font-size:.76rem;color:var(--tx3);padding:6px 0">아직 지원자가 없어요</div>';
+    applBox.innerHTML='<div style="font-size:.76rem;color:var(--tx3);padding:6px 0">지원자가 없습니다</div>';
   } else {
     Object.entries(applicants).forEach(([uid,ap])=>{
       const r=document.createElement('div');
@@ -3509,14 +3751,14 @@ function openDgDetailSheet(dateKey,postId,post){
   }
   const btnArea=document.getElementById('dgd-btn-area');btnArea.innerHTML='';
   if(isClosed){
-    btnArea.innerHTML='<div style="text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px">✅ 종결된 요청입니다</div>';
+    btnArea.innerHTML='<div style="text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px">마감된 요청입니다</div>';
   } else if(!isOwner){
     const alreadyApplied=!!applicants[S.myId];
     if(!alreadyApplied){
       const b=document.createElement('button');b.className='btn pri fw';b.style.marginBottom='8px';
-      b.innerHTML='✋ 지원하기';b.onclick=dgApply;btnArea.appendChild(b);
+      b.textContent='지원하기';b.onclick=dgApply;btnArea.appendChild(b);
     } else {
-      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem;margin-bottom:8px">이미 지원했어요</div>';
+      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem;margin-bottom:8px">이미 지원한 요청입니다</div>';
     }
   } else {
     const b=document.createElement('button');b.className='btn dan fw';b.style.marginBottom='8px';
@@ -3529,7 +3771,7 @@ async function dgApply(){
   if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
   await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}/applicants/${S.myId}`,
     {name:S.myName,color:S.myColor,status:'pending',appliedAt:Date.now()});
-  showToast('지원 완료! ✋');cs('dgd-sov');
+  showToast('지원했습니다');cs('dgd-sov');
 }
 
 async function dgRespond(uid,status){
@@ -3583,10 +3825,10 @@ async function dgRespond(uid,status){
     }
     writes.push(dbS(`${postPath}/closed`,true));
     await Promise.all(writes);
-    showToast('수락 완료! 대근 확정됐어요 ✓');
+    showToast('대근이 확정되었습니다');
   } else {
     await dbS(`${postPath}/applicants/${uid}/status`,'rejected');
-    showToast('거절했어요');
+    showToast('거절했습니다');
   }
   cs('dgd-sov');
 }
@@ -3599,193 +3841,958 @@ async function dgDeletePost(){
 }
 
 let mealYr=0,mealMo=0;
-const _mealMemCache={};
-let _renderedMealYm='';
-let _renderedMealSig='';
+const MEAL_IMG_TTL_MS=7*24*60*60*1000; // 7일(1주일) 경과 시 원본 이미지 자동 삭제
 
-// IndexedDB 대용량 식단표 캐시 (Base64 이미지나 고해상도 데이터도 용량 제한 없이 영구 캐싱)
-const _mealIdb={
-  _dbP:null,
-  open(){
-    if(this._dbP)return this._dbP;
-    this._dbP=new Promise(resolve=>{
-      if(!window.indexedDB){resolve(null);return;}
-      try{
-        const req=indexedDB.open('sc_meal_cache_v1',1);
-        req.onupgradeneeded=e=>{
-          const db=e.target.result;
-          if(!db.objectStoreNames.contains('months'))db.createObjectStore('months');
-        };
-        req.onsuccess=e=>resolve(e.target.result);
-        req.onerror=()=>resolve(null);
-      }catch(e){resolve(null);}
-    });
-    return this._dbP;
-  },
-  async get(ym){
-    if(_mealMemCache[ym])return _mealMemCache[ym];
-    const lsVal=ls.g('meal_ls_'+ym);
-    if(Array.isArray(lsVal)){_mealMemCache[ym]=lsVal;return lsVal;}
-    const db=await this.open();
-    if(!db)return null;
-    return new Promise(resolve=>{
-      try{
-        const tx=db.transaction('months','readonly');
-        const req=tx.objectStore('months').get(ym);
-        req.onsuccess=()=>{
-          const v=req.result||null;
-          if(v)_mealMemCache[ym]=v;
-          resolve(v);
-        };
-        req.onerror=()=>resolve(null);
-      }catch(e){resolve(null);}
-    });
-  },
-  async set(ym,entries){
-    _mealMemCache[ym]=entries;
-    try{
-      const raw=JSON.stringify(entries);
-      if(raw.length<350000)ls.s('meal_ls_'+ym,entries);
-    }catch(e){}
-    const db=await this.open();
-    if(!db)return;
-    try{
-      const tx=db.transaction('months','readwrite');
-      tx.objectStore('months').put(entries,ym);
-    }catch(e){}
-  }
+// 전용 디지털 주간식단표 & AI OCR 자동 추출 + 7일 경과 원본 이미지 자동 삭제 엔진
+// =========================================================================
+const SAMPLE_WEEKLY_MENU={
+  mondayKey:'2026-11-02',
+  title:'영흥화력발전소 주간식단표',
+  period:'11월 2일 (월) ~ 11월 6일 (금)',
+  origin:'쌀,흑미,현미:국내산 / 포기김치:국내산 / 깍두기,열무김치:국내산 / 돈육:국내산(삼겹:오스트리아산) / 우육:호주산,미국산 / 계육(도리육,가슴살):국내산 / 순두부,두부,콩비지:(대두:수입산) / 고춧가루:중국산',
+  days:[
+    {
+      date:'11-02',label:'11월 2일',dow:'월요일',shortDow:'월',
+      lunch:{
+        rice:'잡곡밥&쌀밥',soup:'건새우두부탕',
+        main1:'꽈리고추돈육볶음',main2:'청포묵김가루무침',
+        sides:['샐러드','양배추쌈&씨앗쌈장','배추김치'],
+        plus:'비빔밥/잔치국수',drink:'매실차',packSalad:'참치마요샐러드'
+      },
+      dinner:{
+        rice:'잡곡밥',soup:'어묵볶음',
+        main1:'추어탕',main2:'콘게맛너겟&소스',
+        sides:['아삭이양파무침','봄동겉절이'],
+        plus:'셀프계란후라이'
+      }
+    },
+    {
+      date:'11-03',label:'11월 3일',dow:'화요일',shortDow:'화',
+      lunch:{
+        rice:'잡곡밥&쌀밥',soup:'오뎅김칫국',
+        main1:'치킨까스&소스',main2:'야채쫄면무침',
+        sides:['샐러드','산고추락교','깍두기'],
+        plus:'비빔밥',drink:'요구르트',packSalad:'아보카도닭가슴살샐러드'
+      },
+      dinner:{
+        rice:'잡곡밥',soup:'북엇국',
+        main1:'두반장돈육볶음',main2:'꽃맛살브로컬리볶음',
+        sides:['근대나물','배추김치'],
+        plus:'셀프계란후라이'
+      }
+    },
+    {
+      date:'11-04',label:'11월 4일',dow:'수요일',shortDow:'수',
+      lunch:{
+        rice:'잡곡밥&쌀밥',soup:'고추장찌개',
+        main1:'바베큐맛돈육볶음',main2:'치즈소시지볶음',
+        sides:['샐러드','치커리무침','배추김치'],
+        plus:'비빔밥/잔치국수',drink:'쿨피스',packSalad:'베이컨시저샐러드'
+      },
+      dinner:{
+        rice:'잡곡밥',soup:'사골우거지국',
+        main1:'찰떡궁합떡갈비조림',main2:'오징어마늘쫑볶음',
+        sides:['간장깻잎지','총각김치'],
+        plus:'셀프계란후라이'
+      }
+    },
+    {
+      date:'11-05',label:'11월 5일',dow:'목요일',shortDow:'목',
+      lunch:{
+        rice:'잡곡밥&쌀밥',soup:'된장국',
+        main1:'토마토닭고기카레',main2:'스팸두부조림',
+        sides:['샐러드','오복지','배추김치'],
+        plus:'비빔밥/잔치국수',drink:'복분자차',packSalad:'닭가슴살소시지샐러드'
+      },
+      dinner:{
+        rice:'잡곡밥',soup:'부추양파무침',
+        main1:'고기국밥&면사리',main2:'녹두전',
+        sides:['야채스틱&쌈장','배추김치'],
+        plus:'셀프계란후라이'
+      }
+    },
+    {
+      date:'11-06',label:'11월 6일',dow:'금요일',shortDow:'금',
+      lunch:{
+        rice:'잡곡밥&쌀밥',soup:'돈사태김치찌개',
+        main1:'해물까스&소스',main2:'계란찜',
+        sides:['샐러드','얼갈이나물','깍두기'],
+        plus:'',drink:'요거상큼복숭아',packSalad:''
+      },
+      dinner:null,
+      dinnerNote:'참 멋진 당신의 오늘을 응원합니다'
+    }
+  ]
 };
 
-function _mealEntriesSig(entries){
-  if(!Array.isArray(entries)||!entries.length)return 'empty';
-  return entries.map(e=>`${e.dateKey}:${e.id}:${e.uploadedAt||0}:${(e.url||'').length}`).join('|');
+let _favKwCardOpen=false;
+let _curMealMondayKey='';
+const _mealBoardsMem={'2026-11-02':SAMPLE_WEEKLY_MENU};
+
+function _getMondayOfDate(dt){
+  const d=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+  const dow=d.getDay();
+  const diff=(dow===0)?-6:(1-dow);
+  d.setDate(d.getDate()+diff);
+  return dkey(d);
 }
 
-function _getOptimizedMealImgUrl(url){
-  if(!url||typeof url!=='string')return '';
-  // Cloudinary 등 이미지 CDN URL인 경우 모바일 화면 폭에 맞춰 WebP/자동품질 변환 파라미터 적용
-  if(url.includes('res.cloudinary.com/')&&url.includes('/image/upload/')&&!url.includes('/image/upload/f_')){
-    return url.replace('/image/upload/','/image/upload/f_auto,q_auto,w_1200/');
+function _addDaysToKey(dateKey,days){
+  const p=dateKey.split('-');
+  const d=new Date(+p[0],+p[1]-1,+p[2]+days);
+  return dkey(d);
+}
+
+function _formatWeekRangeLabel(mondayKey){
+  if(!mondayKey)return '';
+  const p=mondayKey.split('-');
+  const mon=new Date(+p[0],+p[1]-1,+p[2]);
+  const fri=new Date(+p[0],+p[1]-1,+p[2]+4);
+  return `${mon.getFullYear()}.${String(mon.getMonth()+1).padStart(2,'0')}.${String(mon.getDate()).padStart(2,'0')} (월) ~ ${String(fri.getMonth()+1).padStart(2,'0')}.${String(fri.getDate()).padStart(2,'0')} (금)`;
+}
+
+function _formatShortPeriod(mondayKey){
+  const p=mondayKey.split('-');
+  const mon=new Date(+p[0],+p[1]-1,+p[2]);
+  const fri=new Date(+p[0],+p[1]-1,+p[2]+4);
+  return `${mon.getMonth()+1}월 ${mon.getDate()}일 (월) ~ ${fri.getMonth()+1}월 ${fri.getDate()}일 (금)`;
+}
+
+// 원본 식단표 이미지가 업로드 후 7일(1주일)이 지났거나 해당 주차 일요일이 지났는지 판별
+function _isMealImageExpired(board,mondayKey){
+  if(!board||!board.origImg)return false;
+  const now=Date.now();
+  if(board.imgUploadedAt&&(now-board.imgUploadedAt>MEAL_IMG_TTL_MS))return true;
+  if(mondayKey){
+    const p=mondayKey.split('-');
+    // 해당 주 일요일 23:59:59 이후면 만료 처리
+    const sunEnd=new Date(+p[0],+p[1]-1,+p[2]+6,23,59,59).getTime();
+    if(now>sunEnd&&(!board.imgUploadedAt||(now-board.imgUploadedAt>MEAL_IMG_TTL_MS)))return true;
   }
-  return url;
+  return false;
 }
 
-function _prewarmMealImages(entries){
-  if(!Array.isArray(entries))return;
-  entries.slice(0,4).forEach(item=>{
-    if(!item||!item.url)return;
-    const img=new Image();
-    img.decoding='async';
-    img.src=_getOptimizedMealImgUrl(item.url);
-    if(img.decode)img.decode().catch(()=>{});
-  });
-}
-
-function _extractMealEntries(snap,startKey,endKey){
-  const entries=[];
-  if(!snap||typeof snap!=='object')return entries;
-  Object.entries(snap).forEach(([dateKey,items])=>{
-    if(dateKey>=startKey&&dateKey<=endKey&&items&&typeof items==='object'){
-      Object.entries(items).forEach(([id,item])=>{
-        if(item&&item.url)entries.push({dateKey,id,...item});
-      });
-    }
-  });
-  entries.sort((a,b)=>(b.uploadedAt||0)-(a.uploadedAt||0));
-  return entries;
-}
-
-async function _fetchMealEntriesFromServer(yr,mo){
-  const startKey=`${yr}-${String(mo+1).padStart(2,'0')}-01`;
-  const endKey=`${yr}-${String(mo+1).padStart(2,'0')}-31`;
-  const restUrl=`https://shift-calender-17a58-default-rtdb.firebaseio.com/menus.json?orderBy=%22$key%22&startAt=%22${startKey}%22&endAt=%22${endKey}%22`;
-  let snap=null;
-  if(FB&&FB.getRange){
-    snap=await FB.getRange('menus',startKey,endKey);
-  }else{
-    try{
-      const r=await fetch(restUrl);
-      if(r.ok)snap=await r.json();
-    }catch(e){snap=await dbG('menus');}
+function _loadCachedMealBoards(){
+  const saved=ls.g('meal_boards_cache_v1');
+  if(saved&&typeof saved==='object'){
+    let dirty=false;
+    Object.entries(saved).forEach(([k,b])=>{
+      if(b&&_isMealImageExpired(b,k)){
+        delete b.origImg;
+        delete b.imgUploadedAt;
+        dirty=true;
+      }
+      if(b)_mealBoardsMem[k]=b;
+    });
+    if(dirty)ls.s('meal_boards_cache_v1',saved);
   }
-  return _extractMealEntries(snap,startKey,endKey);
-}
-
-function _renderMealEntriesDOM(box,ym,entries){
-  const sig=_mealEntriesSig(entries);
-  if(_renderedMealYm===ym&&_renderedMealSig===sig&&box.children.length>0)return;
-  _renderedMealYm=ym;
-  _renderedMealSig=sig;
-  box.innerHTML='';
-  if(!entries||!entries.length){showMealEmpty(box);return;}
-  entries.forEach((item,idx)=>{
-    const dt=new Date(item.dateKey+'T00:00:00');
-    const dow=['일','월','화','수','목','금','토'][dt.getDay()];
-    const dateStr=`${dt.getMonth()+1}월 ${dt.getDate()}일 (${dow})`;
-    const hd=holidays[item.dateKey];
-    const dispUrl=_getOptimizedMealImgUrl(item.url);
-    const isTop=idx<2;
-    const card=document.createElement('div');
-    card.style.cssText='background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);border-radius:var(--r);overflow:hidden;margin-bottom:12px';
-    card.innerHTML=`
-      <div style="padding:9px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:.82rem;font-weight:800;color:var(--a);font-family:'JetBrains Mono',monospace">${dateStr}</span>
-        ${hd?`<span style="font-size:.62rem;color:var(--red);font-weight:700">${hd.name}</span>`:''}
-        ${item.desc?`<span style="font-size:.72rem;color:var(--tx2);margin-left:auto">${escHtml(item.desc)}</span>`:''}
-      </div>
-      <img src="${dispUrl}" ${isTop?'loading="eager" fetchpriority="high"':'loading="lazy"'} decoding="async"
-        style="width:100%;min-height:140px;display:block;cursor:zoom-in;background:var(--bg3)"
-        onclick="openLightbox('${item.url}')"
-        onerror="if(this.src!=='${item.url}'){this.src='${item.url}';}else{this.parentElement.style.display='none';}">
-      <div style="padding:6px 14px;font-size:.63rem;color:var(--tx3)">${item.uploadedBy||''} · ${new Date(item.uploadedAt).toLocaleDateString('ko-KR')}</div>`;
-    box.appendChild(card);
-  });
-}
-
-// 앱 시작 직후 백그라운드에서 이번 달 급식 데이터 및 이미지를 미리 받아둠
-async function prefetchCurrentMonthMeals(){
-  const t=new Date();
-  const yr=mealYr||t.getFullYear(),mo=(mealYr?mealMo:t.getMonth());
-  const ym=`${yr}-${String(mo+1).padStart(2,'0')}`;
+  // 구버전 이미지 캐시(IndexedDB 및 localStorage meal_ls_) 정리
   try{
-    const cached=await _mealIdb.get(ym);
-    if(cached&&cached.length)_prewarmMealImages(cached);
-    const fresh=await _fetchMealEntriesFromServer(yr,mo);
-    await _mealIdb.set(ym,fresh);
-    _prewarmMealImages(fresh);
+    if(window.indexedDB)indexedDB.deleteDatabase('sc_meal_cache_v1');
+    for(let i=localStorage.length-1;i>=0;i--){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith('meal_ls_'))localStorage.removeItem(k);
+    }
+  }catch(e){}
+}
+_loadCachedMealBoards();
+
+function _saveCachedMealBoard(mondayKey,boardData){
+  _mealBoardsMem[mondayKey]=boardData;
+  const saved=ls.g('meal_boards_cache_v1')||{};
+  // 로컬스토리지 용량 절약을 위해 로컬 캐시에는 최근 2주 이내만 origImg 보관
+  const clone={...boardData};
+  if(_isMealImageExpired(clone,mondayKey)){
+    delete clone.origImg;
+    delete clone.imgUploadedAt;
+  }
+  saved[mondayKey]=clone;
+  ls.s('meal_boards_cache_v1',saved);
+}
+
+// 백그라운드에서 7일(1주일)이 지난 원본 식단표 이미지를 Firebase DB에서 자동 삭제 (텍스트 식단표는 보존, 구버전 menus/ 이미지는 삭제)
+let _expiredMealImgCleaned=false;
+async function cleanupExpiredMealImages(){
+  if(_expiredMealImgCleaned||!FB)return;
+  _expiredMealImgCleaned=true;
+  const now=Date.now();
+  const cutoffDateKey=_addDaysToKey(dkey(new Date()),-7);
+  try{
+    // 1) 구버전 menus/ 노드에 남아있는 7일 경과 원본 이미지 자동 삭제
+    const oldMenus=await dbG('menus');
+    if(oldMenus&&typeof oldMenus==='object'){
+      const delJobs=[];
+      Object.entries(oldMenus).forEach(([dateKey,items])=>{
+        if(dateKey<=cutoffDateKey){
+          delJobs.push(dbS('menus/'+dateKey,null));
+        }else if(items&&typeof items==='object'){
+          Object.entries(items).forEach(([id,item])=>{
+            if(item&&item.uploadedAt&&(now-item.uploadedAt>MEAL_IMG_TTL_MS)){
+              delJobs.push(dbS(`menus/${dateKey}/${id}`,null));
+            }
+          });
+        }
+      });
+      if(delJobs.length)await Promise.all(delJobs);
+    }
   }catch(e){}
 }
 
-function mealMonth(d){mealMo+=d;if(mealMo>11){mealMo=0;mealYr++;}if(mealMo<0){mealMo=11;mealYr--;}renderMealTab();}
-function mealGotoToday(){const t=new Date();mealYr=t.getFullYear();mealMo=t.getMonth();renderMealTab();}
-async function renderMealTab(){
-  const yr=mealYr,mo=mealMo;
-  const ym=`${yr}-${String(mo+1).padStart(2,'0')}`;
-  document.getElementById('meal-month-label').textContent=`${yr}년 ${mo+1}월`;
-  const box=document.getElementById('meal-list');
+function changeMealWeek(deltaWeeks){
+  if(!_curMealMondayKey)_curMealMondayKey=_getMondayOfDate(new Date());
+  _curMealMondayKey=_addDaysToKey(_curMealMondayKey,deltaWeeks*7);
+  renderDigitalMealBoard();
+  fetchMealBoardFromServer(_curMealMondayKey);
+}
 
-  // 1) 메모리/IndexedDB 캐시가 있으면 스피너 없이 0.01초 만에 즉시 표시
-  const cached=await _mealIdb.get(ym);
-  if(cached){
-    _renderMealEntriesDOM(box,ym,cached);
-  }else if(_renderedMealYm!==ym){
-    box.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3)"><div class="sp"></div></div>';
+function mealWeekGotoCurrent(){
+  const now=new Date();
+  let monKey=_getMondayOfDate(now);
+  if(now.getDay()===0){
+    const nextMon=_addDaysToKey(monKey,7);
+    if(_mealBoardsMem[nextMon])monKey=nextMon;
   }
+  _curMealMondayKey=monKey;
+  renderDigitalMealBoard();
+  fetchMealBoardFromServer(_curMealMondayKey);
+}
 
-  // 2) 백그라운드에서 최신 식단표 확인 후 변경사항이 있을 때만 갱신
+async function fetchMealBoardFromServer(mondayKey){
+  if(!mondayKey)return;
   try{
-    const fresh=await _fetchMealEntriesFromServer(yr,mo);
-    await _mealIdb.set(ym,fresh);
-    if(mealYr===yr&&mealMo===mo){
-      _renderMealEntriesDOM(box,ym,fresh);
+    const data=await dbG('mealBoards/'+mondayKey);
+    if(data&&Array.isArray(data.days)){
+      // 7일(1주일) 경과한 원본 이미지는 서버(Firebase)에서도 즉시 자동 삭제하고 텍스트 식단표만 유지
+      if(_isMealImageExpired(data,mondayKey)){
+        delete data.origImg;
+        delete data.imgUploadedAt;
+        dbS(`mealBoards/${mondayKey}/origImg`,null);
+        dbS(`mealBoards/${mondayKey}/imgUploadedAt`,null);
+      }
+      const prevSig=JSON.stringify(_mealBoardsMem[mondayKey]||null);
+      const nextSig=JSON.stringify(data);
+      _saveCachedMealBoard(mondayKey,data);
+      if(prevSig!==nextSig&&_curMealMondayKey===mondayKey){
+        renderDigitalMealBoard();
+      }
     }
-  }catch(e){
-    if(!cached){
-      box.innerHTML='<div style="text-align:center;padding:20px;color:var(--red);font-size:.8rem">불러오기 실패</div>';
-    }
+  }catch(e){}
+}
+
+function _favMealKey(){return 'fav_meal_kw_v2_'+(S.myId||S.myName||'local');}
+function _hateMealKey(){return 'hate_meal_kw_v2_'+(S.myId||S.myName||'local');}
+
+function getFavMealKeywords(){
+  if(Array.isArray(S.favMeals)&&S.favMeals.length)return S.favMeals;
+  const saved=ls.g(_favMealKey());
+  if(Array.isArray(saved)){S.favMeals=saved;return saved;}
+  return [];
+}
+function saveFavMealKeywords(list){
+  S.favMeals=list;
+  ls.s(_favMealKey(),list);
+  saveProfile();
+}
+
+function getHateMealKeywords(){
+  if(Array.isArray(S.hateMeals)&&S.hateMeals.length)return S.hateMeals;
+  const saved=ls.g(_hateMealKey());
+  if(Array.isArray(saved)){S.hateMeals=saved;return saved;}
+  return [];
+}
+function saveHateMealKeywords(list){
+  S.hateMeals=list;
+  ls.s(_hateMealKey(),list);
+  saveProfile();
+}
+
+function addFavMealKeyword(){
+  const inp=document.getElementById('fav-meal-inp');
+  if(!inp)return;
+  const kw=inp.value.trim();
+  if(!kw)return;
+  const list=[...getFavMealKeywords()];
+  if(!list.includes(kw)){list.push(kw);saveFavMealKeywords(list);}
+  inp.value='';
+  renderDigitalMealBoard();
+}
+function removeFavMealKeyword(kw){
+  saveFavMealKeywords(getFavMealKeywords().filter(x=>x!==kw));
+  renderDigitalMealBoard();
+}
+
+function addHateMealKeyword(){
+  const inp=document.getElementById('hate-meal-inp');
+  if(!inp)return;
+  const kw=inp.value.trim();
+  if(!kw)return;
+  const list=[...getHateMealKeywords()];
+  if(!list.includes(kw)){list.push(kw);saveHateMealKeywords(list);}
+  inp.value='';
+  renderDigitalMealBoard();
+}
+function removeHateMealKeyword(kw){
+  saveHateMealKeywords(getHateMealKeywords().filter(x=>x!==kw));
+  renderDigitalMealBoard();
+}
+
+function _matchKw(dishText,kwList){
+  if(!dishText||!kwList.length)return null;
+  for(let i=0;i<kwList.length;i++){
+    if(kwList[i]&&dishText.includes(kwList[i]))return kwList[i];
+  }
+  return null;
+}
+
+function toggleFavKwCard(){
+  _favKwCardOpen=!_favKwCardOpen;
+  const wrap=document.getElementById('fav-kw-wrap');
+  const btn=document.getElementById('fav-kw-toggle-btn');
+  if(wrap)wrap.style.display=_favKwCardOpen?'':'none';
+  if(btn)btn.textContent=_favKwCardOpen?'접기 ▲':'펼치기 ▼';
+}
+
+function openCurrentWeekOrigImg(){
+  const menu=_mealBoardsMem[_curMealMondayKey];
+  if(menu&&menu.origImg&&!_isMealImageExpired(menu,_curMealMondayKey)){
+    openLightbox(menu.origImg);
   }
 }
-function showMealEmpty(box){box.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:.82rem">이번 달 식단표가 없어요<br><span style="color:var(--a);font-size:.72rem">+ 업로드 버튼으로 추가해주세요</span></div>';}
+
+function renderDigitalMealBoard(){
+  if(!_curMealMondayKey)_curMealMondayKey=_getMondayOfDate(new Date());
+  const wkLbl=document.getElementById('meal-week-label');
+  if(wkLbl)wkLbl.textContent=_formatWeekRangeLabel(_curMealMondayKey);
+
+  const box=document.getElementById('digital-meal-board');
+  const favTagBox=document.getElementById('fav-meal-tags');
+  const hateTagBox=document.getElementById('hate-meal-tags');
+  if(!box)return;
+
+  const favList=getFavMealKeywords();
+  const hateList=getHateMealKeywords();
+
+  if(favTagBox){
+    favTagBox.innerHTML=favList.length?favList.map(kw=>`
+      <span class="fav-chip" onclick="removeFavMealKeyword('${escHtml(kw)}')" title="클릭하여 삭제">
+        ${escHtml(kw)} <span style="opacity:.65;font-size:.62rem">✕</span>
+      </span>
+    `).join(''):'<span style="font-size:.64rem;color:var(--tx3)">등록된 선호 메뉴가 없습니다</span>';
+  }
+  if(hateTagBox){
+    hateTagBox.innerHTML=hateList.length?hateList.map(kw=>`
+      <span class="hate-chip" onclick="removeHateMealKeyword('${escHtml(kw)}')" title="클릭하여 삭제">
+        ${escHtml(kw)} <span style="opacity:.65;font-size:.62rem">✕</span>
+      </span>
+    `).join(''):'<span style="font-size:.64rem;color:var(--tx3)">등록된 기피 메뉴가 없습니다</span>';
+  }
+
+  const menu=_mealBoardsMem[_curMealMondayKey];
+  if(!menu||!Array.isArray(menu.days)||!menu.days.length){
+    box.innerHTML=`
+      <div class="mboard-card" style="padding:28px 16px;text-align:center">
+        <div style="font-size:.86rem;font-weight:800;color:var(--tx);margin-bottom:4px">등록된 식단표가 없습니다</div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-bottom:14px">식단표 사진을 올리면 주간 메뉴표로 정리됩니다</div>
+        <button type="button" class="btn pri sm" onclick="openMealUploadModal(false)" style="padding:8px 16px;font-size:.76rem">식단표 등록</button>
+      </div>
+    `;
+    return;
+  }
+
+  if(_isMealImageExpired(menu,_curMealMondayKey)){
+    delete menu.origImg;
+    delete menu.imgUploadedAt;
+  }
+  const hasValidOrigImg=!!menu.origImg;
+
+  const favDayFlags={},hateDayFlags={};
+  menu.days.forEach((d,idx)=>{
+    const scan=arr=>{
+      arr.forEach(x=>{
+        if(!x)return;
+        if(_matchKw(x,favList))favDayFlags[idx]=true;
+        if(_matchKw(x,hateList))hateDayFlags[idx]=true;
+      });
+    };
+    if(d.lunch)scan([d.lunch.rice,d.lunch.soup,d.lunch.main1,d.lunch.main2,...(d.lunch.sides||[]),d.lunch.plus,d.lunch.drink,d.lunch.packSalad]);
+    if(d.dinner)scan([d.dinner.rice,d.dinner.soup,d.dinner.main1,d.dinner.main2,...(d.dinner.sides||[]),d.dinner.plus]);
+  });
+
+  const cellDish=(txt,cls='')=>{
+    if(!txt)return '';
+    const isFav=!!_matchKw(txt,favList);
+    const isHate=!isFav&&!!_matchKw(txt,hateList);
+    const hitCls=isFav?'fav-hit':(isHate?'hate-hit':'');
+    const icon='';
+    return `<div class="wk-item ${cls} ${hitCls}">${escHtml(txt)}${icon}</div>`;
+  };
+
+  box.innerHTML=`
+    <div class="mboard-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px;flex-wrap:wrap;gap:4px">
+        <span style="font-size:.82rem;font-weight:900;color:var(--a)">${escHtml(menu.period||_formatShortPeriod(_curMealMondayKey))}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${hasValidOrigImg?`<button type="button" class="btn sec sm" style="padding:2px 7px;font-size:.6rem" onclick="openCurrentWeekOrigImg()">원본 사진</button>`:''}
+          <span style="font-size:.62rem;color:var(--tx3)"><b style="color:var(--a)">선호</b> · <b style="color:var(--red)">기피</b></span>
+        </div>
+      </div>
+      <table class="md-wk-table">
+        <colgroup>
+          <col style="width:19px">
+          <col><col><col><col><col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="padding:4px 1px;font-size:.5rem;color:var(--tx3)"></th>
+            ${menu.days.map((d,i)=>`
+              <th>
+                <div style="color:var(--a);font-size:.72rem">${escHtml((d.label||'').replace(/^\d+월\s*/,(m)=>m.replace('월 ','/')).replace('일',''))}</div>
+                <div style="font-size:.68rem">${escHtml(d.shortDow||'')}</div>
+              </th>
+            `).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="md-wk-sec" style="color:var(--a)">점<br>심</td>
+            ${menu.days.map(d=>{
+              const l=d.lunch;
+              if(!l)return '<td>-</td>';
+              return `<td>
+                ${cellDish(l.rice)}
+                ${cellDish(l.soup)}
+                ${cellDish(l.main1,'main1')}
+                ${cellDish(l.main2,'main2')}
+                ${(l.sides||[]).map(s=>cellDish(s)).join('')}
+              </td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="md-wk-sec" style="color:#e879f9">플<br>러<br>스</td>
+            ${menu.days.map(d=>{
+              const l=d.lunch||{};
+              return `<td style="font-size:.66rem;background:rgba(232,121,249,.05)">
+                ${l.plus?`<div style="color:#e879f9;font-weight:700">${cellDish(l.plus)}</div>`:''}
+                ${l.drink?`<div style="color:var(--as)">${cellDish(l.drink)}</div>`:''}
+                ${(!l.plus&&!l.drink)?'-':''}
+              </td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="md-wk-sec" style="color:var(--vac)">샐<br>러<br>드</td>
+            ${menu.days.map(d=>{
+              const l=d.lunch||{};
+              return `<td style="font-size:.65rem;background:rgba(16,185,129,.05);vertical-align:middle">
+                ${l.packSalad?`<div style="color:var(--vac);font-weight:700">${cellDish(l.packSalad)}</div>`:'-'}
+              </td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="md-wk-sec" style="color:var(--n)">저<br>녁</td>
+            ${menu.days.map(d=>{
+              const dn=d.dinner;
+              if(!dn)return `<td rowspan="2" style="vertical-align:middle;color:var(--tx3);font-size:.63rem;padding:8px 3px;background:var(--bg3)">${escHtml(d.dinnerNote||'석식 미운영')}</td>`;
+              return `<td>
+                ${cellDish(dn.rice)}
+                ${cellDish(dn.soup)}
+                ${cellDish(dn.main1,'main1')}
+                ${cellDish(dn.main2,'main2')}
+                ${(dn.sides||[]).map(s=>cellDish(s)).join('')}
+              </td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="md-wk-sec" style="color:#a3e635">플<br>러<br>스</td>
+            ${menu.days.map(d=>{
+              if(!d.dinner)return '';
+              return `<td style="font-size:.61rem;background:rgba(132,204,22,.06);vertical-align:middle">
+                ${d.dinner.plus?`<div style="color:#a3e635;font-weight:700">${cellDish(d.dinner.plus)}</div>`:'-'}
+              </td>`;
+            }).join('')}
+          </tr>
+        </tbody>
+      </table>
+      ${menu.origin?`<div style="margin-top:8px;font-size:.6rem;color:var(--tx3);line-height:1.4"><b>원산지</b>: ${escHtml(menu.origin)}</div>`:''}
+      ${menu.uploadedBy?`<div style="margin-top:4px;text-align:right;font-size:.58rem;color:var(--tx3)">등록: ${escHtml(menu.uploadedBy)}</div>`:''}
+    </div>
+  `;
+}
+
+// =========================================================================
+// 식단표 AI OCR 키 관리 (관리자 1회 저장 -> Firebase config/ocrApiKey 전 팀원 공유)
+// =========================================================================
+let _sharedOcrApiKey='';
+async function getSharedOcrApiKey(){
+  if(_sharedOcrApiKey)return _sharedOcrApiKey;
+  const cached=ls.g('ocr_api_key_cache');
+  if(cached&&typeof cached==='string'){_sharedOcrApiKey=cached;}
+  try{
+    const remote=await dbG('config/ocrApiKey');
+    if(remote&&typeof remote==='string'&&remote.trim()){
+      _sharedOcrApiKey=remote.trim();
+      ls.s('ocr_api_key_cache',_sharedOcrApiKey);
+    }
+  }catch(e){}
+  return _sharedOcrApiKey;
+}
+
+let ocrKeyMgrOpen=false;
+function toggleOcrKeyMgr(){
+  ocrKeyMgrOpen=!ocrKeyMgrOpen;
+  const wrap=document.getElementById('ocr-key-mgr-wrap');
+  const btn=document.getElementById('ocr-key-toggle-btn');
+  if(wrap)wrap.style.display=ocrKeyMgrOpen?'':'none';
+  if(btn)btn.textContent=ocrKeyMgrOpen?'접기 ▲':'펼치기 ▼';
+  if(ocrKeyMgrOpen){
+    getSharedOcrApiKey().then(k=>{
+      const inp=document.getElementById('ocr-api-key-inp');
+      if(inp&&k)inp.value=k;
+    });
+  }
+}
+function toggleOcrKeyVis(){
+  const inp=document.getElementById('ocr-api-key-inp');
+  const btn=document.getElementById('ocr-key-vis-btn');
+  if(!inp)return;
+  const isPw=inp.type==='password';
+  inp.type=isPw?'text':'password';
+  if(btn)btn.textContent=isPw?'숨김':'보기';
+}
+async function saveOcrApiKey(){
+  const inp=document.getElementById('ocr-api-key-inp');
+  const k=(inp?.value||'').trim();
+  if(!k){showToast('API 키를 입력해주세요');return;}
+  _sharedOcrApiKey=k;
+  ls.s('ocr_api_key_cache',k);
+  await dbS('config/ocrApiKey',k);
+  showToast('API 키가 저장되었습니다');
+}
+async function saveInlineOcrKey(){
+  const inp=document.getElementById('mu-inline-key-inp');
+  const k=(inp?.value||'').trim();
+  if(!k){showToast('API 키를 입력해주세요');return;}
+  _sharedOcrApiKey=k;
+  ls.s('ocr_api_key_cache',k);
+  await dbS('config/ocrApiKey',k);
+  document.getElementById('mu-inline-key-box').style.display='none';
+  showToast('API 키가 저장되었습니다. 사진을 다시 읽습니다');
+  if(_muLastImageBase64)rerunMuOcr();
+}
+
+// =========================================================================
+// 주간 식단표 OCR 업로드 · 5일 편집 모달 로직
+// =========================================================================
+let _muDraftBoard=null;
+let _muEditDayIdx=0;
+let _muLastImageBase64='';
+let _muLastDataUrl='';
+
+function _createEmptyWeekBoard(mondayKey){
+  const dows=['월요일','화요일','수요일','목요일','금요일'];
+  const shortDows=['월','화','수','목','금'];
+  const days=[];
+  for(let i=0;i<5;i++){
+    const dk=_addDaysToKey(mondayKey,i);
+    const p=dk.split('-');
+    const dt=new Date(+p[0],+p[1]-1,+p[2]);
+    days.push({
+      date:`${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`,
+      label:`${dt.getMonth()+1}월 ${dt.getDate()}일`,
+      dow:dows[i],
+      shortDow:shortDows[i],
+      lunch:{rice:'잡곡밥&쌀밥',soup:'',main1:'',main2:'',sides:[],plus:'',drink:'',packSalad:''},
+      dinner:i===4?null:{rice:'잡곡밥',soup:'',main1:'',main2:'',sides:[],plus:'셀프계란후라이'},
+      dinnerNote:i===4?'참 멋진 당신의 오늘을 응원합니다':''
+    });
+  }
+  return {
+    mondayKey,
+    title:'영흥화력발전소 주간식단표',
+    period:_formatShortPeriod(mondayKey),
+    origin:'쌀,흑미,현미:국내산 / 포기김치:국내산 / 깍두기,열무김치:국내산 / 돈육:국내산(삼겹:오스트리아산) / 우육:호주산,미국산 / 계육(도리육,가슴살):국내산 / 순두부,두부,콩비지:(대두:수입산) / 고춧가루:중국산',
+    days
+  };
+}
+
+function _applyMondayDatesToDraft(mondayKey){
+  if(!_muDraftBoard)return;
+  const dows=['월요일','화요일','수요일','목요일','금요일'];
+  const shortDows=['월','화','수','목','금'];
+  _muDraftBoard.mondayKey=mondayKey;
+  _muDraftBoard.period=_formatShortPeriod(mondayKey);
+  for(let i=0;i<5;i++){
+    const dk=_addDaysToKey(mondayKey,i);
+    const p=dk.split('-');
+    const dt=new Date(+p[0],+p[1]-1,+p[2]);
+    if(!_muDraftBoard.days[i])_muDraftBoard.days[i]={lunch:{},dinner:i===4?null:{}};
+    _muDraftBoard.days[i].date=`${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    _muDraftBoard.days[i].label=`${dt.getMonth()+1}월 ${dt.getDate()}일`;
+    _muDraftBoard.days[i].dow=dows[i];
+    _muDraftBoard.days[i].shortDow=shortDows[i];
+  }
+}
+
+async function openMealUploadModal(isEditCurrent){
+  const now=new Date();
+  let defaultMon=_curMealMondayKey||_getMondayOfDate(now);
+  if(!isEditCurrent&&now.getDay()===0){
+    defaultMon=_addDaysToKey(_getMondayOfDate(now),7);
+  }
+  _muLastImageBase64='';
+  _muLastDataUrl='';
+  document.getElementById('mu-modal-title').textContent=isEditCurrent?'식단표 수정':'식단표 등록';
+  document.getElementById('mu-monday-date').value=defaultMon;
+  document.getElementById('mu-ocr-status').style.display='none';
+  document.getElementById('mu-preview-wrap').style.display='none';
+  document.getElementById('mu-file-inp').value='';
+
+  const existing=_mealBoardsMem[defaultMon];
+  if(existing&&Array.isArray(existing.days)){
+    _muDraftBoard=JSON.parse(JSON.stringify(existing));
+    _applyMondayDatesToDraft(defaultMon);
+  }else{
+    _muDraftBoard=_createEmptyWeekBoard(defaultMon);
+  }
+  _muEditDayIdx=0;
+  document.getElementById('mu-origin').value=_muDraftBoard.origin||'';
+  renderMuDayTabs();
+  loadMuDayIntoInputs(0);
+  os('meal-upload-sov');
+
+  const key=await getSharedOcrApiKey();
+  document.getElementById('mu-inline-key-box').style.display=key?'none':'';
+}
+
+function onMuMondayChange(){
+  const raw=document.getElementById('mu-monday-date').value;
+  if(!raw)return;
+  const p=raw.split('-');
+  const dt=new Date(+p[0],+p[1]-1,+p[2]);
+  const monKey=_getMondayOfDate(dt);
+  if(monKey!==raw){
+    document.getElementById('mu-monday-date').value=monKey;
+  }
+  if(_mealBoardsMem[monKey]&&!_muLastImageBase64){
+    _muDraftBoard=JSON.parse(JSON.stringify(_mealBoardsMem[monKey]));
+  }
+  _applyMondayDatesToDraft(monKey);
+  renderMuDayTabs();
+  loadMuDayIntoInputs(_muEditDayIdx);
+}
+
+function renderMuDayTabs(){
+  const box=document.getElementById('mu-day-tabs');
+  if(!box||!_muDraftBoard)return;
+  box.innerHTML=_muDraftBoard.days.map((d,idx)=>`
+    <button type="button" class="dtab ${idx===_muEditDayIdx?'on':''}" style="padding:6px 4px;font-size:.72rem;text-align:center" onclick="selectMuEditDay(${idx})">
+      ${d.shortDow}<br><span style="font-size:.58rem;opacity:.8">${(d.date||'').replace('-','/')}</span>
+    </button>
+  `).join('');
+}
+
+function selectMuEditDay(idx){
+  syncMuDayFromInputs();
+  _muEditDayIdx=idx;
+  renderMuDayTabs();
+  loadMuDayIntoInputs(idx);
+}
+
+function loadMuDayIntoInputs(idx){
+  if(!_muDraftBoard||!_muDraftBoard.days[idx])return;
+  const d=_muDraftBoard.days[idx];
+  document.getElementById('mu-edit-day-lbl').textContent=`${d.label} (${d.dow})`;
+  const l=d.lunch||{};
+  document.getElementById('mu-l-rice').value=l.rice||'';
+  document.getElementById('mu-l-soup').value=l.soup||'';
+  document.getElementById('mu-l-main1').value=l.main1||'';
+  document.getElementById('mu-l-main2').value=l.main2||'';
+  document.getElementById('mu-l-sides').value=Array.isArray(l.sides)?l.sides.join(', '):'';
+  document.getElementById('mu-l-plus').value=l.plus||'';
+  document.getElementById('mu-l-drink').value=l.drink||'';
+  document.getElementById('mu-l-salad').value=l.packSalad||'';
+
+  const isOff=!d.dinner;
+  document.getElementById('mu-d-off').checked=isOff;
+  document.getElementById('mu-d-fields').style.display=isOff?'none':'';
+  document.getElementById('mu-d-note-wrap').style.display=isOff?'':'none';
+  const dn=d.dinner||{};
+  document.getElementById('mu-d-rice').value=dn.rice||'';
+  document.getElementById('mu-d-soup').value=dn.soup||'';
+  document.getElementById('mu-d-main1').value=dn.main1||'';
+  document.getElementById('mu-d-main2').value=dn.main2||'';
+  document.getElementById('mu-d-sides').value=Array.isArray(dn.sides)?dn.sides.join(', '):'';
+  document.getElementById('mu-d-plus').value=dn.plus||'';
+  document.getElementById('mu-d-note').value=d.dinnerNote||'참 멋진 당신의 오늘을 응원합니다';
+  document.getElementById('mu-origin').value=_muDraftBoard.origin||'';
+}
+
+function syncMuDayFromInputs(){
+  if(!_muDraftBoard||!_muDraftBoard.days[_muEditDayIdx])return;
+  const d=_muDraftBoard.days[_muEditDayIdx];
+  d.lunch={
+    rice:document.getElementById('mu-l-rice').value.trim(),
+    soup:document.getElementById('mu-l-soup').value.trim(),
+    main1:document.getElementById('mu-l-main1').value.trim(),
+    main2:document.getElementById('mu-l-main2').value.trim(),
+    sides:document.getElementById('mu-l-sides').value.split(',').map(s=>s.trim()).filter(Boolean),
+    plus:document.getElementById('mu-l-plus').value.trim(),
+    drink:document.getElementById('mu-l-drink').value.trim(),
+    packSalad:document.getElementById('mu-l-salad').value.trim()
+  };
+  const isOff=document.getElementById('mu-d-off').checked;
+  document.getElementById('mu-d-fields').style.display=isOff?'none':'';
+  document.getElementById('mu-d-note-wrap').style.display=isOff?'':'none';
+  if(isOff){
+    d.dinner=null;
+    d.dinnerNote=document.getElementById('mu-d-note').value.trim()||'참 멋진 당신의 오늘을 응원합니다';
+  }else{
+    d.dinner={
+      rice:document.getElementById('mu-d-rice').value.trim(),
+      soup:document.getElementById('mu-d-soup').value.trim(),
+      main1:document.getElementById('mu-d-main1').value.trim(),
+      main2:document.getElementById('mu-d-main2').value.trim(),
+      sides:document.getElementById('mu-d-sides').value.split(',').map(s=>s.trim()).filter(Boolean),
+      plus:document.getElementById('mu-d-plus').value.trim()
+    };
+  }
+  _muDraftBoard.origin=document.getElementById('mu-origin').value.trim();
+}
+
+function _compressImageForOcr(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const maxW=1280;
+        let w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
+        const cv=document.createElement('canvas');
+        cv.width=w;cv.height=h;
+        const ctx=cv.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        const dataUrl=cv.toDataURL('image/jpeg',0.82);
+        resolve(dataUrl);
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function onMuFileSelected(ev){
+  const file=ev.target?.files?.[0];
+  if(!file)return;
+  const stEl=document.getElementById('mu-ocr-status');
+  stEl.style.display='';
+  stEl.style.color='var(--a)';
+  stEl.innerHTML='<div class="sp" style="margin-right:6px"></div> 사진을 불러오는 중입니다...';
+  try{
+    const dataUrl=await _compressImageForOcr(file);
+    _muLastDataUrl=dataUrl;
+    _muLastImageBase64=dataUrl.split(',')[1]||'';
+    const prevWrap=document.getElementById('mu-preview-wrap');
+    const prevImg=document.getElementById('mu-preview-img');
+    if(prevWrap&&prevImg){
+      prevImg.src=dataUrl;
+      prevWrap.style.display='';
+    }
+    await rerunMuOcr();
+  }catch(e){
+    stEl.style.color='var(--red)';
+    stEl.textContent='사진을 불러오지 못했습니다';
+  }
+}
+
+async function rerunMuOcr(){
+  if(!_muLastImageBase64){showToast('먼저 식단표 사진을 선택해주세요');return;}
+  const stEl=document.getElementById('mu-ocr-status');
+  stEl.style.display='';
+  const apiKey=await getSharedOcrApiKey();
+  if(!apiKey){
+    document.getElementById('mu-inline-key-box').style.display='';
+    stEl.style.color='var(--red)';
+    stEl.textContent='위 입력칸에 API 키를 먼저 등록해 주세요';
+    return;
+  }
+  stEl.style.color='var(--a)';
+  stEl.innerHTML='<div class="sp" style="margin-right:6px"></div> 식단표 내용을 읽고 있습니다...';
+
+  const promptText=`다음 주간식단표 이미지에서 월요일부터 금요일까지 5일간의 식단표를 정확히 추출해 JSON으로 반환해줘.
+출력 JSON 스키마:
+{
+  "mondayMonth": 숫자(월요일의 월, 예: 11),
+  "mondayDay": 숫자(월요일의 일, 예: 2),
+  "origin": "하단 원산지표기 전체 문자열",
+  "days": [
+    {
+      "shortDow": "월",
+      "lunch": {
+        "rice": "첫번째 줄 밥(예: 잡곡밥&쌀밥)",
+        "soup": "두번째 줄 국/탕/찌개",
+        "main1": "세번째 줄 메인반찬1(주로 빨간색 글씨)",
+        "main2": "네번째 줄 메인반찬2(주로 파란색 글씨)",
+        "sides": ["나머지 일반 반찬들", "김치류"],
+        "plus": "점심 플러스코너 메뉴(분홍색 줄, 예: 비빔밥/잔치국수, 없으면 빈문자열)",
+        "drink": "점심 음료/후식(노란색 줄, 예: 매실차/요구르트/쿨피스 등, 없으면 빈문자열)",
+        "packSalad": "포장샐러드 메뉴(예: 참치마요샐러드 등, 없으면 빈문자열)"
+      },
+      "dinnerOff": false,
+      "dinnerNote": "",
+      "dinner": {
+        "rice": "저녁 밥(예: 잡곡밥)",
+        "soup": "저녁 두번째 줄 국/반찬",
+        "main1": "저녁 세번째 줄 메인1(주로 빨간색 글씨)",
+        "main2": "저녁 네번째 줄 메인2(주로 파란색 글씨)",
+        "sides": ["저녁 나머지 일반 반찬들", "김치류"],
+        "plus": "저녁 플러스코너(연두색 줄, 예: 셀프계란후라이, 없으면 빈문자열)"
+      }
+    }
+  ]
+}
+주의사항:
+1. days 배열은 반드시 월, 화, 수, 목, 금 순서대로 5개 요소를 반환할 것.
+2. 금요일 저녁 등 석식을 운영하지 않고 응원 문구나 그림이 있는 칸은 "dinnerOff": true, "dinner": null, "dinnerNote": "문구 내용"으로 반환할 것.
+3. 오타 없이 이미지에 적힌 한글 메뉴명을 그대로 정확히 옮길 것.`;
+
+  const models=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+  let parsed=null,lastErr='';
+  for(const model of models){
+    try{
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{
+            parts:[
+              {text:promptText},
+              {inline_data:{mime_type:'image/jpeg',data:_muLastImageBase64}}
+            ]
+          }],
+          generationConfig:{
+            temperature:0.1,
+            responseMimeType:'application/json'
+          }
+        })
+      });
+      if(!r.ok){
+        const errJson=await r.json().catch(()=>({}));
+        lastErr=errJson?.error?.message||`HTTP ${r.status}`;
+        continue;
+      }
+      const resData=await r.json();
+      const rawTxt=resData?.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      if(rawTxt){
+        const cleaned=rawTxt.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+        parsed=JSON.parse(cleaned);
+        if(parsed&&Array.isArray(parsed.days)&&parsed.days.length)break;
+      }
+    }catch(e){
+      lastErr=e.message||'네트워크 오류';
+    }
+  }
+
+  if(!parsed||!Array.isArray(parsed.days)){
+    stEl.style.color='var(--red)';
+    stEl.textContent=`사진을 자동으로 읽지 못했습니다 (${lastErr||'오류'}). 아래 칸에서 직접 입력할 수 있습니다.`;
+    return;
+  }
+
+  if(parsed.mondayMonth&&parsed.mondayDay){
+    const curVal=document.getElementById('mu-monday-date').value;
+    const baseYr=curVal?parseInt(curVal.slice(0,4),10):new Date().getFullYear();
+    const candKey=`${baseYr}-${String(parsed.mondayMonth).padStart(2,'0')}-${String(parsed.mondayDay).padStart(2,'0')}`;
+    const p=candKey.split('-');
+    const candDt=new Date(+p[0],+p[1]-1,+p[2]);
+    if(!isNaN(candDt.getTime())){
+      const alignedMon=_getMondayOfDate(candDt);
+      document.getElementById('mu-monday-date').value=alignedMon;
+      _applyMondayDatesToDraft(alignedMon);
+    }
+  }
+
+  if(parsed.origin)_muDraftBoard.origin=String(parsed.origin).trim();
+  for(let i=0;i<5;i++){
+    const src=parsed.days[i];
+    if(!src)continue;
+    const dst=_muDraftBoard.days[i];
+    const sl=src.lunch||{};
+    dst.lunch={
+      rice:String(sl.rice||'').trim(),
+      soup:String(sl.soup||'').trim(),
+      main1:String(sl.main1||'').trim(),
+      main2:String(sl.main2||'').trim(),
+      sides:Array.isArray(sl.sides)?sl.sides.map(x=>String(x||'').trim()).filter(Boolean):[],
+      plus:String(sl.plus||'').trim(),
+      drink:String(sl.drink||'').trim(),
+      packSalad:String(sl.packSalad||'').trim()
+    };
+    if(src.dinnerOff||!src.dinner){
+      dst.dinner=null;
+      dst.dinnerNote=String(src.dinnerNote||'참 멋진 당신의 오늘을 응원합니다').trim();
+    }else{
+      const sd=src.dinner;
+      dst.dinner={
+        rice:String(sd.rice||'').trim(),
+        soup:String(sd.soup||'').trim(),
+        main1:String(sd.main1||'').trim(),
+        main2:String(sd.main2||'').trim(),
+        sides:Array.isArray(sd.sides)?sd.sides.map(x=>String(x||'').trim()).filter(Boolean):[],
+        plus:String(sd.plus||'').trim()
+      };
+    }
+  }
+
+  _muEditDayIdx=0;
+  renderMuDayTabs();
+  loadMuDayIntoInputs(0);
+  stEl.style.color='var(--vac)';
+  stEl.textContent='식단표 내용을 불러왔습니다. 요일별 메뉴 확인 후 저장을 눌러주세요.';
+}
+
+async function saveUploadedMealBoard(){
+  syncMuDayFromInputs();
+  if(!_muDraftBoard)return;
+  const monKey=document.getElementById('mu-monday-date').value||_muDraftBoard.mondayKey||_getMondayOfDate(new Date());
+  _applyMondayDatesToDraft(monKey);
+  _muDraftBoard.uploadedBy=S.myName||'팀원';
+  _muDraftBoard.uploadedAt=Date.now();
+  if(_muLastDataUrl){
+    _muDraftBoard.origImg=_muLastDataUrl;
+    _muDraftBoard.imgUploadedAt=Date.now();
+  }
+
+  _curMealMondayKey=monKey;
+  _saveCachedMealBoard(monKey,_muDraftBoard);
+  cs('meal-upload-sov');
+  renderDigitalMealBoard();
+  showToast('식단표가 저장되었습니다');
+  await dbS('mealBoards/'+monKey,_muDraftBoard);
+}
+
+async function prefetchCurrentMonthMeals(){
+  const t=new Date();
+  const monKey=_getMondayOfDate(t);
+  fetchMealBoardFromServer(monKey);
+  if(t.getDay()===0)fetchMealBoardFromServer(_addDaysToKey(monKey,7));
+  cleanupExpiredMealImages();
+}
+
+function renderMealTab(){
+  if(!_curMealMondayKey){
+    const now=new Date();
+    let monKey=_getMondayOfDate(now);
+    if(now.getDay()===0&&_mealBoardsMem[_addDaysToKey(monKey,7)]){
+      monKey=_addDaysToKey(monKey,7);
+    }
+    _curMealMondayKey=monKey;
+  }
+  renderDigitalMealBoard();
+  fetchMealBoardFromServer(_curMealMondayKey);
+  cleanupExpiredMealImages();
+}
 let _lightboxOpen=false;
 let _lightboxHistoryPushed=false;
 let _lightboxScrollY=0;
@@ -3942,6 +4949,25 @@ async function sendChat(){
   await dbP('chats/'+chatTopId,{uid:S.myId,name:S.myName,text,ts:Date.now()});
 }
 
+let acctListOpen=false,hdMgrOpen=false;
+function toggleAcctList(){
+  acctListOpen=!acctListOpen;
+  const wrap=document.getElementById('acct-list-wrap');
+  const btn=document.getElementById('acct-toggle-btn');
+  const refBtn=document.getElementById('acct-refresh-btn');
+  if(wrap)wrap.style.display=acctListOpen?'':'none';
+  if(btn)btn.textContent=acctListOpen?'접기 ▲':'펼치기 ▼';
+  if(refBtn)refBtn.style.display=acctListOpen?'':'none';
+  if(acctListOpen)loadAcctList();
+}
+function toggleHolidayMgr(){
+  hdMgrOpen=!hdMgrOpen;
+  const wrap=document.getElementById('holiday-mgr-wrap');
+  const btn=document.getElementById('hd-toggle-btn');
+  if(wrap)wrap.style.display=hdMgrOpen?'':'none';
+  if(btn)btn.textContent=hdMgrOpen?'접기 ▲':'펼치기 ▼';
+  if(hdMgrOpen)renderHolidayList();
+}
 function renderSettings(){
   const av=document.getElementById('av');av.textContent=S.myName?S.myName[0]:'?';av.style.background=S.myColor||'#f59e0b';
   document.getElementById('av-name').textContent=S.myName||'';
@@ -3952,9 +4978,11 @@ function renderSettings(){
   document.getElementById('btn-dark').className='btn fg'+(dark?' pri':'');
   document.getElementById('btn-light').className='btn fg'+(!dark?' pri':'');
   const adminCard=document.getElementById('admin-card');adminCard.style.display=isAdmin()?'':'none';
-  if(isAdmin())loadAcctList();
+  if(isAdmin()&&acctListOpen)loadAcctList();
   const hdCard=document.getElementById('holiday-mgr-card');
-  if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin())renderHolidayList();}
+  if(hdCard){hdCard.style.display=isAdmin()?'':'none';if(isAdmin()&&hdMgrOpen)renderHolidayList();}
+  const ocrCard=document.getElementById('ocr-key-card');
+  if(ocrCard){ocrCard.style.display=isAdmin()?'':'none';}
 }
 function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();if(S.events)renderEventList(S.events);renderMemoList();if(S.topId&&S.divId)renderCal();syncToWidget();}
 function applyTheme(){const t=ls.g('theme');if(t==='light')setTheme('light');}
@@ -3973,7 +5001,7 @@ async function loadAcctList(){
     const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)';
     const av=document.createElement('div');av.style.cssText=`width:30px;height:30px;border-radius:50%;background:${acct.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0`;av.textContent=name[0]||'?';
     const nm=document.createElement('div');nm.style.cssText='flex:1;min-width:0';
-    nm.innerHTML=`<span style="font-size:.85rem;font-weight:700">${name}</span>${isMe?'<span style="font-size:.6rem;color:var(--a);font-weight:700;margin-left:5px">나</span>':''}${isAdminAcct?'<span class="abadge" style="margin-left:4px">👑</span>':''}`;
+    nm.innerHTML=`<span style="font-size:.85rem;font-weight:700">${name}</span>${isMe?'<span style="font-size:.6rem;color:var(--a);font-weight:700;margin-left:5px">나</span>':''}${isAdminAcct?'<span class="abadge" style="margin-left:4px">관리자</span>':''}`;
     const dt=document.createElement('div');
     if(acct.createdAt){const d=new Date(acct.createdAt);dt.style.cssText='font-size:.6rem;color:var(--tx3);white-space:nowrap';dt.textContent=`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;}
     row.appendChild(av);row.appendChild(nm);row.appendChild(dt);
@@ -4004,7 +5032,7 @@ function renderSavedAccts(){
   const box=document.getElementById('saved-accts');if(!box)return;box.innerHTML='';
   const sess=ls.g('sess');if(!sess?.name)return;
   const lbl=document.createElement('div');lbl.style.cssText='font-size:.66rem;color:var(--tx3);text-align:center;margin-bottom:5px';lbl.textContent='최근 계정';box.appendChild(lbl);
-  const btn=document.createElement('button');btn.className='qbtn';btn.innerHTML=`<span>👤</span>${sess.name}으로 빠른 로그인`;
+  const btn=document.createElement('button');btn.className='qbtn';btn.innerHTML=`${sess.name} 계정으로 로그인`;
   btn.onclick=()=>{document.getElementById('ln').value=sess.name;document.getElementById('lp').focus();};box.appendChild(btn);
 }
 
@@ -4092,7 +5120,7 @@ async function onFbReady(){
     instantBootFromCache();
     try{
       await loadProfile();
-      if(S.myId)ls.s('prof_'+S.myId,{myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName});
+      if(S.myId)ls.s('prof_'+S.myId,{myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName,favMeals:Array.isArray(S.favMeals)?S.favMeals:[],hateMeals:Array.isArray(S.hateMeals)?S.hateMeals:[]});
       S.myName=sess.name;S.isAdmin=(sess.name===ADMIN_NAME);
       document.getElementById('splash').classList.add('h');
       document.getElementById('login-screen').classList.add('h');
@@ -4105,7 +5133,7 @@ async function onFbReady(){
 // Firebase 네트워크 연결 전이라도 로컬 캐시가 있으면 0.05초 만에 즉시 달력 화면 표시
 instantBootFromCache();
 if(window._fbReady){onFbReady();}
-else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='⚠️ Firebase 연결 실패';e.style.display='';}},5000);}
+else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='서버 연결 실패';e.style.display='';}},5000);}
 </script>
 </body>
 </html>
