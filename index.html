@@ -738,7 +738,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <!-- 3. 하단 접기/펼치기: 선호 · 기피 메뉴 설정 -->
   <div class="mboard-card" style="padding:11px 13px">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">선호 · 기피 메뉴 설정</div>
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">제육 추적자 설정</div>
       <button type="button" class="btn sec sm" id="fav-kw-toggle-btn" onclick="toggleFavKwCard()">펼치기 ▼</button>
     </div>
     <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
@@ -746,7 +746,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="margin-bottom:10px">
         <div class="lbl" style="font-size:.65rem;color:var(--a);margin-bottom:4px">선호 메뉴</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="fav-meal-inp" placeholder="예: 돈육, 까스, 떡갈비, 국밥" maxlength="12"
+          <input type="text" id="fav-meal-inp" placeholder="예: 제육, 까스, 국밥" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addFavMealKeyword();}">
           <button type="button" class="btn pri sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addFavMealKeyword()">+ 추가</button>
@@ -757,7 +757,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div>
         <div class="lbl" style="font-size:.65rem;color:var(--red);margin-bottom:4px">기피 메뉴</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 오복지, 오징어" maxlength="12"
+          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 삼계탕, 오징어" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addHateMealKeyword();}">
           <button type="button" class="btn dan sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addHateMealKeyword()">+ 추가</button>
