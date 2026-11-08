@@ -4477,26 +4477,26 @@ async function syncOcrKeyToServer(k){
     return !!check;
   }catch(e){return false;}
 }
-async function getSharedOcrApiKey(){
+async function getSharedOcrApiKey(forceRefresh){
+  if(!forceRefresh&&_sharedOcrApiKey)return _sharedOcrApiKey;
+  const cached=ls.g('ocr_api_key_cache');
+  if(!forceRefresh&&cached&&typeof cached==='string'&&cached.trim()){
+    _sharedOcrApiKey=cached.trim();
+    syncOcrKeyToServer(_sharedOcrApiKey);
+    return _sharedOcrApiKey;
+  }
   try{
-    const [aVal,mVal,cVal]=await Promise.all([
+    const [aVal,mVal]=await Promise.all([
       dbG('accounts/__ocr_config__').then(v=>v||_fetchRestJson('accounts/__ocr_config__')),
-      dbG('menus/__ocr_config__').then(v=>v||_fetchRestJson('menus/__ocr_config__')),
-      dbG('config/ocrApiKey')
+      dbG('menus/__ocr_config__').then(v=>v||_fetchRestJson('menus/__ocr_config__'))
     ]);
-    const remoteKey=_extractApiKeyVal(aVal)||_extractApiKeyVal(mVal)||_extractApiKeyVal(cVal);
+    const remoteKey=_extractApiKeyVal(aVal)||_extractApiKeyVal(mVal);
     if(remoteKey){
       _sharedOcrApiKey=remoteKey;
       ls.s('ocr_api_key_cache',remoteKey);
       return _sharedOcrApiKey;
     }
   }catch(e){}
-  if(_sharedOcrApiKey)return _sharedOcrApiKey;
-  const cached=ls.g('ocr_api_key_cache');
-  if(cached&&typeof cached==='string'&&cached.trim()){
-    _sharedOcrApiKey=cached.trim();
-    syncOcrKeyToServer(_sharedOcrApiKey);
-  }
   return _sharedOcrApiKey;
 }
 
@@ -4714,14 +4714,14 @@ function _compressImageForOcr(file){
     reader.onload=e=>{
       const img=new Image();
       img.onload=()=>{
-        const maxW=1280;
+        const maxW=1024;
         let w=img.width,h=img.height;
         if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
         const cv=document.createElement('canvas');
         cv.width=w;cv.height=h;
         const ctx=cv.getContext('2d');
         ctx.drawImage(img,0,0,w,h);
-        const dataUrl=cv.toDataURL('image/jpeg',0.82);
+        const dataUrl=cv.toDataURL('image/jpeg',0.78);
         resolve(dataUrl);
       };
       img.onerror=reject;
@@ -4769,120 +4769,128 @@ async function rerunMuOcr(){
   stEl.style.color='var(--a)';
   stEl.innerHTML='<div class="sp" style="margin-right:6px"></div> 식단표 내용을 읽고 있습니다...';
 
-  const promptText=`다음 주간식단표 이미지에서 월요일부터 금요일까지 5일간의 식단표를 정확히 추출해 JSON으로 반환해줘.
-출력 JSON 스키마:
-{
-  "mondayMonth": 숫자(월요일의 월, 예: 11),
-  "mondayDay": 숫자(월요일의 일, 예: 2),
-  "origin": "하단 원산지표기 전체 문자열",
-  "days": [
-    {
-      "shortDow": "월",
-      "lunch": {
-        "rice": "첫번째 줄 밥(예: 잡곡밥&쌀밥)",
-        "soup": "두번째 줄 국/탕/찌개",
-        "main1": "세번째 줄 메인반찬1(주로 빨간색 글씨)",
-        "main2": "네번째 줄 메인반찬2(주로 파란색 글씨)",
-        "sides": ["나머지 일반 반찬들", "김치류"],
-        "plus": "점심 플러스코너 메뉴(분홍색 줄, 예: 비빔밥/잔치국수, 없으면 빈문자열)",
-        "drink": "점심 음료/후식(노란색 줄, 예: 매실차/요구르트/쿨피스 등, 없으면 빈문자열)",
-        "packSalad": "포장샐러드 메뉴(예: 참치마요샐러드 등, 없으면 빈문자열)"
-      },
-      "dinnerOff": false,
-      "dinnerNote": "",
-      "dinner": {
-        "rice": "저녁 밥(예: 잡곡밥)",
-        "soup": "저녁 두번째 줄 국/반찬",
-        "main1": "저녁 세번째 줄 메인1(주로 빨간색 글씨)",
-        "main2": "저녁 네번째 줄 메인2(주로 파란색 글씨)",
-        "sides": ["저녁 나머지 일반 반찬들", "김치류"],
-        "plus": "저녁 플러스코너(연두색 줄, 예: 셀프계란후라이, 없으면 빈문자열)"
-      }
-    }
-  ]
-}
-주의사항:
-1. days 배열은 반드시 월, 화, 수, 목, 금 순서대로 5개 요소를 반환할 것.
-2. 금요일 저녁 등 석식을 운영하지 않고 응원 문구나 그림이 있는 칸은 "dinnerOff": true, "dinner": null, "dinnerNote": "문구 내용"으로 반환할 것.
-3. 오타 없이 이미지에 적힌 한글 메뉴명을 그대로 정확히 옮길 것.`;
+  const promptText=`주간식단표 이미지(월~금 5일)를 읽어 JSON만 반환해.
+{"mondayMonth":11,"mondayDay":2,"origin":"원산지 전체","days":[{"shortDow":"월","lunch":{"rice":"밥","soup":"국/탕","main1":"빨간글씨 메인1","main2":"파란글씨 메인2","sides":["반찬1","반찬2","김치"],"plus":"점심 플러스코너","drink":"후식음료","packSalad":"포장샐러드"},"dinnerOff":false,"dinnerNote":"","dinner":{"rice":"밥","soup":"국/반찬","main1":"저녁 메인1","main2":"저녁 메인2","sides":["반찬","김치"],"plus":"저녁 플러스코너"}}]}
+규칙: days는 월~금 5개 고정. 금요일 등 석식 미운영 칸은 "dinnerOff":true,"dinner":null,"dinnerNote":"안내문구". 이미지의 한글 메뉴명을 그대로 옮길 것.`;
 
-  const models=['gemini-3.8-flash','gemini-flash-latest','gemini-2.5-flash'];
-  const triedModels=new Set();
   let parsed=null,lastErr='';
-
-  async function _tryCallModel(modelName){
-    const cleanModel=String(modelName||'').replace(/^models\//,'').trim();
-    if(!cleanModel||triedModels.has(cleanModel))return false;
-    triedModels.add(cleanModel);
-    try{
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${encodeURIComponent(apiKey)}`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          contents:[{
-            parts:[
-              {text:promptText},
-              {inline_data:{mime_type:'image/jpeg',data:_muLastImageBase64}}
-            ]
-          }],
-          generationConfig:{
-            temperature:0.1,
-            responseMimeType:'application/json'
-          }
-        })
-      });
-      if(!r.ok){
-        const errJson=await r.json().catch(()=>({}));
-        const msg=errJson?.error?.message||`HTTP ${r.status}`;
-        lastErr=msg;
-        // 에러 메시지에서 권장 모델명(예: use models/gemini-3.8-flash)을 안내하면 즉시队列에 추가
-        const mRec=msg.match(/use\s+models\/([a-zA-Z0-9._-]+)/i);
-        if(mRec&&mRec[1]&&!triedModels.has(mRec[1])){
-          models.push(mRec[1]);
-        }
-        return false;
-      }
-      const resData=await r.json();
-      const parts=resData?.candidates?.[0]?.content?.parts||[];
-      for(let pi=parts.length-1;pi>=0;pi--){
-        const pTxt=parts[pi]?.text||'';
-        if(!pTxt)continue;
-        try{
-          const cleaned=pTxt.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
-          const mJson=cleaned.match(/\{[\s\S]*\}/);
-          const candidateObj=JSON.parse(mJson?mJson[0]:cleaned);
-          if(candidateObj&&Array.isArray(candidateObj.days)&&candidateObj.days.length){
-            parsed=candidateObj;
-            return true;
-          }
-        }catch(e){}
-      }
-    }catch(e){
-      lastErr=e.message||'네트워크 오류';
+  const t0=Date.now();
+  const timerIv=setInterval(()=>{
+    const sec=Math.max(1,Math.floor((Date.now()-t0)/1000));
+    if(stEl&&stEl.style.display!=='none'){
+      stEl.innerHTML=`<div class="sp" style="margin-right:6px"></div> 식단표 내용을 읽고 있습니다... (${sec}초)`;
     }
-    return false;
+  },500);
+
+  function _buildGenConfig(cleanModel,mode){
+    // Gemini 3 시리즈는 temperature, thinkingBudget 대신 thinkingLevel을 사용
+    // - gemini-3.8-flash: minimal 미지원 -> low가 최소 추론 레벨
+    // - gemini-3.5-flash-lite, gemini-3.6-flash: minimal 지원(추론 생략, 초고속)
+    // - gemini-2.5 계열: thinkingBudget: 0 사용
+    const cfg={responseMimeType:'application/json'};
+    if(mode==='plain')return cfg;
+    if(/^gemini-2\.5/i.test(cleanModel)){
+      cfg.thinkingConfig={thinkingBudget:0};
+    }else if(/3\.8/i.test(cleanModel)||mode==='low'){
+      cfg.thinkingConfig={thinkingLevel:'low'};
+    }else{
+      cfg.thinkingConfig={thinkingLevel:'minimal'};
+    }
+    return cfg;
   }
 
-  for(let mi=0;mi<models.length;mi++){
-    if(await _tryCallModel(models[mi]))break;
+  function _parseCandidateJson(resData){
+    const parts=resData?.candidates?.[0]?.content?.parts||[];
+    for(let pi=parts.length-1;pi>=0;pi--){
+      const pTxt=parts[pi]?.text||'';
+      if(!pTxt)continue;
+      try{
+        const cleaned=pTxt.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+        const mJson=cleaned.match(/\{[\s\S]*\}/);
+        const obj=JSON.parse(mJson?mJson[0]:cleaned);
+        if(obj&&Array.isArray(obj.days)&&obj.days.length)return obj;
+      }catch(e){}
+    }
+    return null;
   }
 
-  // 만약 기본 모델명이 모두 변경되었을 경우 API에서 사용 가능한 최신 flash 모델 목록을 조회해 자동 재시도
+  async function _callModelWithFastThinking(modelName,signal){
+    const cleanModel=String(modelName||'').replace(/^models\//,'').trim();
+    if(!cleanModel)throw new Error('empty model');
+    const send=async(mode)=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${encodeURIComponent(apiKey)}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      signal,
+      body:JSON.stringify({
+        contents:[{
+          parts:[
+            {text:promptText},
+            {inline_data:{mime_type:'image/jpeg',data:_muLastImageBase64}}
+          ]
+        }],
+        generationConfig:_buildGenConfig(cleanModel,mode)
+      })
+    });
+
+    let r=await send('fast');
+    if(!r.ok&&r.status===400){
+      const err400=await r.json().catch(()=>({}));
+      const msg400=err400?.error?.message||'';
+      // minimal 미지원 모델이면 즉시 low로 재시도 (절대 무설정 medium으로 폴백하지 않음)
+      if(/minimal/i.test(msg400)){
+        r=await send('low');
+      }else if(/thinking/i.test(msg400)){
+        r=await send('plain');
+      }else{
+        lastErr=msg400||`HTTP ${r.status}`;
+        throw new Error(lastErr);
+      }
+    }
+    if(!r.ok){
+      const errJson=await r.json().catch(()=>({}));
+      const msg=errJson?.error?.message||`HTTP ${r.status}`;
+      lastErr=msg;
+      throw new Error(msg);
+    }
+    const resData=await r.json();
+    const obj=_parseCandidateJson(resData);
+    if(!obj)throw new Error('JSON 파싱 실패');
+    return obj;
+  }
+
+  // 1단계: 초고속 minimal 지원 모델(3.5-flash-lite, 3.6-flash)과 3.8-flash(low)를 병렬 레이싱하여
+  // 가장 먼저 도착하는 응답(보통 2~4초)을 즉시 채택하고 나머지는 abort 처리
+  const raceModels=['gemini-3.5-flash-lite','gemini-3.6-flash','gemini-3.8-flash'];
+  const controllers=raceModels.map(()=>new AbortController());
+  try{
+    parsed=await Promise.any(
+      raceModels.map((m,idx)=>_callModelWithFastThinking(m,controllers[idx].signal).then(res=>{
+        controllers.forEach((c,ci)=>{if(ci!==idx)try{c.abort();}catch(e){}});
+        return res;
+      }))
+    );
+  }catch(e){}
+
+  // 2단계: 만약 위 3개 모델이 모두 실패했을 경우에만 사용 가능한 flash 모델 목록을 조회해 low 레벨로 호출
   if(!parsed){
     try{
       const mRes=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
       if(mRes.ok){
         const mData=await mRes.json();
         const avail=(mData?.models||[])
-          .filter(m=>Array.isArray(m.supportedGenerationMethods)&&m.supportedGenerationMethods.includes('generateContent')&&/flash/i.test(m.name||''))
+          .filter(m=>Array.isArray(m.supportedGenerationMethods)&&m.supportedGenerationMethods.includes('generateContent')&&/flash/i.test(m.name||'')&&!/tts|audio|image|live/i.test(m.name||''))
           .map(m=>String(m.name).replace(/^models\//,''))
-          .reverse();
+          .filter(m=>!raceModels.includes(m));
         for(const dynModel of avail){
-          if(await _tryCallModel(dynModel))break;
+          try{
+            parsed=await _callModelWithFastThinking(dynModel);
+            if(parsed)break;
+          }catch(e){}
         }
       }
     }catch(e){}
   }
+  clearInterval(timerIv);
 
   if(!parsed||!Array.isArray(parsed.days)){
     stEl.style.color='var(--red)';
