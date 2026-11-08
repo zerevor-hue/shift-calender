@@ -724,10 +724,21 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <!-- 1. 최상단: 급식 탭 진입 즉시 보이는 주간 식단표 -->
   <div id="digital-meal-board"></div>
 
-  <!-- 2. 하단 접기/펼치기: 선호(⭐) · 불호(🚫) 메뉴 키워드 설정 -->
+  <!-- 2. 주간 식단표 바로 아래 접기/펼치기: 해당 주 식단표 원본 이미지 (이달 이미지 보관) -->
   <div class="mboard-card" style="padding:11px 13px">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">제육 추적자 설정</div>
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">식단표 원본 이미지</div>
+      <button type="button" class="btn sec sm" id="week-img-toggle-btn" onclick="toggleWeekOrigImgCard()">펼치기 ▼</button>
+    </div>
+    <div id="week-img-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
+      <div id="week-img-content"></div>
+    </div>
+  </div>
+
+  <!-- 3. 하단 접기/펼치기: 선호 · 기피 메뉴 설정 -->
+  <div class="mboard-card" style="padding:11px 13px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">선호 · 기피 메뉴 설정</div>
       <button type="button" class="btn sec sm" id="fav-kw-toggle-btn" onclick="toggleFavKwCard()">펼치기 ▼</button>
     </div>
     <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
@@ -3883,7 +3894,7 @@ async function dgDeletePost(){
 }
 
 let mealYr=0,mealMo=0;
-const MEAL_IMG_TTL_MS=7*24*60*60*1000; // 7일(1주일) 경과 시 원본 이미지 자동 삭제
+const MEAL_IMG_TTL_MS=35*24*60*60*1000; // 이달(약 5주·35일) 식단표 원본 이미지 보관 후 자동 삭제
 
 // 전용 디지털 주간식단표 & AI OCR 자동 추출 + 7일 경과 원본 이미지 자동 삭제 엔진
 // =========================================================================
@@ -4000,17 +4011,24 @@ function _formatShortPeriod(mondayKey){
   return `${mon.getMonth()+1}월 ${mon.getDate()}일 (월) ~ ${fri.getMonth()+1}월 ${fri.getDate()}일 (금)`;
 }
 
-// 원본 식단표 이미지가 업로드 후 7일(1주일)이 지났거나 해당 주차 일요일이 지났는지 판별
+// 원본 식단표 이미지가 이번 달이거나 35일 이내면 유지하고, 그 이전 달(35일 경과)이면 만료 판별
 function _isMealImageExpired(board,mondayKey){
   if(!board||!board.origImg)return false;
-  const now=Date.now();
-  if(board.imgUploadedAt&&(now-board.imgUploadedAt>MEAL_IMG_TTL_MS))return true;
+  const nowDt=new Date();
+  const now=nowDt.getTime();
   if(mondayKey){
     const p=mondayKey.split('-');
-    // 해당 주 일요일 23:59:59 이후면 만료 처리
+    const monDt=new Date(+p[0],+p[1]-1,+p[2]);
+    const friDt=new Date(+p[0],+p[1]-1,+p[2]+4);
+    // 해당 주 월요일 또는 금요일이 이번 달에 속하면 무조건 보관
+    if((monDt.getFullYear()===nowDt.getFullYear()&&monDt.getMonth()===nowDt.getMonth())||
+       (friDt.getFullYear()===nowDt.getFullYear()&&friDt.getMonth()===nowDt.getMonth())){
+      return false;
+    }
     const sunEnd=new Date(+p[0],+p[1]-1,+p[2]+6,23,59,59).getTime();
-    if(now>sunEnd&&(!board.imgUploadedAt||(now-board.imgUploadedAt>MEAL_IMG_TTL_MS)))return true;
+    if(now-sunEnd>MEAL_IMG_TTL_MS)return true;
   }
+  if(board.imgUploadedAt&&(now-board.imgUploadedAt>MEAL_IMG_TTL_MS))return true;
   return false;
 }
 
@@ -4050,10 +4068,16 @@ function _saveCachedMealBoard(mondayKey,boardData){
     delete clone.imgUploadedAt;
   }
   saved[mondayKey]=clone;
-  ls.s('meal_boards_cache_v1',saved);
+  try{
+    localStorage.setItem('meal_boards_cache_v1',JSON.stringify(saved));
+  }catch(e){
+    // 로컬스토리지 용량 초과 시 오래된 주차의 로컬 캐시 이미지만 비우고 서버 이미지는 유지
+    Object.keys(saved).sort().slice(0,-2).forEach(k=>{if(saved[k])delete saved[k].origImg;});
+    ls.s('meal_boards_cache_v1',saved);
+  }
 }
 
-// 백그라운드에서 7일이 지난 식단표 원본 이미지를 다운로드 없이 즉시 삭제 (데이터 트래픽 0바이트)
+// 백그라운드에서 35일(한 달)이 지난 이전 달 식단표 원본 이미지를 다운로드 없이 자동 삭제
 let _expiredMealImgCleaned=false;
 async function cleanupExpiredMealImages(){
   if(_expiredMealImgCleaned||!FB)return;
@@ -4064,15 +4088,13 @@ async function cleanupExpiredMealImages(){
   try{
     const curMon=_getMondayOfDate(new Date());
     const jobs=[];
-    [-14,-21].forEach(offset=>{
+    [-42,-49,-56].forEach(offset=>{
       const oldMon=_addDaysToKey(curMon,offset);
+      jobs.push(dbS(`menus/wk_${oldMon}/origImg`,null));
+      jobs.push(dbS(`menus/wk_${oldMon}/imgUploadedAt`,null));
       jobs.push(dbS(`mealBoards/${oldMon}/origImg`,null));
       jobs.push(dbS(`mealBoards/${oldMon}/imgUploadedAt`,null));
     });
-    if(!ls.g('legacy_menus_cleared_v1')){
-      jobs.push(dbS('menus',null));
-      ls.s('legacy_menus_cleared_v1',1);
-    }
     await Promise.all(jobs);
   }catch(e){}
 }
@@ -4099,14 +4121,17 @@ function mealWeekGotoCurrent(){
 async function fetchMealBoardFromServer(mondayKey){
   if(!mondayKey)return;
   try{
-    const data=await dbG('mealBoards/'+mondayKey);
+    let data=await dbG('menus/wk_'+mondayKey);
+    if(!data||!Array.isArray(data.days)){
+      data=await dbG('mealBoards/'+mondayKey);
+    }
     if(data&&Array.isArray(data.days)){
       // 7일(1주일) 경과한 원본 이미지는 서버(Firebase)에서도 즉시 자동 삭제하고 텍스트 식단표만 유지
       if(_isMealImageExpired(data,mondayKey)){
         delete data.origImg;
         delete data.imgUploadedAt;
-        dbS(`mealBoards/${mondayKey}/origImg`,null);
-        dbS(`mealBoards/${mondayKey}/imgUploadedAt`,null);
+        dbS(`menus/wk_${mondayKey}/origImg`,null);
+        dbS(`menus/wk_${mondayKey}/imgUploadedAt`,null);
       }
       const prevSig=JSON.stringify(_mealBoardsMem[mondayKey]||null);
       const nextSig=JSON.stringify(data);
@@ -4191,6 +4216,72 @@ function toggleFavKwCard(){
   if(btn)btn.textContent=_favKwCardOpen?'접기 ▲':'펼치기 ▼';
 }
 
+let _weekImgCardOpen=false;
+const _legacyWeekImgChecked={};
+function toggleWeekOrigImgCard(){
+  _weekImgCardOpen=!_weekImgCardOpen;
+  const wrap=document.getElementById('week-img-wrap');
+  const btn=document.getElementById('week-img-toggle-btn');
+  if(wrap)wrap.style.display=_weekImgCardOpen?'':'none';
+  if(btn)btn.textContent=_weekImgCardOpen?'접기 ▲':'펼치기 ▼';
+  if(_weekImgCardOpen)renderWeekOrigImgCard();
+}
+
+async function _tryLoadLegacyWeekImg(mondayKey){
+  if(!FB||!mondayKey||_legacyWeekImgChecked[mondayKey])return;
+  _legacyWeekImgChecked[mondayKey]=true;
+  try{
+    const sKey=_addDaysToKey(mondayKey,-2);
+    const eKey=_addDaysToKey(mondayKey,5);
+    const snap=await (FB.getRange?FB.getRange('menus',sKey,eKey):null);
+    if(!snap||typeof snap!=='object')return;
+    let foundUrl='',foundTs=0;
+    Object.entries(snap).forEach(([k,val])=>{
+      if(k.startsWith('wk_')||k.startsWith('__'))return;
+      if(val&&typeof val==='object'){
+        Object.values(val).forEach(item=>{
+          if(item&&typeof item.url==='string'&&item.url.startsWith('data:image')&&(item.uploadedAt||0)>=foundTs){
+            foundUrl=item.url;
+            foundTs=item.uploadedAt||Date.now();
+          }
+        });
+      }
+    });
+    if(foundUrl&&_mealBoardsMem[mondayKey]&&!_mealBoardsMem[mondayKey].origImg){
+      _mealBoardsMem[mondayKey].origImg=foundUrl;
+      _mealBoardsMem[mondayKey].imgUploadedAt=foundTs;
+      if(_curMealMondayKey===mondayKey&&_weekImgCardOpen)renderWeekOrigImgCard();
+    }
+  }catch(e){}
+}
+
+function renderWeekOrigImgCard(){
+  const box=document.getElementById('week-img-content');
+  const btn=document.getElementById('week-img-toggle-btn');
+  if(!box)return;
+  const menu=_mealBoardsMem[_curMealMondayKey];
+  const hasImg=!!(menu&&menu.origImg&&!_isMealImageExpired(menu,_curMealMondayKey));
+  if(btn){
+    btn.textContent=_weekImgCardOpen?'접기 ▲':'펼치기 ▼';
+  }
+  if(!_weekImgCardOpen)return;
+  if(hasImg){
+    box.innerHTML=`
+      <img src="${menu.origImg}" alt="주간 식단표 원본 이미지"
+           style="width:100%;display:block;border-radius:10px;background:var(--bg3);cursor:zoom-in"
+           onclick="openLightbox(this.src)">
+      <div style="margin-top:6px;text-align:center;font-size:.65rem;color:var(--tx3)">이미지를 누르면 확대해서 볼 수 있습니다</div>
+    `;
+  }else{
+    box.innerHTML=`
+      <div style="padding:18px 10px;text-align:center;font-size:.75rem;color:var(--tx3)">
+        해당 주차(${_formatShortPeriod(_curMealMondayKey)})에 등록된 식단표 원본 이미지가 없습니다
+      </div>
+    `;
+    _tryLoadLegacyWeekImg(_curMealMondayKey);
+  }
+}
+
 function openCurrentWeekOrigImg(){
   const menu=_mealBoardsMem[_curMealMondayKey];
   if(menu&&menu.origImg&&!_isMealImageExpired(menu,_curMealMondayKey)){
@@ -4235,6 +4326,7 @@ function renderDigitalMealBoard(){
         <button type="button" class="btn pri sm" onclick="openMealUploadModal(false)" style="padding:8px 16px;font-size:.76rem">식단표 등록</button>
       </div>
     `;
+    renderWeekOrigImgCard();
     return;
   }
 
@@ -4271,7 +4363,6 @@ function renderDigitalMealBoard(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px;flex-wrap:wrap;gap:4px">
         <span style="font-size:.82rem;font-weight:900;color:var(--a)">${escHtml(menu.period||_formatShortPeriod(_curMealMondayKey))}</span>
         <div style="display:flex;align-items:center;gap:6px">
-          ${hasValidOrigImg?`<button type="button" class="btn sec sm" style="padding:2px 7px;font-size:.6rem" onclick="openCurrentWeekOrigImg()">원본 사진</button>`:''}
           <span style="font-size:.62rem;color:var(--tx3)"><b style="color:var(--a)">선호</b> · <b style="color:var(--red)">기피</b></span>
         </div>
       </div>
@@ -4355,23 +4446,57 @@ function renderDigitalMealBoard(){
       ${menu.uploadedBy?`<div style="margin-top:4px;text-align:right;font-size:.58rem;color:var(--tx3)">등록: ${escHtml(menu.uploadedBy)}</div>`:''}
     </div>
   `;
+  renderWeekOrigImgCard();
 }
 
 // =========================================================================
 // 식단표 AI OCR 키 관리 (관리자 1회 저장 -> Firebase config/ocrApiKey 전 팀원 공유)
 // =========================================================================
 let _sharedOcrApiKey='';
-async function getSharedOcrApiKey(){
-  if(_sharedOcrApiKey)return _sharedOcrApiKey;
-  const cached=ls.g('ocr_api_key_cache');
-  if(cached&&typeof cached==='string'){_sharedOcrApiKey=cached;}
+function _extractApiKeyVal(v){
+  if(!v)return '';
+  if(typeof v==='string')return v.trim();
+  if(typeof v==='object'&&typeof v.apiKey==='string')return v.apiKey.trim();
+  return '';
+}
+async function _fetchRestJson(path){
   try{
-    const remote=await dbG('config/ocrApiKey');
-    if(remote&&typeof remote==='string'&&remote.trim()){
-      _sharedOcrApiKey=remote.trim();
-      ls.s('ocr_api_key_cache',_sharedOcrApiKey);
+    const r=await fetch(`https://shift-calender-17a58-default-rtdb.firebaseio.com/${path}.json`);
+    return r.ok?await r.json():null;
+  }catch(e){return null;}
+}
+async function syncOcrKeyToServer(k){
+  if(!k)return false;
+  const obj={apiKey:k,updatedAt:Date.now()};
+  try{
+    await Promise.all([
+      dbS('accounts/__ocr_config__',obj),
+      dbS('menus/__ocr_config__',obj)
+    ]);
+    const check=_extractApiKeyVal(await dbG('accounts/__ocr_config__'))||_extractApiKeyVal(await _fetchRestJson('accounts/__ocr_config__'));
+    return !!check;
+  }catch(e){return false;}
+}
+async function getSharedOcrApiKey(){
+  try{
+    const [aVal,mVal,cVal]=await Promise.all([
+      dbG('accounts/__ocr_config__').then(v=>v||_fetchRestJson('accounts/__ocr_config__')),
+      dbG('menus/__ocr_config__').then(v=>v||_fetchRestJson('menus/__ocr_config__')),
+      dbG('config/ocrApiKey')
+    ]);
+    const remoteKey=_extractApiKeyVal(aVal)||_extractApiKeyVal(mVal)||_extractApiKeyVal(cVal);
+    if(remoteKey){
+      _sharedOcrApiKey=remoteKey;
+      ls.s('ocr_api_key_cache',remoteKey);
+      return _sharedOcrApiKey;
     }
   }catch(e){}
+  if(_sharedOcrApiKey)return _sharedOcrApiKey;
+  const cached=ls.g('ocr_api_key_cache');
+  if(cached&&typeof cached==='string'&&cached.trim()){
+    _sharedOcrApiKey=cached.trim();
+    syncOcrKeyToServer(_sharedOcrApiKey);
+  }
   return _sharedOcrApiKey;
 }
 
@@ -4403,8 +4528,8 @@ async function saveOcrApiKey(){
   if(!k){showToast('API 키를 입력해주세요');return;}
   _sharedOcrApiKey=k;
   ls.s('ocr_api_key_cache',k);
-  await dbS('config/ocrApiKey',k);
-  showToast('API 키가 저장되었습니다');
+  const ok=await syncOcrKeyToServer(k);
+  showToast(ok?'API 키가 서버에 저장되어 전 계정과 공유됩니다':'API 키가 저장되었습니다');
 }
 
 // =========================================================================
@@ -4681,7 +4806,7 @@ async function rerunMuOcr(){
 2. 금요일 저녁 등 석식을 운영하지 않고 응원 문구나 그림이 있는 칸은 "dinnerOff": true, "dinner": null, "dinnerNote": "문구 내용"으로 반환할 것.
 3. 오타 없이 이미지에 적힌 한글 메뉴명을 그대로 정확히 옮길 것.`;
 
-  const models=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+  const models=['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'];
   let parsed=null,lastErr='';
   for(const model of models){
     try{
@@ -4703,18 +4828,27 @@ async function rerunMuOcr(){
       });
       if(!r.ok){
         const errJson=await r.json().catch(()=>({}));
-        lastErr=errJson?.error?.message||`HTTP ${r.status}`;
+        if(!lastErr)lastErr=errJson?.error?.message||`HTTP ${r.status}`;
         continue;
       }
       const resData=await r.json();
-      const rawTxt=resData?.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(rawTxt){
-        const cleaned=rawTxt.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
-        parsed=JSON.parse(cleaned);
-        if(parsed&&Array.isArray(parsed.days)&&parsed.days.length)break;
+      const parts=resData?.candidates?.[0]?.content?.parts||[];
+      for(let pi=parts.length-1;pi>=0;pi--){
+        const pTxt=parts[pi]?.text||'';
+        if(!pTxt)continue;
+        try{
+          const cleaned=pTxt.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+          const mJson=cleaned.match(/\{[\s\S]*\}/);
+          const candidateObj=JSON.parse(mJson?mJson[0]:cleaned);
+          if(candidateObj&&Array.isArray(candidateObj.days)&&candidateObj.days.length){
+            parsed=candidateObj;
+            break;
+          }
+        }catch(e){}
       }
+      if(parsed)break;
     }catch(e){
-      lastErr=e.message||'네트워크 오류';
+      if(!lastErr)lastErr=e.message||'네트워크 오류';
     }
   }
 
@@ -4793,13 +4927,17 @@ async function saveUploadedMealBoard(){
   cs('meal-upload-sov');
   renderDigitalMealBoard();
   showToast('식단표가 저장되었습니다');
-  await dbS('mealBoards/'+monKey,_muDraftBoard);
+  await Promise.all([
+    dbS('menus/wk_'+monKey,_muDraftBoard),
+    dbS('mealBoards/'+monKey,_muDraftBoard)
+  ]);
 }
 
 let _mealsPrefetched=false;
 async function prefetchCurrentMonthMeals(){
   if(_mealsPrefetched||!FB)return;
   _mealsPrefetched=true;
+  getSharedOcrApiKey();
   const t=new Date();
   const monKey=_getMondayOfDate(t);
   fetchMealBoardFromServer(monKey);
@@ -5023,7 +5161,7 @@ async function loadAcctList(){
   const accounts=await dbG('accounts');
   if(!accounts||!Object.keys(accounts).length){box.innerHTML='<div style="font-size:.78rem;color:var(--tx3);text-align:center;padding:10px">가입된 계정이 없어요</div>';return;}
   box.innerHTML='';
-  Object.entries(accounts).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name,acct])=>{
+  Object.entries(accounts).filter(([name])=>!name.startsWith('__')).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name,acct])=>{
     const isMe=name===S.myName,isAdminAcct=name===ADMIN_NAME;
     const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)';
     const av=document.createElement('div');av.style.cssText=`width:30px;height:30px;border-radius:50%;background:${acct.color||'#f59e0b'};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#000;flex-shrink:0`;av.textContent=name[0]||'?';
