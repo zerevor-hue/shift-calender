@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1017">
+<title>교대근무 달력 - 앱 다운로드 및 설치 안내</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+:root{
+  --a:#f59e0b;--as:#fbbf24;--n:#818cf8;--vac:#10b981;--red:#f87171;
+  --a-bg:rgba(245,158,11,.16);--vac-bg:rgba(16,185,129,.16);
+  --bg:#0d1017;--bg2:#151923;--bg3:#1e2330;
+  --pill-sh:0 6px 20px rgba(0,0,0,.32);
+  --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.15);
+  --tx:#f8fafc;--tx2:#94a3b8;--tx3:#64748b;
+  --r:20px;--rs:12px;
+}
+body.light{
+  --a:#d97706;--as:#b45309;--n:#5b21b6;--vac:#047857;--red:#e11d48;
+  --a-bg:#ffedd5;--vac-bg:#d1fae5;
+  --bg:#f6f7f9;--bg2:#ffffff;--bg3:#f1f3f6;
+  --pill-sh:0 4px 16px rgba(15,23,42,.06);
+  --bd:rgba(15,23,42,.08);--bd2:rgba(15,23,42,.14);
+  --tx:#111827;--tx2:#4b5563;--tx3:#9ca3af;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  background:var(--bg);color:var(--tx);min-height:100vh;max-width:480px;margin:0 auto;
+  padding:20px 14px 48px;line-height:1.5;
+}
+.card{
+  background:var(--bg2);border:1px solid var(--bd);box-shadow:var(--pill-sh);
+  border-radius:var(--r);padding:18px 16px;margin-bottom:12px;
+}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:13px 16px;border-radius:var(--rs);font-size:.92rem;font-weight:800;
+  text-decoration:none;cursor:pointer;border:1.5px solid var(--bd);transition:all .15s;
+  font-family:inherit;
+}
+.btn:active{filter:brightness(.92)}
+.btn.pri{background:var(--a);color:#000;border-color:var(--a)}
+body.light .btn.pri{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.btn.sec{background:var(--bg3);color:var(--tx2);border-color:var(--bd)}
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step-item{
+  background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);
+  padding:12px 13px;display:flex;gap:11px;align-items:flex-start;
+}
+.step-num{
+  width:22px;height:22px;border-radius:50%;background:var(--a-bg);color:var(--a);
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.step-body{flex:1;min-width:0}
+.step-title{font-size:.84rem;font-weight:800;color:var(--tx);margin-bottom:3px}
+.step-desc{font-size:.75rem;color:var(--tx2);line-height:1.48}
+.step-desc b{color:var(--tx);font-weight:700}
+.hl{color:var(--a)!important;font-weight:800!important}
+.dl-notice{
+  display:none;margin-top:10px;padding:10px 12px;border-radius:var(--rs);
+  background:var(--vac-bg);border:1px solid var(--vac);color:var(--vac);
+  font-size:.75rem;font-weight:700;line-height:1.45;text-align:center;
+}
+.dl-notice.on{display:block}
+</style>
+</head>
+<body>
+<script>
+try{
+  var t=JSON.parse(localStorage.getItem('theme')||'null');
+  if(t==='light')document.body.classList.add('light');
+}catch(e){}
+</script>
+
+<!-- 상단 앱 정보 및 다운로드 카드 -->
+<div class="card" style="text-align:center;padding:24px 18px 20px">
+  <img src="data:image/webp;base64,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" alt="교대근무 달력"
+       style="width:76px;height:76px;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.35);display:block;margin:0 auto 12px">
+  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em">교대근무 달력</div>
+  <div style="font-size:.75rem;color:var(--tx3);margin-top:3px;margin-bottom:16px">안드로이드 전용 앱 · 홈 화면 위젯 지원</div>
+
+  <a id="apk-dl-btn" href="./ShiftCalendar.apk" download="ShiftCalendar.apk" class="btn pri" onclick="onDownloadStart()">
+    ShiftCalendar.apk 다운로드
+  </a>
+
+  <div id="dl-status" class="dl-notice">
+    다운로드가 시작되었습니다.<br>완료 후 아래 안내에 따라 설치를 진행해 주세요.
+  </div>
+
+  <div style="margin-top:10px;font-size:.68rem;color:var(--tx3);font-family:'JetBrains Mono',monospace">
+    파일명: ShiftCalendar.apk · Android 8.0 이상
+  </div>
+</div>
+
+<!-- 설치 방법 안내 카드 -->
+<div class="card" id="install-guide-card">
+  <div style="font-size:.82rem;font-weight:800;color:var(--tx);margin-bottom:12px">설치 방법 안내</div>
+
+  <div class="step-list">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">다운로드한 파일 실행</div>
+        <div class="step-desc">
+          다운로드가 끝나면 상단 알림창에서 <b class="hl">ShiftCalendar.apk</b>를 누르거나, 휴대폰의 <b>[내 파일] → [다운로드]</b> 폴더에서 파일을 선택합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">출처를 알 수 없는 앱 설치 허용</div>
+        <div class="step-desc">
+          보안 설정 안내창이 뜨면 <b>[설정]</b>을 누른 뒤 <b class="hl">'이 출처 허용'</b> 스위치를 켜고 뒤로 돌아와 <b>[설치]</b>를 누릅니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Play 프로텍트 안내창 처리</div>
+        <div class="step-desc">
+          스토어 외부 앱 확인창이 나타나면 <b>[세부정보 더보기]</b>를 누른 후 <b class="hl">[무시하고 설치]</b>(또는 검사 후 설치)를 누르면 설치가 완료됩니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">홈 화면 달력 위젯 추가</div>
+        <div class="step-desc">
+          앱을 실행해 로그인한 뒤, 휴대폰 바탕화면 빈 곳을 길게 눌러 <b>[위젯] → [shift calender]</b>를 추가하면 홈 화면에서 바로 근무표를 볼 수 있습니다.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="./index.html" class="btn sec">달력 화면으로 돌아가기</a>
+
+<script>
+function onDownloadStart(){
+  var st=document.getElementById('dl-status');
+  if(st)st.classList.add('on');
+}
+(function(){
+  if(location.search.indexOf('auto=1')!==-1){
+    setTimeout(function(){
+      var btn=document.getElementById('apk-dl-btn');
+      if(btn){
+        onDownloadStart();
+        var a=document.createElement('a');
+        a.href='./ShiftCalendar.apk';
+        a.setAttribute('download','ShiftCalendar.apk');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }, 300);
+  }
+})();
+</script>
+</body>
+</html>
