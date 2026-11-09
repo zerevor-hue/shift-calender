@@ -1127,21 +1127,22 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <!-- 상단 지급합계 / 공제합계 / 차인지급액(실수령액) 배너 -->
     <div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:16px;padding:13px 14px;margin-bottom:10px">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
-        <span style="font-size:.74rem;font-weight:800;color:var(--tx2)">총 지급액 (세전 합계)</span>
+        <span style="font-size:.74rem;font-weight:800;color:var(--tx2)">지급합계 (세전 총액)</span>
         <span id="sal-gross-total" style="font-family:'JetBrains Mono',monospace;font-size:1.26rem;font-weight:900;color:var(--a)">0원</span>
       </div>
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:.71rem;font-weight:700;color:var(--tx3)">공제합계 (4대보험·노조비·세금)</span>
+        <span style="font-size:.71rem;font-weight:700;color:var(--tx3)">공제합계</span>
         <span id="sal-deduct-total" style="font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:800;color:var(--red)">-0원</span>
       </div>
       <div style="display:flex;align-items:baseline;justify-content:space-between;padding-top:7px;border-top:1px dashed var(--bd)">
         <span style="font-size:.76rem;font-weight:800;color:var(--tx)">차인지급액 (실수령액)</span>
         <span id="sal-net-total" style="font-family:'JetBrains Mono',monospace;font-size:1.22rem;font-weight:900;color:var(--vac)">0원</span>
       </div>
-      <div id="sal-per-sub-info" style="margin-top:8px;padding:6px 9px;background:var(--bg2);border-radius:10px;font-size:.65rem;color:var(--tx2);display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap">
+      <div id="sal-per-sub-info" style="margin-top:8px;padding:6px 9px;background:var(--bg2);border-radius:10px;font-size:.63rem;color:var(--tx2);display:grid;grid-template-columns:repeat(2,1fr);gap:4px 8px">
         <span>통상시급 <b id="sal-unit-hourly" style="color:var(--tx)">0원</b></span>
-        <span>주간대근 1회 <b id="sal-unit-ds" style="color:var(--as)">+0원</b></span>
-        <span>야간대근 1회 <b id="sal-unit-ns" style="color:var(--ns)">+0원</b></span>
+        <span>공휴일 1회 <b id="sal-unit-hd" style="color:var(--ev-tx)">+0원</b></span>
+        <span>평일 주간대근 1회 <b id="sal-unit-ds" style="color:var(--as)">+0원</b></span>
+        <span>평일 야간대근 1회 <b id="sal-unit-ns" style="color:var(--ns)">+0원</b></span>
       </div>
     </div>
 
@@ -1155,22 +1156,22 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <option value="shift194">4조 3교대 (194h · 연장8/휴일16/야간53)</option>
         </select>
       </div>
-      <div style="font-size:.62rem;color:var(--tx3);line-height:1.45;background:var(--bg2);padding:6px 8px;border-radius:8px">
-        • <b>통상시급 공식</b>: <span style="font-family:'JetBrains Mono',monospace">(기본급 + 기술 + 직책 + 식대 + 기본급×2/12) ÷ <span id="sal-div-h-lbl">157</span>h</span><br>
-        • <b>월 상여금</b>: <span style="font-family:'JetBrains Mono',monospace">기본급 × 1.2 / 12 (10%)</span> · <b>노조비</b>: <span style="font-family:'JetBrains Mono',monospace">통상임금 × 1.2%</span>
+      <div style="font-size:.61rem;color:var(--tx3);line-height:1.45;background:var(--bg2);padding:6px 8px;border-radius:8px">
+        • <b>통상시급</b>: <span style="font-family:'JetBrains Mono',monospace">(기본급 + 기술 + 직책 + 식대 + 기본급×2/12) ÷ <span id="sal-div-h-lbl">157</span>h</span><br>
+        • <b>공휴일 1회(10.5h)</b>: <span style="font-family:'JetBrains Mono',monospace">8h×1.5배(12h) + 2.5h×2.0배(5h) = 시급×17h</span> (올림)
       </div>
     </div>
 
-    <!-- 1. 기본급 및 통상임금 산입 수당 (주황색 입력란 대응 · 기기 캐시 저장) -->
+    <!-- 1. 지급 항목 입력 (급여명세서 지급내역 순서와 동일) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">기본급 · 고정수당</div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">기본급 · 고정/추가 지급 항목</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.63rem;color:var(--a)">월 기본급 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="기본급 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
+          <div class="lbl" style="font-size:.63rem;color:var(--a)">기본급 (원)</div>
+          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="예: 2,181,313" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.63rem">통상시급 (원)</div>
+          <div class="lbl" style="font-size:.63rem">통상시급 (자동 계산)</div>
           <input type="text" inputmode="numeric" id="sal-hourly" placeholder="자동 계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange(this)">
         </div>
       </div>
@@ -1194,119 +1195,135 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <input type="text" inputmode="numeric" id="sal-welfare-pay" placeholder="370,000" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.61rem">육아수당</div>
-          <input type="text" inputmode="numeric" id="sal-child-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.61rem;color:var(--ev-tx)">상품권 (지급)</div>
+          <input type="text" inputmode="numeric" id="sal-gift-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
-          <div class="lbl" style="font-size:.61rem;color:var(--vac)">이번 달 휴가비·기타 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-extra-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
+          <div class="lbl" style="font-size:.61rem">육아수당</div>
+          <input type="text" inputmode="numeric" id="sal-child-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.61rem;color:var(--ev-tx)">이번 달 상품권 (지급·공제)</div>
-          <input type="text" inputmode="numeric" id="sal-gift-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
+          <div class="lbl" style="font-size:.61rem;color:var(--vac)">휴가비·기타수당</div>
+          <input type="text" inputmode="numeric" id="sal-extra-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
     </div>
 
-    <!-- 2. 일반 대근 · 공휴일 근무 · 미사용 연차 (시트 구조 + 달력 자동 연동) -->
+    <!-- 2. 평일 대근 · 공휴일 근무 횟수 (연장추가수당 / 휴일추가수당 / 야간추가수당 산정) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">대근 · 공휴일 · 연차</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">대근 · 공휴일 근무 횟수</span>
         <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.63rem" onclick="resetSalCountsFromCal()">달력 기준 불러오기</button>
       </div>
-      <!-- 일반 대근(주/야) & 공휴일(주/야) 개수 -->
+      <div style="font-size:.6rem;color:var(--tx3);margin-bottom:7px;line-height:1.4">
+        ※ <b>공휴일 대근/근무</b>는 오른쪽 <b>공휴일(주)·공휴일(야)</b>에만 입력하고, 왼쪽에는 <b>평일 대근</b>만 입력하세요.
+      </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.56rem;color:var(--as)">평일 주간대근</div>
-          <input type="number" id="sal-cnt-ds" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
+          <div class="lbl" style="font-size:.55rem;color:var(--as)">평일 주간대근</div>
+          <input type="number" id="sal-cnt-ds" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.56rem;color:var(--ns)">평일 야간대근</div>
-          <input type="number" id="sal-cnt-ns" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
+          <div class="lbl" style="font-size:.55rem;color:var(--ns)">평일 야간대근</div>
+          <input type="number" id="sal-cnt-ns" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--red)">공휴일(주)</div>
-          <input type="number" id="sal-cnt-hd" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
+          <div class="lbl" style="font-size:.55rem;color:var(--red)">공휴일(주)</div>
+          <input type="number" id="sal-cnt-hd" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem;color:var(--red)">공휴일(야)</div>
-          <input type="number" id="sal-cnt-hdn" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="calcSalary(false)">
+          <div class="lbl" style="font-size:.55rem;color:var(--red)">공휴일(야)</div>
+          <input type="number" id="sal-cnt-hdn" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
       </div>
       <!-- 1회당 적용 시간 및 미사용 연차 -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.55rem">대근1개(h·1.5배)</div>
+          <div class="lbl" style="font-size:.55rem">평일대근(h)</div>
           <input type="number" id="sal-sub-h" step="0.5" min="0" max="24" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.55rem">공휴1개(h·1.5배)</div>
+          <div class="lbl" style="font-size:.55rem">공휴근무(h)</div>
           <input type="number" id="sal-hd-h" step="0.5" min="0" max="24" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.55rem">야간가산(h·0.5배)</div>
+          <div class="lbl" style="font-size:.55rem">야간가산(h)</div>
           <input type="number" id="sal-night-h" step="0.5" min="0" max="12" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.55rem;color:var(--vac)">미사용연차(개)</div>
-          <input type="number" id="sal-vac-pay-days" step="0.5" min="0" placeholder="0" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(false)">
+          <input type="number" id="sal-vac-pay-days" step="0.5" min="0" placeholder="0" style="padding:5px 4px;font-size:.74rem;text-align:center" oninput="calcSalary(true)">
         </div>
       </div>
-      <!-- 월 기본(고정) 교대/포괄 시간 (원래 근무시간 기준: 연장 ×1.5배 / 휴일 ×1.5배 / 야간 ×0.5배) -->
+      <!-- 월 기본(고정) 교대/포괄 시간 -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-top:7px;border-top:1px dashed var(--bd)">
         <div>
-          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">기본 연장시간(h·×1.5)</div>
+          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">고정 연장시간(h)</div>
           <input type="number" id="sal-base-ot-h" step="0.5" min="0" style="padding:4px;font-size:.73rem;text-align:center" oninput="calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">기본 휴일시간(h·×1.5)</div>
+          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">고정 휴일시간(h)</div>
           <input type="number" id="sal-base-hd-h" step="0.5" min="0" style="padding:4px;font-size:.73rem;text-align:center" oninput="calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">기본 야간시간(h·×0.5)</div>
+          <div class="lbl" style="font-size:.56rem;color:var(--tx3)">고정 야간시간(h)</div>
           <input type="number" id="sal-base-nt-h" step="0.5" min="0" style="padding:4px;font-size:.73rem;text-align:center" oninput="calcSalary(true)">
         </div>
       </div>
     </div>
 
-    <!-- 3. 공제 설정 (4대보험 · 노조비 1.2% · 세금, 기기 캐시 저장) -->
+    <!-- 3. 공제 내역 입력 (급여명세서 공제내역과 1:1 동일 구조) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 내역</div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 내역 (비워두면 요율 자동 계산)</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
-          <div class="lbl" style="font-size:.6rem">국민연금 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="자동(4.5%)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">국민연금</div>
+          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="자동(4.5%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">건강보험 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="자동(3.545%)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">건강보험</div>
+          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="자동(3.545%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">장기요양 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(요양)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">장기요양보험료</div>
+          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(요양)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
+        <div>
+          <div class="lbl" style="font-size:.58rem">고용보험</div>
+          <input type="text" inputmode="numeric" id="sal-ded-emp" placeholder="자동(0.9%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+        </div>
+        <div>
+          <div class="lbl" style="font-size:.58rem">식사비</div>
+          <input type="text" inputmode="numeric" id="sal-ded-meal" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+        </div>
+        <div>
+          <div class="lbl" style="font-size:.58rem">노조조합비</div>
+          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="자동 계산" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div>
-          <div class="lbl" style="font-size:.6rem">소득세</div>
-          <input type="text" inputmode="numeric" id="sal-ded-tax" placeholder="자동 계산" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
+          <div class="lbl" style="font-size:.58rem">소득세</div>
+          <input type="text" inputmode="numeric" id="sal-ded-tax" placeholder="0 (직접 입력)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">지방소득세 (소득세 10%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-ltax" placeholder="자동 계산" style="padding:6px;font-size:.78rem" readonly>
+          <div class="lbl" style="font-size:.58rem">지방소득세 (소득세 10%)</div>
+          <input type="text" inputmode="numeric" id="sal-ded-ltax" placeholder="0" style="padding:6px;font-size:.76rem" readonly>
         </div>
       </div>
     </div>
 
-    <!-- 4. 명세서 1:1 지급/공제 상세 내역표 -->
+    <!-- 4. 급여명세서와 100% 동일한 항목별 지급내역 / 공제내역 표 -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">급여 상세 내역</span>
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">급여명세서 항목별 내역</span>
         <button type="button" class="btn pri sm" style="padding:4px 9px;font-size:.65rem" onclick="saveCurrentMonthSalary()">이 달 내역 저장</button>
       </div>
-      <div id="sal-breakdown" style="display:flex;flex-direction:column;gap:5px;font-size:.73rem"></div>
+      <div id="sal-breakdown" style="display:flex;flex-direction:column;gap:4px;font-size:.73rem"></div>
     </div>
 
     <!-- 5. 최하단: 1월 ~ 현재까지 저장된 월별 급여 내역 (기기 캐시) -->
@@ -3028,15 +3045,10 @@ function changeDgMonth(d){dgMo+=d;if(dgMo>11){dgMo=0;dgYr++;}if(dgMo<0){dgMo=11;
 function dgGotoToday(){const t=new Date();dgYr=t.getFullYear();dgMo=t.getMonth();renderDgCal();}
 
 let salYr=0,salMo=0;
+let _salManualCountsDirty=false;
 function _salCfgKey(){return 'sal_cfg_v4_'+(S.myId||'local');}
 function _salHistKey(yr){return `sal_hist_v4_${S.myId||'local'}_${yr}`;}
 
-// 근무형태별 기본 프리셋 (임금협약 및 단체협약 제48조 기준)
-// - 통상임금 월액 = 기본급 + 기술수당 + 직책수당 + 식대(200,000) + (기본급 * 2 / 12)
-// - 통상시급 = 통상임금 월액 / 소정근로시간 (4조2교대: 157h, 일근제: 209h, 4조3교대: 194h)
-// - 상여 = ceil(기본급 * 1.2 / 12) (= 기본급의 10%)
-// - 노조조합비 = round(통상임금 월액 * 1.2%)
-// - 고용보험 = floor(((지급합계 - 비과세식대) * 0.9%) / 10) * 10
 const SAL_MODE_PRESETS={
   shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:10.5,nightH:8},
   day209:{divH:209,baseOtRawH:13,baseHdRawH:12,baseNtRawH:8,subH:10.5,hdH:6,nightH:6.5},
@@ -3055,7 +3067,9 @@ function _num(v,defVal=0){
 
 function _fmtCommaVal(v){
   if(v===''||v===null||v===undefined)return '';
-  const clean=String(v).replace(/[^\d]/g,'');
+  const s=String(v).trim();
+  if(s==='0')return '0';
+  const clean=s.replace(/[^\d]/g,'');
   if(!clean)return '';
   const n=parseInt(clean,10);
   return Number.isFinite(n)?n.toLocaleString('ko-KR'):'';
@@ -3121,10 +3135,19 @@ function getSalCfg(){
     welfarePay:370000,childPay:0,
     subH:10.5,hdH:10.5,nightH:8,
     baseOtH:38,baseHdH:0,baseNtH:49,
-    dedPen:'',dedHlth:'',dedCare:''
+    dedPen:'',dedHlth:'',dedCare:'',
+    dedEmp:'',dedMeal:'',dedUnion:''
   };
   const saved=ls.g(_salCfgKey());
-  return saved&&typeof saved==='object'?{...def,...saved}:def;
+  if(!saved||typeof saved!=='object')return def;
+  const merged={...def,...saved};
+  // 근무형태와 고정 시간이 서로 다른 모드의 값으로 섞여있으면 해당 근무형태의 표준 시간으로 자동 보정
+  const p=SAL_MODE_PRESETS[merged.workMode]||SAL_MODE_PRESETS.shift157;
+  if(merged.workMode==='shift157'&&(merged.baseOtH===13||merged.baseOtH===8||merged.hdH===6)){
+    merged.baseOtH=p.baseOtRawH;merged.baseHdH=p.baseHdRawH;merged.baseNtH=p.baseNtRawH;
+    merged.subH=p.subH;merged.hdH=p.hdH;merged.nightH=p.nightH;
+  }
+  return merged;
 }
 function saveSalCfg(cfg){ls.s(_salCfgKey(),cfg);}
 function getSalHist(yr){
@@ -3158,7 +3181,6 @@ function getCalMonthShiftStats(yr,mo,workMode){
         if(sh==='ds')st.hd++;
         else if(sh==='ns')st.hdn++;
       }else{
-        // 공휴일 주간(정규·대근) 및 야간(정규·대근)은 휴일추가수당(8h×1.5 + 2.5h×2.0 = 17h분)으로 집계하며 평일 연장대근(ds/ns)과 중복 합산하지 않음
         if(sh==='dr'||sh==='ds')st.hd++;
         else if(sh==='nr'||sh==='ns')st.hdn++;
       }
@@ -3199,24 +3221,22 @@ function computeSalaryAmounts(cfg,moData){
   const hdCnt=Math.max(0,parseInt(moData.hd)||0);
   const hdnCnt=Math.max(0,parseInt(moData.hdn)||0);
   const vacPayDays=Math.max(0,parseFloat(moData.vacPayDays)||0);
-  const extraPay=Math.max(0,parseFloat(moData.extraPay)||0);
-  const giftPay=Math.max(0,parseFloat(moData.giftPay)||0);
+  const extraPay=_num(moData.extraPay,0);
+  const giftPay=_num(moData.giftPay,0);
 
-  // 1) 월 상여금 = ceil(기본급 * 1.2 / 12) (= 기본급의 10%)
+  // 1) 상여 = ceil(기본급 * 10%)
   const bonusPay=basePay>0?Math.ceil(basePay*0.1):0;
 
-  // 2) 기본(고정) 연장·휴일·야간수당 및 추가 대근·공휴일 수당 (명세서 원단위 올림 기준)
+  // 2) 고정 연장수당 / 고정 휴일수당 / 고정 야간수당 (원 단위 올림)
   const baseOtPay=hourly>0?Math.ceil(hourly*baseOtRawH*1.5):0;
   const baseHdPay=hourly>0?Math.ceil(hourly*baseHdRawH*1.5):0;
   const baseNtPay=hourly>0?Math.ceil(hourly*baseNtRawH*0.5):0;
 
-  // 평일 대근 연장시간: (평일 주간대근 + 평일 야간대근) × 10.5h (× 1.5배)
+  // 3) 연장추가수당(평일대근) / 휴일추가수당(공휴일 8h*1.5 + 2.5h*2.0 = 17h) / 야간추가수당(평일야간대근 + 공휴일야간)
   const addOtHours=(dsCnt+nsCnt)*subH;
-  // 공휴일 근무(10.5h): 8h 이내 × 1.5배(12h) + 8h 초과분(2.5h) 휴일·연장 중복 × 2.0배(5h) = 1회당 시급 × 17.0h
   const addHdHours=(hdCnt+hdnCnt)*hdH;
   const hdUnitPayHours=hdH>8?((8*1.5)+((hdH-8)*2.0)):(hdH*1.5);
   const addHdPayHours=(hdCnt+hdnCnt)*hdUnitPayHours;
-  // 야간추가시간: (평일 야간대근 + 공휴일 야간) × 8h (× 0.5배)
   const addNtHours=(nsCnt+hdnCnt)*nightH;
 
   const addOtPay=hourly>0?Math.ceil(hourly*addOtHours*1.5):0;
@@ -3227,44 +3247,33 @@ function computeSalaryAmounts(cfg,moData){
   const totalHdPay=baseHdPay+addHdPay;
   const totalNtPay=baseNtPay+addNtPay;
 
-  // 1회당 체감 수당 안내용
   const unitSubPay=Math.ceil(hourly*subH*1.5);
   const unitNsNightPay=Math.ceil(hourly*nightH*0.5);
   const unitNsTotalPay=unitSubPay+unitNsNightPay;
   const unitHdPay=Math.ceil(hourly*hdUnitPayHours);
 
-  // 3) 미사용 연차수당 (시트 H12 및 단협 제65조: 통상시급 * 8h * 연차개수)
-  const vacAllowancePay=vacPayDays>0?Math.round(hourly*8*vacPayDays):0;
+  // 4) 미사용 연차수당
+  const vacAllowancePay=vacPayDays>0?Math.ceil(hourly*8*vacPayDays):0;
 
-  // 4) 지급합계
-  const grossTotal=basePay+techPay+posPay+bonusPay+totalOtPay+totalHdPay+totalNtPay+mealPay+welfarePay+childPay+vacAllowancePay+extraPay+giftPay;
+  // 5) 지급합계 (명세서 지급내역 합계와 100% 동일)
+  const grossTotal=basePay+bonusPay+baseOtPay+baseHdPay+baseNtPay+addOtPay+addHdPay+addNtPay+mealPay+techPay+posPay+welfarePay+giftPay+childPay+vacAllowancePay+extraPay;
 
-  // 5) 공제내역 (직접 입력 시 입력값 사용, 미입력 시 법정 요율 자동 산정)
+  // 6) 공제내역 (명세서 공제내역과 1:1 대응)
   const taxable=Math.max(0,grossTotal-mealPay);
-  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null?Math.round(parseFloat(cfg.dedPen)||0):Math.floor((taxable*0.045)/10)*10):0;
-  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null?Math.round(parseFloat(cfg.dedHlth)||0):Math.floor((taxable*0.03545)/10)*10):0;
-  const care=hasIncome?(cfg.dedCare!==''&&cfg.dedCare!==null?Math.round(parseFloat(cfg.dedCare)||0):Math.floor((health*0.1295)/10)*10):0;
-
-  // 고용보험: (지급합계 - 비과세식대) * 0.9% (10원 미만 절사)
-  const empIns=hasIncome?Math.floor((taxable*0.009)/10)*10:0;
-
-  // 노조조합비: 통상임금 월액 * 1.2% (원 단위 반올림)
-  const unionDues=hasIncome?Math.round(ordMonthly*0.012):0;
+  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null&&cfg.dedPen!==undefined?_num(cfg.dedPen,0):Math.floor((taxable*0.045)/10)*10):0;
+  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null&&cfg.dedHlth!==undefined?_num(cfg.dedHlth,0):Math.floor((taxable*0.03545)/10)*10):0;
+  const care=hasIncome?(cfg.dedCare!==''&&cfg.dedCare!==null&&cfg.dedCare!==undefined?_num(cfg.dedCare,0):Math.floor((health*0.1295)/10)*10):0;
+  const empIns=hasIncome?(cfg.dedEmp!==''&&cfg.dedEmp!==null&&cfg.dedEmp!==undefined?_num(cfg.dedEmp,0):Math.floor((taxable*0.009)/10)*10):0;
+  const mealDed=hasIncome?_num(moData.dedMeal!==undefined&&moData.dedMeal!==''?moData.dedMeal:cfg.dedMeal,0):0;
+  const unionDues=hasIncome?(cfg.dedUnion!==''&&cfg.dedUnion!==null&&cfg.dedUnion!==undefined?_num(cfg.dedUnion,0):Math.round(ordMonthly*0.012)):0;
 
   let incomeTax=0;
-  if(hasIncome){
-    if(moData.customTax!==undefined&&moData.customTax!==''&&moData.customTax!==null){
-      incomeTax=Math.max(0,Math.round(parseFloat(moData.customTax)||0));
-    }else{
-      // 근로소득 간이세액표 20,000원 구간 중간값 기반 자동 추정
-      const mid=(Math.floor(taxable/20000)*20000)+10000;
-      incomeTax=taxable>2500000?Math.max(0,Math.floor((Math.round(mid*0.1222-301712))/10)*10):0;
-    }
+  if(hasIncome&&moData.customTax!==undefined&&moData.customTax!==''&&moData.customTax!==null){
+    incomeTax=_num(moData.customTax,0);
   }
   const localTax=Math.floor((incomeTax*0.1)/10)*10;
-  const giftDeduct=giftPay;
 
-  const totalDeduct=pension+health+care+empIns+unionDues+incomeTax+localTax+giftDeduct;
+  const totalDeduct=pension+health+care+empIns+mealDed+unionDues+incomeTax+localTax;
   const netTotal=Math.max(0,grossTotal-totalDeduct);
 
   return {
@@ -3279,7 +3288,7 @@ function computeSalaryAmounts(cfg,moData){
     totalOtPay,totalHdPay,totalNtPay,
     unitSubPay,unitNsTotalPay,unitHdPay,unitNsNightPay,
     grossTotal:Math.round(grossTotal),
-    pension,health,care,empIns,unionDues,incomeTax,localTax,giftDeduct,
+    pension,health,care,empIns,mealDed,unionDues,incomeTax,localTax,
     totalDeduct:Math.round(totalDeduct),
     netTotal:Math.round(netTotal)
   };
@@ -3289,11 +3298,15 @@ function openSalaryCalc(){
   const now=new Date();
   salYr=dgYr>0?dgYr:(S.yr>0?S.yr:now.getFullYear());
   salMo=dgYr>0?dgMo:(S.yr>0?S.mo:now.getMonth());
+  _salManualCountsDirty=false;
   const cfg=getSalCfg();
+  const mode=cfg.workMode||'shift157';
+  const p=SAL_MODE_PRESETS[mode]||SAL_MODE_PRESETS.shift157;
   const modeEl=document.getElementById('sal-work-mode');
-  if(modeEl)modeEl.value=cfg.workMode||'shift157';
+  if(modeEl)modeEl.value=mode;
   const divLbl=document.getElementById('sal-div-h-lbl');
-  if(divLbl)divLbl.textContent=SAL_MODE_PRESETS[cfg.workMode||'shift157']?.divH||157;
+  if(divLbl)divLbl.textContent=p.divH;
+
   _setMoneyEl('sal-base-pay',cfg.basePay!==''&&cfg.basePay!==null?cfg.basePay:'');
   _setMoneyEl('sal-tech-pay',cfg.techPay||'');
   _setMoneyEl('sal-pos-pay',cfg.posPay||'');
@@ -3301,16 +3314,22 @@ function openSalaryCalc(){
   _setMoneyEl('sal-welfare-pay',cfg.welfarePay??370000);
   _setMoneyEl('sal-child-pay',cfg.childPay||'');
   const initBase=_num(cfg.basePay,0);
-  _setMoneyEl('sal-hourly',initBase>0?Math.round(calcHourlyFromBasePay(initBase,cfg.workMode,cfg.techPay,cfg.posPay,cfg.mealPay)):(cfg.hourly||''));
-  document.getElementById('sal-sub-h').value=cfg.subH??10.5;
-  document.getElementById('sal-hd-h').value=cfg.hdH??10.5;
-  document.getElementById('sal-night-h').value=cfg.nightH??8;
-  document.getElementById('sal-base-ot-h').value=cfg.baseOtH??38;
-  document.getElementById('sal-base-hd-h').value=cfg.baseHdH??0;
-  document.getElementById('sal-base-nt-h').value=cfg.baseNtH??49;
+  _setMoneyEl('sal-hourly',initBase>0?Math.round(calcHourlyFromBasePay(initBase,mode,cfg.techPay,cfg.posPay,cfg.mealPay)):(cfg.hourly||''));
+
+  document.getElementById('sal-sub-h').value=cfg.subH??p.subH;
+  document.getElementById('sal-hd-h').value=cfg.hdH??p.hdH;
+  document.getElementById('sal-night-h').value=cfg.nightH??p.nightH;
+  document.getElementById('sal-base-ot-h').value=cfg.baseOtH??p.baseOtRawH;
+  document.getElementById('sal-base-hd-h').value=cfg.baseHdH??p.baseHdRawH;
+  document.getElementById('sal-base-nt-h').value=cfg.baseNtH??p.baseNtRawH;
+
   _setMoneyEl('sal-ded-pen',cfg.dedPen!==''&&cfg.dedPen!==null?cfg.dedPen:'');
   _setMoneyEl('sal-ded-hlth',cfg.dedHlth!==''&&cfg.dedHlth!==null?cfg.dedHlth:'');
   _setMoneyEl('sal-ded-care',cfg.dedCare!==''&&cfg.dedCare!==null?cfg.dedCare:'');
+  _setMoneyEl('sal-ded-emp',cfg.dedEmp!==''&&cfg.dedEmp!==null?cfg.dedEmp:'');
+  _setMoneyEl('sal-ded-meal',cfg.dedMeal!==''&&cfg.dedMeal!==null?cfg.dedMeal:'');
+  _setMoneyEl('sal-ded-union',cfg.dedUnion!==''&&cfg.dedUnion!==null?cfg.dedUnion:'');
+
   loadSalMonthData();
   os('sal-sov');
 }
@@ -3319,12 +3338,19 @@ function changeSalMonth(d){
   salMo+=d;
   if(salMo>11){salMo=0;salYr++;}
   if(salMo<0){salMo=11;salYr--;}
+  _salManualCountsDirty=false;
   loadSalMonthData();
 }
 
 function selectSalMonth(moIdx){
   salMo=moIdx;
+  _salManualCountsDirty=false;
   loadSalMonthData();
+}
+
+function onSalCountsManualInput(){
+  _salManualCountsDirty=true;
+  calcSalary(true);
 }
 
 function loadSalMonthData(){
@@ -3349,6 +3375,7 @@ function loadSalMonthData(){
   document.getElementById('sal-vac-pay-days').value=savedMo?.vacPayDays?savedMo.vacPayDays:'';
   _setMoneyEl('sal-extra-pay',savedMo?.extraPay?savedMo.extraPay:'');
   _setMoneyEl('sal-gift-pay',savedMo?.giftPay?savedMo.giftPay:'');
+  if(savedMo?.dedMeal!==undefined&&savedMo?.dedMeal!=='')_setMoneyEl('sal-ded-meal',savedMo.dedMeal);
   _setMoneyEl('sal-ded-tax',savedMo?.customTax!==undefined&&savedMo?.customTax!==''?savedMo.customTax:'');
   calcSalary(false);
 }
@@ -3357,6 +3384,7 @@ function resetSalCountsFromCal(){
   document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월`;
   const mode=document.getElementById('sal-work-mode')?.value||'shift157';
   const st=getCalMonthShiftStats(salYr,salMo,mode);
+  _salManualCountsDirty=false;
   document.getElementById('sal-cnt-ds').value=st.ds;
   document.getElementById('sal-cnt-ns').value=st.ns;
   document.getElementById('sal-cnt-hd').value=st.hd;
@@ -3376,11 +3404,14 @@ function onSalModeChange(applyPresetHours){
     document.getElementById('sal-sub-h').value=p.subH;
     document.getElementById('sal-hd-h').value=p.hdH;
     document.getElementById('sal-night-h').value=p.nightH;
-    const st=getCalMonthShiftStats(salYr,salMo,mode);
-    document.getElementById('sal-cnt-ds').value=st.ds;
-    document.getElementById('sal-cnt-ns').value=st.ns;
-    document.getElementById('sal-cnt-hd').value=st.hd;
-    document.getElementById('sal-cnt-hdn').value=st.hdn;
+    // 사용자가 직접 대근/공휴일 횟수를 입력한 상태가 아닐 때만 달력 기준으로 횟수 갱신
+    if(!_salManualCountsDirty){
+      const st=getCalMonthShiftStats(salYr,salMo,mode);
+      document.getElementById('sal-cnt-ds').value=st.ds;
+      document.getElementById('sal-cnt-ns').value=st.ns;
+      document.getElementById('sal-cnt-hd').value=st.hd;
+      document.getElementById('sal-cnt-hdn').value=st.hdn;
+    }
   }
   onSalBaseChange();
 }
@@ -3431,6 +3462,9 @@ function readSalFormCfg(){
   const rawPen=_readMoneyEl('sal-ded-pen',true);
   const rawHlth=_readMoneyEl('sal-ded-hlth',true);
   const rawCare=_readMoneyEl('sal-ded-care',true);
+  const rawEmp=_readMoneyEl('sal-ded-emp',true);
+  const rawDedMeal=_readMoneyEl('sal-ded-meal',true);
+  const rawUnion=_readMoneyEl('sal-ded-union',true);
   return {
     workMode:document.getElementById('sal-work-mode')?.value||'shift157',
     basePay:rawBase===''?'':rawBase,
@@ -3449,11 +3483,15 @@ function readSalFormCfg(){
     dedPen:rawPen===''?'':rawPen,
     dedHlth:rawHlth===''?'':rawHlth,
     dedCare:rawCare===''?'':rawCare,
+    dedEmp:rawEmp===''?'':rawEmp,
+    dedMeal:rawDedMeal===''?'':rawDedMeal,
+    dedUnion:rawUnion===''?'':rawUnion
   };
 }
 
 function readSalFormMoData(){
   const rawTax=_readMoneyEl('sal-ded-tax',true);
+  const rawDedMeal=_readMoneyEl('sal-ded-meal',true);
   return {
     ds:Math.max(0,parseInt(document.getElementById('sal-cnt-ds').value)||0),
     ns:Math.max(0,parseInt(document.getElementById('sal-cnt-ns').value)||0),
@@ -3462,6 +3500,7 @@ function readSalFormMoData(){
     vacPayDays:Math.max(0,parseFloat(document.getElementById('sal-vac-pay-days').value)||0),
     extraPay:_readMoneyEl('sal-extra-pay',false),
     giftPay:_readMoneyEl('sal-gift-pay',false),
+    dedMeal:rawDedMeal===''?'':rawDedMeal,
     customTax:rawTax===''?'':rawTax
   };
 }
@@ -3473,42 +3512,46 @@ function saveCurrentMonthSalary(){
   const res=computeSalaryAmounts(cfg,moData);
   const hist=getSalHist(salYr);
   const calSt=getCalMonthShiftStats(salYr,salMo,cfg.workMode);
-  const isManualCnt=(moData.ds!==calSt.ds||moData.ns!==calSt.ns||moData.hd!==calSt.hd||moData.hdn!==calSt.hdn);
+  const isManualCnt=(_salManualCountsDirty||moData.ds!==calSt.ds||moData.ns!==calSt.ns||moData.hd!==calSt.hd||moData.hdn!==calSt.hdn);
   hist[String(salMo+1)]={
     basePay:res.basePay,
     grossTotal:res.grossTotal,
     netTotal:res.netTotal,
     totalDeduct:res.totalDeduct,
-    workMode:cfg.workMode,counts:{ds:moData.ds,ns:moData.ns,hd:moData.hd,hdn:moData.hdn},
+    workMode:cfg.workMode,
+    counts:{ds:moData.ds,ns:moData.ns,hd:moData.hd,hdn:moData.hdn},
     manualCounts:isManualCnt,
     manualSaved:true,
     vacPayDays:moData.vacPayDays,
     extraPay:moData.extraPay,
     giftPay:moData.giftPay,
+    dedMeal:moData.dedMeal,
     customTax:moData.customTax,
     updatedAt:Date.now()
   };
   saveSalHist(salYr,hist);
-  renderSalHistoryList(cfg);
+  renderSalHistoryList(cfg,moData);
   showToast(`${salYr}년 ${salMo+1}월 급여 내역이 저장되었습니다`);
 }
 
 function syncAllMonthsSalaryToCache(){
   const cfg=readSalFormCfg();
   saveSalCfg(cfg);
+  const curMoData=readSalFormMoData();
   const now=new Date();
   const maxMo=(salYr===now.getFullYear())?(now.getMonth()+1):12;
   const hist=getSalHist(salYr);
   for(let m=1;m<=maxMo;m++){
     const prev=hist[String(m)]||{};
-    const st=(m-1===salMo)?readSalFormMoData():{
+    const st=(m-1===salMo)?curMoData:{
       ...getCalMonthShiftStats(salYr,m-1,cfg.workMode),
       vacPayDays:prev.vacPayDays||0,
       extraPay:prev.extraPay||0,
       giftPay:prev.giftPay||0,
+      dedMeal:prev.dedMeal??'',
       customTax:prev.customTax??''
     };
-    const mCfg=prev.basePay?{...cfg,basePay:prev.basePay}:cfg;
+    const mCfg=(prev.manualSaved&&prev.basePay)?{...cfg,basePay:prev.basePay}:cfg;
     const res=computeSalaryAmounts(mCfg,st);
     hist[String(m)]={
       basePay:mCfg.basePay,
@@ -3517,19 +3560,22 @@ function syncAllMonthsSalaryToCache(){
       totalDeduct:res.totalDeduct,
       workMode:cfg.workMode,
       counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0},
+      manualCounts:(m-1===salMo)?_salManualCountsDirty:!!prev.manualCounts,
+      manualSaved:!!prev.manualSaved,
       vacPayDays:st.vacPayDays||0,
       extraPay:st.extraPay||0,
       giftPay:st.giftPay||0,
+      dedMeal:st.dedMeal??'',
       customTax:st.customTax??'',
       updatedAt:Date.now()
     };
   }
   saveSalHist(salYr,hist);
-  renderSalHistoryList(cfg);
+  renderSalHistoryList(cfg,curMoData);
   showToast(`1월~${maxMo}월 급여 내역이 갱신되었습니다`);
 }
 
-function renderSalHistoryList(cfg){
+function renderSalHistoryList(cfg,curMoData){
   const listEl=document.getElementById('sal-history-list');
   const titleEl=document.getElementById('sal-hist-title');
   if(!listEl)return;
@@ -3538,39 +3584,46 @@ function renderSalHistoryList(cfg){
   if(titleEl)titleEl.textContent=`${salYr}년 1월 ~ ${maxMo}월 급여 내역`;
 
   const hist=getSalHist(salYr);
-  const hasWage=(parseFloat(cfg.basePay)>0||parseFloat(cfg.hourly)>0);
+  const hasWage=(_num(cfg.basePay,0)>0||_num(cfg.hourly,0)>0);
   let sumGross=0,sumNet=0;
   const rowsHtml=[];
 
   for(let m=1;m<=maxMo;m++){
+    const isCur=(m-1===salMo);
     const saved=hist[String(m)];
     let gross=0,net=0,st=null;
-    const liveSt=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
-    const countsMatchSaved=saved?.counts&&saved.counts.ds===liveSt.ds&&saved.counts.ns===liveSt.ns&&saved.counts.hd===liveSt.hd&&(saved.counts.hdn||0)===(liveSt.hdn||0);
-    const baseMatchSaved=saved?.basePay===cfg.basePay;
-    if(saved&&saved.manualSaved&&(!saved.workMode||saved.workMode===cfg.workMode)&&typeof saved.grossTotal==='number'&&saved.grossTotal>0&&(saved.manualCounts||countsMatchSaved)&&baseMatchSaved){
-      gross=saved.grossTotal;
-      net=saved.netTotal;
-      st=saved.counts||liveSt;
-    }else if(hasWage){
-      st=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
-      const calc=computeSalaryAmounts(cfg,st);
+    if(isCur&&curMoData){
+      st=curMoData;
+      const calc=computeSalaryAmounts(cfg,curMoData);
       gross=calc.grossTotal;
       net=calc.netTotal;
-      hist[String(m)]={basePay:cfg.basePay,grossTotal:gross,netTotal:net,totalDeduct:calc.totalDeduct,workMode:cfg.workMode,counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0},updatedAt:Date.now()};
     }else{
-      st=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
+      const liveSt=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
+      const countsMatchSaved=saved?.counts&&saved.counts.ds===liveSt.ds&&saved.counts.ns===liveSt.ns&&saved.counts.hd===liveSt.hd&&(saved.counts.hdn||0)===(liveSt.hdn||0);
+      const baseMatchSaved=saved?.basePay===cfg.basePay;
+      if(saved&&saved.manualSaved&&(!saved.workMode||saved.workMode===cfg.workMode)&&typeof saved.grossTotal==='number'&&saved.grossTotal>0&&(saved.manualCounts||countsMatchSaved)&&baseMatchSaved){
+        gross=saved.grossTotal;
+        net=saved.netTotal;
+        st=saved.counts||liveSt;
+      }else if(hasWage){
+        st=saved?.manualCounts&&saved?.counts?saved.counts:liveSt;
+        const moInput={...st,vacPayDays:saved?.vacPayDays||0,extraPay:saved?.extraPay||0,giftPay:saved?.giftPay||0,dedMeal:saved?.dedMeal??'',customTax:saved?.customTax??''};
+        const calc=computeSalaryAmounts(cfg,moInput);
+        gross=calc.grossTotal;
+        net=calc.netTotal;
+      }else{
+        st=liveSt;
+      }
     }
     sumGross+=gross;
     sumNet+=net;
-    const isCur=(m-1===salMo);
     const subCnt=(st?.ds||0)+(st?.ns||0);
     const hdTotal=(st?.hd||0)+(st?.hdn||0);
     rowsHtml.push(`
       <div onclick="selectSalMonth(${m-1})" style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:10px;cursor:pointer;background:${isCur?'var(--a-bg)':'var(--bg2)'};border:1px solid ${isCur?'var(--a)':'var(--bd)'}">
         <div style="display:flex;align-items:center;gap:8px;min-width:0">
           <span style="font-weight:800;font-size:.78rem;color:${isCur?'var(--a)':'var(--tx)'};min-width:32px">${m}월</span>
-          <span style="font-size:.63rem;color:var(--tx3);white-space:nowrap">대근 ${subCnt}회${hdTotal?` · 공휴일 ${hdTotal}회`:''}</span>
+          <span style="font-size:.63rem;color:var(--tx3);white-space:nowrap">평일대근 ${subCnt}회${hdTotal?` · 공휴일 ${hdTotal}회`:''}</span>
         </div>
         <div style="text-align:right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;color:var(--tx)">${gross>0?fmtWon(gross):'미입력'}</div>
@@ -3579,7 +3632,6 @@ function renderSalHistoryList(cfg){
       </div>
     `);
   }
-  if(hasWage)saveSalHist(salYr,hist);
 
   rowsHtml.push(`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 10px;margin-top:3px;border-radius:10px;background:var(--bg2);border:1px dashed var(--bd2)">
@@ -3604,15 +3656,21 @@ function calcSalary(shouldSaveCfg){
     saveSalCfg(cfg);
     if(res.basePay>0||res.hourly>0){
       const hist=getSalHist(salYr);
+      const calSt=getCalMonthShiftStats(salYr,salMo,cfg.workMode);
+      const isManualCnt=(_salManualCountsDirty||moData.ds!==calSt.ds||moData.ns!==calSt.ns||moData.hd!==calSt.hd||moData.hdn!==calSt.hdn);
       hist[String(salMo+1)]={
         basePay:res.basePay,
         grossTotal:res.grossTotal,
         netTotal:res.netTotal,
         totalDeduct:res.totalDeduct,
-        workMode:cfg.workMode,counts:{ds:moData.ds,ns:moData.ns,hd:moData.hd,hdn:moData.hdn},
+        workMode:cfg.workMode,
+        counts:{ds:moData.ds,ns:moData.ns,hd:moData.hd,hdn:moData.hdn},
+        manualCounts:isManualCnt,
+        manualSaved:hist[String(salMo+1)]?.manualSaved||false,
         vacPayDays:moData.vacPayDays,
         extraPay:moData.extraPay,
         giftPay:moData.giftPay,
+        dedMeal:moData.dedMeal,
         customTax:moData.customTax,
         updatedAt:Date.now()
       };
@@ -3624,73 +3682,80 @@ function calcSalary(shouldSaveCfg){
   document.getElementById('sal-deduct-total').textContent='-'+fmtWon(res.totalDeduct);
   document.getElementById('sal-net-total').textContent=fmtWon(res.netTotal);
   document.getElementById('sal-unit-hourly').textContent=res.exactHourly>0?(res.exactHourly.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})+'원'):'0원';
+  const hdUnitEl=document.getElementById('sal-unit-hd');
+  if(hdUnitEl)hdUnitEl.textContent='+'+fmtWon(res.unitHdPay);
   document.getElementById('sal-unit-ds').textContent='+'+fmtWon(res.unitSubPay);
   document.getElementById('sal-unit-ns').textContent='+'+fmtWon(res.unitNsTotalPay);
 
+  // 급여명세서와 1:1로 일치하는 개별 항목 분리 표시
   const box=document.getElementById('sal-breakdown');
+  const hdSubTxt=res.hdH>8
+    ?`공휴일 ${res.hdCnt+res.hdnCnt}회 (회당 8h×1.5 + ${res.hdH-8}h×2.0 = 17h분)`
+    :`공휴일 ${res.hdCnt+res.hdnCnt}회 (${res.addHdHours}h × 1.5배)`;
+
   const payRows=[
-    {lbl:`기본급`,sub:`통상임금 월액 ${fmtWon(res.ordMonthly)} (÷${res.divH}h)`,val:res.basePay,col:'var(--tx)'},
-    {lbl:`상여 (10%)`,sub:`기본급 × 1.2 / 12`,val:res.bonusPay,col:'var(--tx)'},
+    {lbl:'기본급',sub:`통상임금 월액 ${fmtWon(res.ordMonthly)} (÷${res.divH}h)`,val:res.basePay,col:'var(--tx)'},
+    {lbl:'상여',sub:'기본급 × 10% (올림)',val:res.bonusPay,col:'var(--tx)'},
+    {lbl:'연장수당',sub:`고정 ${res.baseOtRawH}h × 1.5배`,val:res.baseOtPay,col:'var(--a)'},
+    {lbl:'야간수당',sub:`고정 ${res.baseNtRawH}h × 0.5배`,val:res.baseNtPay,col:'var(--n)'},
+    {lbl:'연장추가수당',sub:`평일대근 ${res.dsCnt+res.nsCnt}회 (${res.addOtHours}h × 1.5배)`,val:res.addOtPay,col:'var(--as)'},
+    {lbl:'휴일추가수당',sub:hdSubTxt,val:res.addHdPay,col:'var(--ev-tx)'},
+    {lbl:'야간추가수당',sub:`야간 ${res.nsCnt+res.hdnCnt}회 (${res.addNtHours}h × 0.5배)`,val:res.addNtPay,col:'var(--ns)'},
+    {lbl:'식대',sub:'비과세 식대',val:res.mealPay,col:'var(--vac)'},
+    {lbl:'기술수당',sub:'통상임금 산입',val:res.techPay,col:'var(--tx)'},
+    {lbl:'복지수당',sub:'월 복지수당',val:res.welfarePay,col:'var(--vac)'},
   ];
-  if(res.techPay>0||res.posPay>0){
-    payRows.push({lbl:`기술 · 직책수당`,sub:`기술 ${fmtWon(res.techPay)} + 직책 ${fmtWon(res.posPay)}`,val:res.techPay+res.posPay,col:'var(--tx)'});
-  }
-  payRows.push(
-    {lbl:`연장수당 (고정)`,sub:`기본 ${res.baseOtRawH}h × 1.5배`,val:res.baseOtPay,col:'var(--a)'}
-  );
-  if(res.addOtPay>0){
-    payRows.push({lbl:`연장추가수당 (평일대근)`,sub:`평일대근 ${res.dsCnt+res.nsCnt}회 (${res.addOtHours}h × 1.5배)`,val:res.addOtPay,col:'var(--as)'});
-  }
-  if(res.baseHdPay>0){
-    payRows.push({lbl:`휴일수당 (고정)`,sub:`기본 ${res.baseHdRawH}h × 1.5배`,val:res.baseHdPay,col:'var(--ev-tx)'});
-  }
-  if(res.addHdPay>0||res.baseHdPay===0){
-    const hdSubTxt=res.hdH>8?`공휴일 ${res.hdCnt+res.hdnCnt}회 (회당 8h×1.5 + ${(res.hdH-8)}h×2.0 = 17h분)`:`공휴일 ${res.hdCnt+res.hdnCnt}회 (${res.addHdHours}h × 1.5배)`;
-    payRows.push({lbl:`휴일추가수당 (공휴일)`,sub:hdSubTxt,val:res.addHdPay,col:'var(--ev-tx)'});
-  }
-  payRows.push(
-    {lbl:`야간수당 (고정)`,sub:`기본 ${res.baseNtRawH}h × 0.5배`,val:res.baseNtPay,col:'var(--n)'}
-  );
-  if(res.addNtPay>0){
-    payRows.push({lbl:`야간추가수당`,sub:`야간 ${res.nsCnt+res.hdnCnt}회 (${res.addNtHours}h × 0.5배)`,val:res.addNtPay,col:'var(--ns)'});
-  }
-  payRows.push(
-    {lbl:`식대 · 복지수당`,sub:`식대 ${fmtWon(res.mealPay)} + 복지 ${fmtWon(res.welfarePay)}`+(res.childPay>0?` + 육아 ${fmtWon(res.childPay)}`:''),val:res.mealPay+res.welfarePay+res.childPay,col:'var(--vac)'}
-  );
-  if(res.vacAllowancePay>0)payRows.push({lbl:`미사용 연차수당`,sub:`${res.vacPayDays}개 × 8h × 통상시급`,val:res.vacAllowancePay,col:'var(--vac)'});
-  if(res.extraPay>0)payRows.push({lbl:`휴가비 · 기타수당`,sub:`당월 추가 지급`,val:res.extraPay,col:'var(--vac)'});
-  if(res.giftPay>0)payRows.push({lbl:`상품권 (지급)`,sub:`현물/상품권 지급분`,val:res.giftPay,col:'var(--ev-tx)'});
+  if(res.posPay>0)payRows.push({lbl:'직책수당',sub:'통상임금 산입',val:res.posPay,col:'var(--tx)'});
+  if(res.baseHdPay>0)payRows.push({lbl:'휴일수당 (고정)',sub:`고정 ${res.baseHdRawH}h × 1.5배`,val:res.baseHdPay,col:'var(--ev-tx)'});
+  if(res.giftPay>0)payRows.push({lbl:'상품권',sub:'당월 상품권 지급',val:res.giftPay,col:'var(--ev-tx)'});
+  if(res.childPay>0)payRows.push({lbl:'육아수당',sub:'월 육아수당',val:res.childPay,col:'var(--vac)'});
+  if(res.vacAllowancePay>0)payRows.push({lbl:'미사용 연차수당',sub:`${res.vacPayDays}개 × 8h × 통상시급`,val:res.vacAllowancePay,col:'var(--vac)'});
+  if(res.extraPay>0)payRows.push({lbl:'휴가비 · 기타수당',sub:'당월 추가 지급',val:res.extraPay,col:'var(--vac)'});
 
   const dedRows=[
-    {lbl:`국민연금 · 건강 · 장기요양`,sub:`연금 ${fmtWon(res.pension)} · 건보 ${fmtWon(res.health)} · 요양 ${fmtWon(res.care)}`,val:res.pension+res.health+res.care},
-    {lbl:`고용보험 · 노조조합비`,sub:`고용(0.9%) ${fmtWon(res.empIns)} · 노조비(통상×1.2%) ${fmtWon(res.unionDues)}`,val:res.empIns+res.unionDues},
-    {lbl:`소득세 · 지방소득세`,sub:`소득세 ${fmtWon(res.incomeTax)} · 지방세 ${fmtWon(res.localTax)}`,val:res.incomeTax+res.localTax},
+    {lbl:'국민연금',sub:cfg.dedPen!==''?'직접 입력':'과세급여 × 4.5% (10원 미만 절사)',val:res.pension},
+    {lbl:'건강보험',sub:cfg.dedHlth!==''?'직접 입력':'과세급여 × 3.545% (10원 미만 절사)',val:res.health},
+    {lbl:'장기요양보험료',sub:cfg.dedCare!==''?'직접 입력':'건강보험 × 12.95% (10원 미만 절사)',val:res.care},
+    {lbl:'고용보험',sub:cfg.dedEmp!==''?'직접 입력':'(지급합계 - 식대) × 0.9% (10원 미만 절사)',val:res.empIns},
+    {lbl:'식사비',sub:'구내식당 식사비 공제',val:res.mealDed},
+    {lbl:'노조조합비',sub:cfg.dedUnion!==''?'직접 입력':'통상임금 × 1.2% 자동추정',val:res.unionDues},
   ];
-  if(res.giftDeduct>0)dedRows.push({lbl:`상품권 (공제)`,sub:`지급분 동일 차감`,val:res.giftDeduct});
+  if(res.incomeTax>0||res.localTax>0){
+    dedRows.push(
+      {lbl:'소득세',sub:'근로소득세',val:res.incomeTax},
+      {lbl:'지방소득세',sub:'소득세 × 10%',val:res.localTax}
+    );
+  }
 
   box.innerHTML=`
-    <div style="font-size:.66rem;font-weight:800;color:var(--a);margin-bottom:2px">[지급 내역] 합계 ${fmtWon(res.grossTotal)} (연장+휴일+야간 ${fmtWon(res.totalOtPay+res.totalHdPay+res.totalNtPay)})</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;font-size:.68rem;font-weight:800;color:var(--a)">
+      <span>[지급내역]</span>
+      <span>지급합계 ${fmtWon(res.grossTotal)}</span>
+    </div>
   `+payRows.map(r=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
       <div>
         <div style="font-weight:700;color:var(--tx)">${r.lbl}</div>
-        <div style="font-size:.61rem;color:var(--tx3)">${r.sub}</div>
+        <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:${r.col}">${fmtWon(r.val)}</div>
     </div>
   `).join('')+`
-    <div style="font-size:.66rem;font-weight:800;color:var(--red);margin-top:8px;margin-bottom:2px">[공제 내역] 합계 -${fmtWon(res.totalDeduct)}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--red)">
+      <span>[공제내역]</span>
+      <span>공제합계 -${fmtWon(res.totalDeduct)}</span>
+    </div>
   `+dedRows.map(r=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
       <div>
         <div style="font-weight:700;color:var(--tx2)">${r.lbl}</div>
-        <div style="font-size:.61rem;color:var(--tx3)">${r.sub}</div>
+        <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--red)">-${fmtWon(r.val)}</div>
     </div>
   `).join('');
 
-  renderSalHistoryList(cfg);
+  renderSalHistoryList(cfg,moData);
 }
 
 async function openDgSheet(date){
