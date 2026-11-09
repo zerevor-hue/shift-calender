@@ -738,7 +738,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <!-- 3. 하단 접기/펼치기: 선호 · 기피 메뉴 설정 -->
   <div class="mboard-card" style="padding:11px 13px">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">제육 추적자 설정</div>
+      <div style="font-size:.74rem;font-weight:800;color:var(--tx2)">선호 · 기피 메뉴 설정</div>
       <button type="button" class="btn sec sm" id="fav-kw-toggle-btn" onclick="toggleFavKwCard()">펼치기 ▼</button>
     </div>
     <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
@@ -746,7 +746,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="margin-bottom:10px">
         <div class="lbl" style="font-size:.65rem;color:var(--a);margin-bottom:4px">선호 메뉴</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="fav-meal-inp" placeholder="예: 제육, 까스, 국밥" maxlength="12"
+          <input type="text" id="fav-meal-inp" placeholder="예: 돈육, 까스, 떡갈비, 국밥" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addFavMealKeyword();}">
           <button type="button" class="btn pri sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addFavMealKeyword()">+ 추가</button>
@@ -757,7 +757,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div>
         <div class="lbl" style="font-size:.65rem;color:var(--red);margin-bottom:4px">기피 메뉴</div>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 삼계탕, 오징어" maxlength="12"
+          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 오복지, 오징어" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addHateMealKeyword();}">
           <button type="button" class="btn dan sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addHateMealKeyword()">+ 추가</button>
@@ -1167,45 +1167,45 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.63rem;color:var(--a)">월 기본급 (원)</div>
-          <input type="number" id="sal-base-pay" step="1000" min="0" placeholder="기본급 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange()">
+          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="기본급 입력" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
         </div>
         <div>
           <div class="lbl" style="font-size:.63rem">통상시급 (원)</div>
-          <input type="number" id="sal-hourly" step="1" min="0" placeholder="자동 계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange()">
+          <input type="text" inputmode="numeric" id="sal-hourly" placeholder="자동 계산" style="padding:7px 9px;font-size:.84rem;font-weight:700" oninput="onSalHourlyChange(this)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.6rem">기술수당</div>
-          <input type="number" id="sal-tech-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="text" inputmode="numeric" id="sal-tech-pay" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange(this)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">직책수당</div>
-          <input type="number" id="sal-pos-pay" step="1000" min="0" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="text" inputmode="numeric" id="sal-pos-pay" placeholder="0" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange(this)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">식대</div>
-          <input type="number" id="sal-meal-pay" step="10000" min="0" placeholder="200000" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange()">
+          <input type="text" inputmode="numeric" id="sal-meal-pay" placeholder="200,000" style="padding:6px 7px;font-size:.78rem" oninput="onSalBaseChange(this)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.61rem">복지수당</div>
-          <input type="number" id="sal-welfare-pay" step="10000" min="0" placeholder="370000" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-welfare-pay" placeholder="370,000" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.61rem">육아수당</div>
-          <input type="number" id="sal-child-pay" step="10000" min="0" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-child-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
           <div class="lbl" style="font-size:.61rem;color:var(--vac)">이번 달 휴가비·기타 (원)</div>
-          <input type="number" id="sal-extra-pay" step="10000" min="0" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
+          <input type="text" inputmode="numeric" id="sal-extra-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
         </div>
         <div>
           <div class="lbl" style="font-size:.61rem;color:var(--ev-tx)">이번 달 상품권 (지급·공제)</div>
-          <input type="number" id="sal-gift-pay" step="1000" min="0" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="calcSalary(false)">
+          <input type="text" inputmode="numeric" id="sal-gift-pay" placeholder="0" style="padding:6px 8px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
         </div>
       </div>
     </div>
@@ -1277,25 +1277,25 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
           <div class="lbl" style="font-size:.6rem">국민연금 (원)</div>
-          <input type="number" id="sal-ded-pen" step="10" min="0" placeholder="자동(4.5%)" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="자동(4.5%)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">건강보험 (원)</div>
-          <input type="number" id="sal-ded-hlth" step="10" min="0" placeholder="자동(3.545%)" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="자동(3.545%)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">장기요양 (원)</div>
-          <input type="number" id="sal-ded-care" step="10" min="0" placeholder="자동(요양)" style="padding:6px;font-size:.78rem" oninput="calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(요양)" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div>
           <div class="lbl" style="font-size:.6rem">소득세</div>
-          <input type="number" id="sal-ded-tax" step="10" min="0" placeholder="자동 계산" style="padding:6px;font-size:.78rem" oninput="calcSalary(false)">
+          <input type="text" inputmode="numeric" id="sal-ded-tax" placeholder="자동 계산" style="padding:6px;font-size:.78rem" oninput="_formatMoneyInputEl(this);calcSalary(false)">
         </div>
         <div>
           <div class="lbl" style="font-size:.6rem">지방소득세 (소득세 10%)</div>
-          <input type="number" id="sal-ded-ltax" step="10" min="0" placeholder="자동 계산" style="padding:6px;font-size:.78rem" readonly>
+          <input type="text" inputmode="numeric" id="sal-ded-ltax" placeholder="자동 계산" style="padding:6px;font-size:.78rem" readonly>
         </div>
       </div>
     </div>
@@ -3045,8 +3045,55 @@ const SAL_MODE_PRESETS={
 
 function _num(v,defVal=0){
   if(v===''||v===null||v===undefined)return defVal;
+  if(typeof v==='string'){
+    v=v.replace(/,/g,'').trim();
+    if(v==='')return defVal;
+  }
   const n=Number(v);
   return Number.isFinite(n)?Math.max(0,n):defVal;
+}
+
+function _fmtCommaVal(v){
+  if(v===''||v===null||v===undefined)return '';
+  const clean=String(v).replace(/[^\d]/g,'');
+  if(!clean)return '';
+  const n=parseInt(clean,10);
+  return Number.isFinite(n)?n.toLocaleString('ko-KR'):'';
+}
+
+function _setMoneyEl(id,v){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.value=_fmtCommaVal(v);
+}
+
+function _formatMoneyInputEl(el){
+  if(!el)return;
+  const raw=el.value||'';
+  const sel=typeof el.selectionStart==='number'?el.selectionStart:raw.length;
+  const digitsBefore=raw.slice(0,sel).replace(/[^\d]/g,'').length;
+  const formatted=_fmtCommaVal(raw);
+  if(el.value===formatted)return;
+  el.value=formatted;
+  try{
+    if(document.activeElement===el){
+      let pos=0,cnt=0;
+      while(pos<formatted.length&&cnt<digitsBefore){
+        if(/\d/.test(formatted[pos]))cnt++;
+        pos++;
+      }
+      el.setSelectionRange(pos,pos);
+    }
+  }catch(e){}
+}
+
+function _readMoneyEl(id,allowEmpty=false){
+  const el=document.getElementById(id);
+  if(!el)return allowEmpty?'':0;
+  const clean=String(el.value||'').replace(/[^\d]/g,'');
+  if(!clean)return allowEmpty?'':0;
+  const n=parseInt(clean,10);
+  return Number.isFinite(n)?Math.max(0,n):(allowEmpty?'':0);
 }
 
 function calcOrdinaryWageMonthly(basePay,techPay,posPay,mealPay){
@@ -3242,22 +3289,23 @@ function openSalaryCalc(){
   if(modeEl)modeEl.value=cfg.workMode||'shift157';
   const divLbl=document.getElementById('sal-div-h-lbl');
   if(divLbl)divLbl.textContent=SAL_MODE_PRESETS[cfg.workMode||'shift157']?.divH||157;
-  document.getElementById('sal-base-pay').value=cfg.basePay!==''&&cfg.basePay!==null?cfg.basePay:'';
-  document.getElementById('sal-tech-pay').value=cfg.techPay||'';
-  document.getElementById('sal-pos-pay').value=cfg.posPay||'';
-  document.getElementById('sal-meal-pay').value=cfg.mealPay??200000;
-  document.getElementById('sal-welfare-pay').value=cfg.welfarePay??370000;
-  document.getElementById('sal-child-pay').value=cfg.childPay||'';
-  document.getElementById('sal-hourly').value=cfg.basePay>0?Math.round(calcHourlyFromBasePay(parseFloat(cfg.basePay),cfg.workMode,cfg.techPay,cfg.posPay,cfg.mealPay)):(cfg.hourly||'');
+  _setMoneyEl('sal-base-pay',cfg.basePay!==''&&cfg.basePay!==null?cfg.basePay:'');
+  _setMoneyEl('sal-tech-pay',cfg.techPay||'');
+  _setMoneyEl('sal-pos-pay',cfg.posPay||'');
+  _setMoneyEl('sal-meal-pay',cfg.mealPay??200000);
+  _setMoneyEl('sal-welfare-pay',cfg.welfarePay??370000);
+  _setMoneyEl('sal-child-pay',cfg.childPay||'');
+  const initBase=_num(cfg.basePay,0);
+  _setMoneyEl('sal-hourly',initBase>0?Math.round(calcHourlyFromBasePay(initBase,cfg.workMode,cfg.techPay,cfg.posPay,cfg.mealPay)):(cfg.hourly||''));
   document.getElementById('sal-sub-h').value=cfg.subH??10.5;
   document.getElementById('sal-hd-h').value=cfg.hdH??10.5;
   document.getElementById('sal-night-h').value=cfg.nightH??8;
   document.getElementById('sal-base-ot-h').value=cfg.baseOtH??38;
   document.getElementById('sal-base-hd-h').value=cfg.baseHdH??0;
   document.getElementById('sal-base-nt-h').value=cfg.baseNtH??49;
-  document.getElementById('sal-ded-pen').value=cfg.dedPen!==''&&cfg.dedPen!==null?cfg.dedPen:'';
-  document.getElementById('sal-ded-hlth').value=cfg.dedHlth!==''&&cfg.dedHlth!==null?cfg.dedHlth:'';
-  document.getElementById('sal-ded-care').value=cfg.dedCare!==''&&cfg.dedCare!==null?cfg.dedCare:'';
+  _setMoneyEl('sal-ded-pen',cfg.dedPen!==''&&cfg.dedPen!==null?cfg.dedPen:'');
+  _setMoneyEl('sal-ded-hlth',cfg.dedHlth!==''&&cfg.dedHlth!==null?cfg.dedHlth:'');
+  _setMoneyEl('sal-ded-care',cfg.dedCare!==''&&cfg.dedCare!==null?cfg.dedCare:'');
   loadSalMonthData();
   os('sal-sov');
 }
@@ -3276,15 +3324,17 @@ function selectSalMonth(moIdx){
 
 function loadSalMonthData(){
   document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월`;
-  const mode=document.getElementById('sal-work-mode')?.value||'shift157';
+  const cfg=getSalCfg();
+  const mode=document.getElementById('sal-work-mode')?.value||cfg.workMode||'shift157';
   const hist=getSalHist(salYr);
   const savedMo=hist[String(salMo+1)];
-  if(savedMo?.basePay&&savedMo.basePay>0){
-    document.getElementById('sal-base-pay').value=savedMo.basePay;
-    const tech=parseFloat(document.getElementById('sal-tech-pay').value)||0;
-    const pos=parseFloat(document.getElementById('sal-pos-pay').value)||0;
-    const meal=_num(document.getElementById('sal-meal-pay').value,200000);
-    document.getElementById('sal-hourly').value=Math.round(calcHourlyFromBasePay(savedMo.basePay,mode,tech,pos,meal));
+  const activeBase=_num((savedMo?.manualSaved&&savedMo?.basePay>0)?savedMo.basePay:cfg.basePay,0);
+  if(activeBase>0){
+    _setMoneyEl('sal-base-pay',activeBase);
+    const tech=_readMoneyEl('sal-tech-pay',false);
+    const pos=_readMoneyEl('sal-pos-pay',false);
+    const meal=_num(_readMoneyEl('sal-meal-pay',true),200000);
+    _setMoneyEl('sal-hourly',Math.round(calcHourlyFromBasePay(activeBase,mode,tech,pos,meal)));
   }
   const st=(savedMo?.manualCounts&&savedMo?.counts&&(!savedMo.workMode||savedMo.workMode===mode))?savedMo.counts:getCalMonthShiftStats(salYr,salMo,mode);
   document.getElementById('sal-cnt-ds').value=st.ds??0;
@@ -3292,9 +3342,9 @@ function loadSalMonthData(){
   document.getElementById('sal-cnt-hd').value=st.hd??0;
   document.getElementById('sal-cnt-hdn').value=st.hdn??0;
   document.getElementById('sal-vac-pay-days').value=savedMo?.vacPayDays?savedMo.vacPayDays:'';
-  document.getElementById('sal-extra-pay').value=savedMo?.extraPay?savedMo.extraPay:'';
-  document.getElementById('sal-gift-pay').value=savedMo?.giftPay?savedMo.giftPay:'';
-  document.getElementById('sal-ded-tax').value=savedMo?.customTax!==undefined&&savedMo?.customTax!==''?savedMo.customTax:'';
+  _setMoneyEl('sal-extra-pay',savedMo?.extraPay?savedMo.extraPay:'');
+  _setMoneyEl('sal-gift-pay',savedMo?.giftPay?savedMo.giftPay:'');
+  _setMoneyEl('sal-ded-tax',savedMo?.customTax!==undefined&&savedMo?.customTax!==''?savedMo.customTax:'');
   calcSalary(false);
 }
 
@@ -3330,34 +3380,36 @@ function onSalModeChange(applyPresetHours){
   onSalBaseChange();
 }
 
-function onSalBaseChange(){
-  const rawBase=document.getElementById('sal-base-pay').value.trim();
+function onSalBaseChange(el){
+  if(el)_formatMoneyInputEl(el);
+  const rawBase=_readMoneyEl('sal-base-pay',true);
   if(rawBase===''){
-    document.getElementById('sal-hourly').value='';
+    _setMoneyEl('sal-hourly','');
   }else{
-    const basePay=Math.max(0,parseFloat(rawBase)||0);
+    const basePay=_num(rawBase,0);
     const mode=document.getElementById('sal-work-mode')?.value||'shift157';
-    const tech=parseFloat(document.getElementById('sal-tech-pay').value)||0;
-    const pos=parseFloat(document.getElementById('sal-pos-pay').value)||0;
-    const meal=_num(document.getElementById('sal-meal-pay').value,200000);
-    document.getElementById('sal-hourly').value=Math.round(calcHourlyFromBasePay(basePay,mode,tech,pos,meal));
+    const tech=_readMoneyEl('sal-tech-pay',false);
+    const pos=_readMoneyEl('sal-pos-pay',false);
+    const meal=_num(_readMoneyEl('sal-meal-pay',true),200000);
+    _setMoneyEl('sal-hourly',Math.round(calcHourlyFromBasePay(basePay,mode,tech,pos,meal)));
   }
   calcSalary(true);
 }
 
-function onSalHourlyChange(){
-  const rawHourly=document.getElementById('sal-hourly').value.trim();
+function onSalHourlyChange(el){
+  if(el)_formatMoneyInputEl(el);
+  const rawHourly=_readMoneyEl('sal-hourly',true);
   if(rawHourly===''){
-    document.getElementById('sal-base-pay').value='';
+    _setMoneyEl('sal-base-pay','');
   }else{
-    const hourly=Math.max(0,parseFloat(rawHourly)||0);
+    const hourly=_num(rawHourly,0);
     const mode=document.getElementById('sal-work-mode')?.value||'shift157';
     const divH=SAL_MODE_PRESETS[mode]?.divH||157;
-    const tech=parseFloat(document.getElementById('sal-tech-pay').value)||0;
-    const pos=parseFloat(document.getElementById('sal-pos-pay').value)||0;
-    const meal=_num(document.getElementById('sal-meal-pay').value,200000);
+    const tech=_readMoneyEl('sal-tech-pay',false);
+    const pos=_readMoneyEl('sal-pos-pay',false);
+    const meal=_num(_readMoneyEl('sal-meal-pay',true),200000);
     const basePay=Math.max(0,Math.round((hourly*divH-tech-pos-meal)*(6/7)));
-    document.getElementById('sal-base-pay').value=basePay;
+    _setMoneyEl('sal-base-pay',basePay);
   }
   calcSalary(true);
 }
@@ -3367,43 +3419,45 @@ function fmtWon(n){
 }
 
 function readSalFormCfg(){
-  const rawBase=document.getElementById('sal-base-pay').value.trim();
-  const rawHourly=document.getElementById('sal-hourly').value.trim();
-  const rawPen=document.getElementById('sal-ded-pen').value.trim();
-  const rawHlth=document.getElementById('sal-ded-hlth').value.trim();
-  const rawCare=document.getElementById('sal-ded-care').value.trim();
+  const rawBase=_readMoneyEl('sal-base-pay',true);
+  const rawHourly=_readMoneyEl('sal-hourly',true);
+  const rawMeal=_readMoneyEl('sal-meal-pay',true);
+  const rawWelfare=_readMoneyEl('sal-welfare-pay',true);
+  const rawPen=_readMoneyEl('sal-ded-pen',true);
+  const rawHlth=_readMoneyEl('sal-ded-hlth',true);
+  const rawCare=_readMoneyEl('sal-ded-care',true);
   return {
     workMode:document.getElementById('sal-work-mode')?.value||'shift157',
-    basePay:rawBase===''?'':Math.max(0,parseFloat(rawBase)||0),
-    hourly:rawHourly===''?'':Math.max(0,parseFloat(rawHourly)||0),
-    techPay:Math.max(0,parseFloat(document.getElementById('sal-tech-pay').value)||0),
-    posPay:Math.max(0,parseFloat(document.getElementById('sal-pos-pay').value)||0),
-    mealPay:Math.max(0,parseFloat(document.getElementById('sal-meal-pay').value)||0),
-    welfarePay:Math.max(0,parseFloat(document.getElementById('sal-welfare-pay').value)||0),
-    childPay:Math.max(0,parseFloat(document.getElementById('sal-child-pay').value)||0),
+    basePay:rawBase===''?'':rawBase,
+    hourly:rawHourly===''?'':rawHourly,
+    techPay:_readMoneyEl('sal-tech-pay',false),
+    posPay:_readMoneyEl('sal-pos-pay',false),
+    mealPay:rawMeal===''?200000:rawMeal,
+    welfarePay:rawWelfare===''?370000:rawWelfare,
+    childPay:_readMoneyEl('sal-child-pay',false),
     subH:Math.max(0,parseFloat(document.getElementById('sal-sub-h').value)||0),
     hdH:Math.max(0,parseFloat(document.getElementById('sal-hd-h').value)||0),
     nightH:Math.max(0,parseFloat(document.getElementById('sal-night-h').value)||0),
     baseOtH:Math.max(0,parseFloat(document.getElementById('sal-base-ot-h').value)||0),
     baseHdH:Math.max(0,parseFloat(document.getElementById('sal-base-hd-h').value)||0),
     baseNtH:Math.max(0,parseFloat(document.getElementById('sal-base-nt-h').value)||0),
-    dedPen:rawPen===''?'':Math.max(0,parseFloat(rawPen)||0),
-    dedHlth:rawHlth===''?'':Math.max(0,parseFloat(rawHlth)||0),
-    dedCare:rawCare===''?'':Math.max(0,parseFloat(rawCare)||0),
+    dedPen:rawPen===''?'':rawPen,
+    dedHlth:rawHlth===''?'':rawHlth,
+    dedCare:rawCare===''?'':rawCare,
   };
 }
 
 function readSalFormMoData(){
-  const rawTax=document.getElementById('sal-ded-tax').value.trim();
+  const rawTax=_readMoneyEl('sal-ded-tax',true);
   return {
     ds:Math.max(0,parseInt(document.getElementById('sal-cnt-ds').value)||0),
     ns:Math.max(0,parseInt(document.getElementById('sal-cnt-ns').value)||0),
     hd:Math.max(0,parseInt(document.getElementById('sal-cnt-hd').value)||0),
     hdn:Math.max(0,parseInt(document.getElementById('sal-cnt-hdn').value)||0),
     vacPayDays:Math.max(0,parseFloat(document.getElementById('sal-vac-pay-days').value)||0),
-    extraPay:Math.max(0,parseFloat(document.getElementById('sal-extra-pay').value)||0),
-    giftPay:Math.max(0,parseFloat(document.getElementById('sal-gift-pay').value)||0),
-    customTax:rawTax===''?'':Math.max(0,parseFloat(rawTax)||0)
+    extraPay:_readMoneyEl('sal-extra-pay',false),
+    giftPay:_readMoneyEl('sal-gift-pay',false),
+    customTax:rawTax===''?'':rawTax
   };
 }
 
@@ -3422,6 +3476,7 @@ function saveCurrentMonthSalary(){
     totalDeduct:res.totalDeduct,
     workMode:cfg.workMode,counts:{ds:moData.ds,ns:moData.ns,hd:moData.hd,hdn:moData.hdn},
     manualCounts:isManualCnt,
+    manualSaved:true,
     vacPayDays:moData.vacPayDays,
     extraPay:moData.extraPay,
     giftPay:moData.giftPay,
@@ -3487,7 +3542,8 @@ function renderSalHistoryList(cfg){
     let gross=0,net=0,st=null;
     const liveSt=getCalMonthShiftStats(salYr,m-1,cfg.workMode);
     const countsMatchSaved=saved?.counts&&saved.counts.ds===liveSt.ds&&saved.counts.ns===liveSt.ns&&saved.counts.hd===liveSt.hd&&(saved.counts.hdn||0)===(liveSt.hdn||0);
-    if(saved&&(!saved.workMode||saved.workMode===cfg.workMode)&&typeof saved.grossTotal==='number'&&saved.grossTotal>0&&(saved.manualCounts||countsMatchSaved)){
+    const baseMatchSaved=saved?.basePay===cfg.basePay;
+    if(saved&&saved.manualSaved&&(!saved.workMode||saved.workMode===cfg.workMode)&&typeof saved.grossTotal==='number'&&saved.grossTotal>0&&(saved.manualCounts||countsMatchSaved)&&baseMatchSaved){
       gross=saved.grossTotal;
       net=saved.netTotal;
       st=saved.counts||liveSt;
@@ -3537,7 +3593,7 @@ function calcSalary(shouldSaveCfg){
   const moData=readSalFormMoData();
   const res=computeSalaryAmounts(cfg,moData);
 
-  document.getElementById('sal-ded-ltax').value=res.localTax||0;
+  _setMoneyEl('sal-ded-ltax',res.localTax||0);
 
   if(shouldSaveCfg){
     saveSalCfg(cfg);
