@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
 <script>
 (function(){
   const CFG={
@@ -20,70 +20,89 @@
     projectId:"shift-calender-17a58",
     storageBucket:"shift-calender-17a58.firebasestorage.app",
     messagingSenderId:"434862222996",
-    appId:"1:434862222996:web:e7e2a67c5188542bc90e81",
+    appId:"1:434862222996:web:e7e2a67c5188542bc90e81"
   };
-  window._fbCfg = CFG;
-  if(window.firebase && window.firebase.initializeApp){
-    try{
-      const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(CFG);
-      const db = window.firebase.database(app);
-      window._fb={
-        async get(p){try{const s=await db.ref(p).get();return s.exists()?s.val():null}catch(e){
-          try{const r=await fetch(`https://shift-calender-17a58-default-rtdb.firebaseio.com/${p}.json`);return r.ok?await r.json():null}catch{return null}
-        }},
-        async getRange(p,sKey,eKey){
-          const restUrl=`https://shift-calender-17a58-default-rtdb.firebaseio.com/${p}.json?orderBy=%22$key%22&startAt=%22${encodeURIComponent(sKey)}%22&endAt=%22${encodeURIComponent(eKey)}%22`;
-          const restP=fetch(restUrl).then(r=>r.ok?r.json():Promise.reject());
-          const sdkP=db.ref(p).orderByKey().startAt(sKey).endAt(eKey).get().then(s=>s.exists()?s.val():null);
-          try{return await Promise.any([restP,sdkP]);}catch(e){
-            try{const r=await restP;return r;}catch{return this.get(p);}
-          }
-        },
-        async set(p,v){try{await db.ref(p).set(v)}catch(e){
-          await fetch(`https://shift-calender-17a58-default-rtdb.firebaseio.com/${p}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});
-        }},
-        async push(p,v){try{const ref=await db.ref(p).push(v);return {key:ref.key}}catch(e){
-          const r=await fetch(`https://shift-calender-17a58-default-rtdb.firebaseio.com/${p}.json`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});
-          const d=await r.json();return {key:d&&d.name};
-        }},
-        listen(p,cb){
-          const r=db.ref(p);
-          const fn=s=>cb(s.exists()?s.val():null);
-          r.on("value",fn);
-          return()=>r.off("value",fn);
-        }
-      };
-      window._fbReady=true;
-      window.dispatchEvent(new Event("fbReady"));
-    }catch(e){}
+  const DB_URL=CFG.databaseURL;
+  let _sdkDb=null;
+  const _activeListeners=[];
+
+  async function restGet(p){
+    try{const r=await fetch(`${DB_URL}/${p}.json`);return r.ok?await r.json():null;}catch{return null;}
   }
+  async function restSet(p,v){
+    try{await fetch(`${DB_URL}/${p}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});}catch{}
+  }
+  async function restPush(p,v){
+    try{
+      const r=await fetch(`${DB_URL}/${p}.json`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});
+      const d=await r.json();return {key:d&&d.name};
+    }catch{return {key:null};}
+  }
+
+  window._fb={
+    async get(p){
+      if(_sdkDb){try{const s=await _sdkDb.ref(p).get();return s.exists()?s.val():null;}catch{}}
+      return restGet(p);
+    },
+    async getRange(p,sKey,eKey){
+      const restUrl=`${DB_URL}/${p}.json?orderBy=%22$key%22&startAt=%22${encodeURIComponent(sKey)}%22&endAt=%22${encodeURIComponent(eKey)}%22`;
+      const restP=fetch(restUrl).then(r=>r.ok?r.json():Promise.reject());
+      if(_sdkDb){
+        const sdkP=_sdkDb.ref(p).orderByKey().startAt(sKey).endAt(eKey).get().then(s=>s.exists()?s.val():null);
+        try{return await Promise.any([restP,sdkP]);}catch{}
+      }
+      try{return await restP;}catch{return this.get(p);}
+    },
+    async set(p,v){
+      if(_sdkDb){try{await _sdkDb.ref(p).set(v);return;}catch{}}
+      await restSet(p,v);
+    },
+    async push(p,v){
+      if(_sdkDb){try{const ref=await _sdkDb.ref(p).push(v);return {key:ref.key};}catch{}}
+      return restPush(p,v);
+    },
+    listen(p,cb){
+      const entry={p,cb,ref:null,fn:null,active:true};
+      if(_sdkDb){
+        const r=_sdkDb.ref(p);
+        const fn=s=>{if(entry.active)cb(s.exists()?s.val():null);};
+        entry.ref=r;entry.fn=fn;
+        r.on("value",fn);
+      }else{
+        _activeListeners.push(entry);
+        restGet(p).then(val=>{if(entry.active&&!entry.ref)cb(val);});
+      }
+      return()=>{
+        entry.active=false;
+        if(entry.ref&&entry.fn)entry.ref.off("value",entry.fn);
+      };
+    }
+  };
+
+  function tryInitSdk(){
+    if(_sdkDb||!window.firebase||!window.firebase.initializeApp)return false;
+    try{
+      const app=window.firebase.apps.length?window.firebase.app():window.firebase.initializeApp(CFG);
+      _sdkDb=window.firebase.database(app);
+      while(_activeListeners.length){
+        const entry=_activeListeners.shift();
+        if(!entry||!entry.active)continue;
+        const r=_sdkDb.ref(entry.p);
+        const fn=s=>{if(entry.active)entry.cb(s.exists()?s.val():null);};
+        entry.ref=r;entry.fn=fn;
+        r.on("value",fn);
+      }
+      return true;
+    }catch{return false;}
+  }
+
+  window._fbReady=true;
+  window.addEventListener("DOMContentLoaded",()=>{
+    tryInitSdk();
+    window.dispatchEvent(new Event("fbReady"));
+  });
+  window.addEventListener("load",tryInitSdk);
 })();
-</script>
-<script type="module">
-if(!window._fbReady){
-  const CFG=window._fbCfg;
-  Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
-  ]).then(([{initializeApp},{getDatabase,ref,set,get,push,onValue,off}])=>{
-    if(window._fbReady)return;
-    const db=getDatabase(initializeApp(CFG));
-    window._fb={
-      async get(p){try{const s=await get(ref(db,p));return s.exists()?s.val():null}catch{return null}},
-      async getRange(p,sKey,eKey){
-        try{
-          const r=await fetch(`https://shift-calender-17a58-default-rtdb.firebaseio.com/${p}.json?orderBy=%22$key%22&startAt=%22${encodeURIComponent(sKey)}%22&endAt=%22${encodeURIComponent(eKey)}%22`);
-          if(r.ok)return await r.json();
-        }catch(e){}
-        return this.get(p);
-      },
-      async set(p,v){await set(ref(db,p),v)},
-      async push(p,v){return await push(ref(db,p),v)},
-      listen(p,cb){const r=ref(db,p);onValue(r,s=>cb(s.exists()?s.val():null));return()=>off(r)},
-    };
-    window._fbReady=true;window.dispatchEvent(new Event('fbReady'));
-  }).catch(()=>{});
-}
 </script>
 <style>
 :root{
@@ -327,7 +346,6 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 .spicker{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .sopt{display:none}
 .slbl{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:var(--rs);border:2px solid var(--bd);cursor:pointer;font-size:.66rem;font-weight:700;color:var(--tx2);text-align:center;line-height:1.3}
-.slbl .si{font-size:1.1rem}
 .sopt:checked+.slbl{border-color:currentColor;background:var(--bg3)}
 .sl-dr{color:var(--a)}.sl-ds{color:var(--as)}.sl-nr{color:var(--n)}.sl-ns{color:var(--ns)}.sl-of{color:var(--tx2)}.sl-vc{color:var(--vac)}
 
@@ -635,10 +653,10 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   </div>
 </div>
 
-<!-- PAGE: 팀 달력 -->
+<!-- PAGE: 근무자 -->
 <div class="page" id="page-tcal">
   <div style="margin-bottom:12px">
-    <div class="ph" style="margin-bottom:0">팀 달력</div>
+    <div class="ph" style="margin-bottom:0">근무자</div>
   </div>
   <div class="dtabs" id="top-tabs"></div>
   <div id="no-tcal" class="no-banner">
@@ -868,7 +886,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 
 <nav class="bnav">
   <button class="ni on" id="ni-cal"      onclick="goTab('cal')">     <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>내 달력</button>
-  <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>팀 달력</button>
+  <button class="ni"    id="ni-tcal"     onclick="goTab('tcal')">    <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>근무자</button>
   <button class="ni"    id="ni-dg"       onclick="goTab('dg')">      <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>대근</button>
   <button class="ni"    id="ni-meal"     onclick="goTab('meal')">     <span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></span>급식</button>
   <button class="ni"    id="ni-settings" onclick="goTab('settings')"><span class="ni-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>설정</button>
@@ -1167,7 +1185,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
           <div class="lbl" style="font-size:.61rem">기본급 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="예: 2,181,313" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
+          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="0" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
         </div>
         <div>
           <div class="lbl" style="font-size:.61rem">통상시급 (자동 계산)</div>
@@ -1253,7 +1271,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         </div>
         <div>
           <div class="lbl" style="font-size:.58rem">노조조합비</div>
-          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="자동(조합비)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
     </div>
@@ -1679,13 +1697,22 @@ function _cleanLegacyWrongHolidays(obj){
 
 function initLocalHolidays(){
   const curYr=new Date().getFullYear();
-  [curYr-1,curYr,curYr+1,curYr+2].forEach(y=>ensureYearHolidays(y));
+  const targetYears=[curYr-1,curYr,curYr+1,curYr+2];
   const cached=ls.g('holidays_cache');
   if(cached&&typeof cached==='object'){
     _cleanLegacyWrongHolidays(cached);
     Object.assign(holidays,cached);
+    targetYears.forEach(y=>{
+      const prefix=y+'-';
+      if(Object.keys(cached).some(k=>k.startsWith(prefix))){
+        _generatedHolidayYears.add(y);
+      }
+    });
   }
-  [curYr-1,curYr,curYr+1,curYr+2].forEach(y=>applyFixedCompanyHolidays(holidays,y));
+  targetYears.forEach(y=>{
+    ensureYearHolidays(y);
+    applyFixedCompanyHolidays(holidays,y);
+  });
 }
 
 async function loadHolidays(forceDb){
@@ -3180,14 +3207,19 @@ function computeSalaryAmounts(cfg,moData){
   // 4) 지급합계 (명세서 지급내역 합계와 100% 동일)
   const grossTotal=basePay+bonusPay+baseOtPay+baseHdPay+baseNtPay+addOtPay+addHdPay+addNtPay+mealPay+techPay+welfarePay+giftPay;
 
-  // 5) 공제내역 6개 항목 (명세서 공제내역과 1:1 대응)
-  const taxable=Math.max(0,grossTotal-mealPay);
-  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null&&cfg.dedPen!==undefined?_num(cfg.dedPen,0):Math.floor((taxable*0.045)/10)*10):0;
-  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null&&cfg.dedHlth!==undefined?_num(cfg.dedHlth,0):Math.floor((taxable*0.03545)/10)*10):0;
+  // 5) 공제내역 6개 항목 (명세서 공제내역 기준 보수월액·기준소득월액 근사 및 직접입력 우선 적용)
+  const empTaxable=Math.max(0,grossTotal-mealPay);
+  // 국민연금 기준소득월액(만원 단위 절사 및 상한 617만원 적용) × 4.5%
+  const penStdMonthly=Math.min(6170000,Math.max(0,Math.floor((grossTotal-mealPay-giftPay*0.3)/10000)*10000));
+  // 건강보험 보수월액(비과세 식대·상품권 제외 및 변동 추가수당 보정) × 3.545%
+  const hlthStdMonthly=Math.max(0,grossTotal-mealPay-giftPay-(addOtPay+addHdPay+addNtPay)*0.075);
+
+  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null&&cfg.dedPen!==undefined?_num(cfg.dedPen,0):Math.floor((penStdMonthly*0.045)/10)*10):0;
+  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null&&cfg.dedHlth!==undefined?_num(cfg.dedHlth,0):Math.floor((hlthStdMonthly*0.03545)/10)*10):0;
   const care=hasIncome?(cfg.dedCare!==''&&cfg.dedCare!==null&&cfg.dedCare!==undefined?_num(cfg.dedCare,0):Math.floor((health*0.1314)/10)*10):0;
-  const empIns=hasIncome?(cfg.dedEmp!==''&&cfg.dedEmp!==null&&cfg.dedEmp!==undefined?_num(cfg.dedEmp,0):Math.floor((taxable*0.009)/10)*10):0;
+  const empIns=hasIncome?(cfg.dedEmp!==''&&cfg.dedEmp!==null&&cfg.dedEmp!==undefined?_num(cfg.dedEmp,0):Math.floor((empTaxable*0.009)/10)*10):0;
   const mealDed=hasIncome?_num(moData.dedMeal!==undefined&&moData.dedMeal!==''?moData.dedMeal:cfg.dedMeal,0):0;
-  const unionDues=hasIncome?(cfg.dedUnion!==''&&cfg.dedUnion!==null&&cfg.dedUnion!==undefined?_num(cfg.dedUnion,0):0):0;
+  const unionDues=hasIncome?(cfg.dedUnion!==''&&cfg.dedUnion!==null&&cfg.dedUnion!==undefined?_num(cfg.dedUnion,0):Math.round(basePay*0.018194)):0;
 
   const totalDeduct=pension+health+care+empIns+mealDed+unionDues;
   const netTotal=Math.max(0,grossTotal-totalDeduct);
@@ -3292,7 +3324,7 @@ function loadSalMonthData(){
   document.getElementById('sal-cnt-hd').value=st.hd??0;
   document.getElementById('sal-cnt-hdn').value=st.hdn??0;
   _setMoneyEl('sal-gift-pay',savedMo?.giftPay?savedMo.giftPay:'');
-  if(savedMo?.dedMeal!==undefined&&savedMo?.dedMeal!=='')_setMoneyEl('sal-ded-meal',savedMo.dedMeal);
+  _setMoneyEl('sal-ded-meal',(savedMo?.dedMeal!==undefined&&savedMo?.dedMeal!=='')?savedMo.dedMeal:(cfg.dedMeal??''));
   calcSalary(false);
 }
 
@@ -3563,12 +3595,12 @@ function calcSalary(shouldSaveCfg){
   }
 
   const dedRows=[
-    {lbl:'국민연금',sub:cfg.dedPen!==''?'직접 입력':'과세급여 × 4.5% (10원 미만 절사)',val:res.pension},
-    {lbl:'건강보험',sub:cfg.dedHlth!==''?'직접 입력':'과세급여 × 3.545% (10원 미만 절사)',val:res.health},
+    {lbl:'국민연금',sub:cfg.dedPen!==''?'직접 입력':'기준소득월액 × 4.5% (10원 미만 절사)',val:res.pension},
+    {lbl:'건강보험',sub:cfg.dedHlth!==''?'직접 입력':'보수월액 × 3.545% (10원 미만 절사)',val:res.health},
     {lbl:'장기요양보험료',sub:cfg.dedCare!==''?'직접 입력':'건강보험 × 13.14% (10원 미만 절사)',val:res.care},
     {lbl:'고용보험',sub:cfg.dedEmp!==''?'직접 입력':'(지급합계 - 식대) × 0.9% (10원 미만 절사)',val:res.empIns},
     {lbl:'식사비',sub:'식사비 공제',val:res.mealDed},
-    {lbl:'노조조합비',sub:'노동조합비 공제',val:res.unionDues}
+    {lbl:'노조조합비',sub:cfg.dedUnion!==''?'직접 입력':'기본급 × 1.82% 자동추정',val:res.unionDues}
   ];
 
   box.innerHTML=`
@@ -3936,94 +3968,13 @@ async function dgDeletePost(){
   showToast('삭제됨');cs('dgd-sov');
 }
 
-let mealYr=0,mealMo=0;
 const MEAL_IMG_TTL_MS=35*24*60*60*1000; // 이달(약 5주·35일) 식단표 원본 이미지 보관 후 자동 삭제
 
-// 전용 디지털 주간식단표 & AI OCR 자동 추출 + 7일 경과 원본 이미지 자동 삭제 엔진
+// 전용 디지털 주간식단표 & AI OCR 자동 추출 + 한 달 경과 원본 이미지 자동 정리 엔진
 // =========================================================================
-const SAMPLE_WEEKLY_MENU={
-  mondayKey:'2026-11-02',
-  title:'영흥화력발전소 주간식단표',
-  period:'11월 2일 (월) ~ 11월 6일 (금)',
-  origin:'쌀,흑미,현미:국내산 / 포기김치:국내산 / 깍두기,열무김치:국내산 / 돈육:국내산(삼겹:오스트리아산) / 우육:호주산,미국산 / 계육(도리육,가슴살):국내산 / 순두부,두부,콩비지:(대두:수입산) / 고춧가루:중국산',
-  days:[
-    {
-      date:'11-02',label:'11월 2일',dow:'월요일',shortDow:'월',
-      lunch:{
-        rice:'잡곡밥&쌀밥',soup:'건새우두부탕',
-        main1:'꽈리고추돈육볶음',main2:'청포묵김가루무침',
-        sides:['샐러드','양배추쌈&씨앗쌈장','배추김치'],
-        plus:'비빔밥/잔치국수',drink:'매실차',packSalad:'참치마요샐러드'
-      },
-      dinner:{
-        rice:'잡곡밥',soup:'어묵볶음',
-        main1:'추어탕',main2:'콘게맛너겟&소스',
-        sides:['아삭이양파무침','봄동겉절이'],
-        plus:'셀프계란후라이'
-      }
-    },
-    {
-      date:'11-03',label:'11월 3일',dow:'화요일',shortDow:'화',
-      lunch:{
-        rice:'잡곡밥&쌀밥',soup:'오뎅김칫국',
-        main1:'치킨까스&소스',main2:'야채쫄면무침',
-        sides:['샐러드','산고추락교','깍두기'],
-        plus:'비빔밥',drink:'요구르트',packSalad:'아보카도닭가슴살샐러드'
-      },
-      dinner:{
-        rice:'잡곡밥',soup:'북엇국',
-        main1:'두반장돈육볶음',main2:'꽃맛살브로컬리볶음',
-        sides:['근대나물','배추김치'],
-        plus:'셀프계란후라이'
-      }
-    },
-    {
-      date:'11-04',label:'11월 4일',dow:'수요일',shortDow:'수',
-      lunch:{
-        rice:'잡곡밥&쌀밥',soup:'고추장찌개',
-        main1:'바베큐맛돈육볶음',main2:'치즈소시지볶음',
-        sides:['샐러드','치커리무침','배추김치'],
-        plus:'비빔밥/잔치국수',drink:'쿨피스',packSalad:'베이컨시저샐러드'
-      },
-      dinner:{
-        rice:'잡곡밥',soup:'사골우거지국',
-        main1:'찰떡궁합떡갈비조림',main2:'오징어마늘쫑볶음',
-        sides:['간장깻잎지','총각김치'],
-        plus:'셀프계란후라이'
-      }
-    },
-    {
-      date:'11-05',label:'11월 5일',dow:'목요일',shortDow:'목',
-      lunch:{
-        rice:'잡곡밥&쌀밥',soup:'된장국',
-        main1:'토마토닭고기카레',main2:'스팸두부조림',
-        sides:['샐러드','오복지','배추김치'],
-        plus:'비빔밥/잔치국수',drink:'복분자차',packSalad:'닭가슴살소시지샐러드'
-      },
-      dinner:{
-        rice:'잡곡밥',soup:'부추양파무침',
-        main1:'고기국밥&면사리',main2:'녹두전',
-        sides:['야채스틱&쌈장','배추김치'],
-        plus:'셀프계란후라이'
-      }
-    },
-    {
-      date:'11-06',label:'11월 6일',dow:'금요일',shortDow:'금',
-      lunch:{
-        rice:'잡곡밥&쌀밥',soup:'돈사태김치찌개',
-        main1:'해물까스&소스',main2:'계란찜',
-        sides:['샐러드','얼갈이나물','깍두기'],
-        plus:'',drink:'요거상큼복숭아',packSalad:''
-      },
-      dinner:null,
-      dinnerNote:'참 멋진 당신의 오늘을 응원합니다'
-    }
-  ]
-};
-
 let _favKwCardOpen=false;
 let _curMealMondayKey='';
-const _mealBoardsMem={'2026-11-02':SAMPLE_WEEKLY_MENU};
+const _mealBoardsMem={};
 const _mealImagesMem={}; // 주차별 원본 이미지 메모리 캐시 (텍스트 식단표와 분리하여 초고속 렌더링)
 
 function _getMondayOfDate(dt){
@@ -4235,8 +4186,9 @@ function addFavMealKeyword(){
   inp.value='';
   renderDigitalMealBoard();
 }
-function removeFavMealKeyword(kw){
-  saveFavMealKeywords(getFavMealKeywords().filter(x=>x!==kw));
+function removeFavMealKeyword(kwOrIdx){
+  const list=getFavMealKeywords();
+  saveFavMealKeywords(typeof kwOrIdx==='number'?list.filter((_,i)=>i!==kwOrIdx):list.filter(x=>x!==kwOrIdx));
   renderDigitalMealBoard();
 }
 
@@ -4250,8 +4202,9 @@ function addHateMealKeyword(){
   inp.value='';
   renderDigitalMealBoard();
 }
-function removeHateMealKeyword(kw){
-  saveHateMealKeywords(getHateMealKeywords().filter(x=>x!==kw));
+function removeHateMealKeyword(kwOrIdx){
+  const list=getHateMealKeywords();
+  saveHateMealKeywords(typeof kwOrIdx==='number'?list.filter((_,i)=>i!==kwOrIdx):list.filter(x=>x!==kwOrIdx));
   renderDigitalMealBoard();
 }
 
@@ -4389,15 +4342,15 @@ function renderDigitalMealBoard(){
   const hateList=getHateMealKeywords();
 
   if(favTagBox){
-    favTagBox.innerHTML=favList.length?favList.map(kw=>`
-      <span class="fav-chip" onclick="removeFavMealKeyword('${escHtml(kw)}')" title="클릭하여 삭제">
+    favTagBox.innerHTML=favList.length?favList.map((kw,idx)=>`
+      <span class="fav-chip" onclick="removeFavMealKeyword(${idx})" title="클릭하여 삭제">
         ${escHtml(kw)} <span style="opacity:.65;font-size:.62rem">✕</span>
       </span>
     `).join(''):'<span style="font-size:.64rem;color:var(--tx3)">등록된 선호 메뉴가 없습니다</span>';
   }
   if(hateTagBox){
-    hateTagBox.innerHTML=hateList.length?hateList.map(kw=>`
-      <span class="hate-chip" onclick="removeHateMealKeyword('${escHtml(kw)}')" title="클릭하여 삭제">
+    hateTagBox.innerHTML=hateList.length?hateList.map((kw,idx)=>`
+      <span class="hate-chip" onclick="removeHateMealKeyword(${idx})" title="클릭하여 삭제">
         ${escHtml(kw)} <span style="opacity:.65;font-size:.62rem">✕</span>
       </span>
     `).join(''):'<span style="font-size:.64rem;color:var(--tx3)">등록된 기피 메뉴가 없습니다</span>';
@@ -4420,28 +4373,13 @@ function renderDigitalMealBoard(){
     delete menu.origImg;
     delete menu.imgUploadedAt;
   }
-  const hasValidOrigImg=!!menu.origImg;
-
-  const favDayFlags={},hateDayFlags={};
-  menu.days.forEach((d,idx)=>{
-    const scan=arr=>{
-      arr.forEach(x=>{
-        if(!x)return;
-        if(_matchKw(x,favList))favDayFlags[idx]=true;
-        if(_matchKw(x,hateList))hateDayFlags[idx]=true;
-      });
-    };
-    if(d.lunch)scan([d.lunch.rice,d.lunch.soup,d.lunch.main1,d.lunch.main2,...(d.lunch.sides||[]),d.lunch.plus,d.lunch.drink,d.lunch.packSalad]);
-    if(d.dinner)scan([d.dinner.rice,d.dinner.soup,d.dinner.main1,d.dinner.main2,...(d.dinner.sides||[]),d.dinner.plus]);
-  });
 
   const cellDish=(txt,cls='')=>{
     if(!txt)return '';
     const isFav=!!_matchKw(txt,favList);
     const isHate=!isFav&&!!_matchKw(txt,hateList);
     const hitCls=isFav?'fav-hit':(isHate?'hate-hit':'');
-    const icon='';
-    return `<div class="wk-item ${cls} ${hitCls}">${escHtml(txt)}${icon}</div>`;
+    return `<div class="wk-item ${cls} ${hitCls}">${escHtml(txt)}</div>`;
   };
 
   box.innerHTML=`
@@ -5383,15 +5321,12 @@ async function loadAcctList(){
 async function deleteAcct(name,myId){
   if(!(await askConfirm(`"${name}" 계정 삭제?`)))return;
   const jobs=[dbS('accounts/'+name,null)];
-  if(myId)jobs.push(dbS('profiles/'+myId,null));
-  const teams=await dbG('teams');
-  if(teams){
-    for(const[tid,team]of Object.entries(teams)){
-      if(!team.divs)continue;
-      for(const divId of Object.keys(team.divs)){
-        if(myId&&team.divs[divId]?.members?.[myId])jobs.push(dbS(`teams/${tid}/divs/${divId}/members/${myId}`,null));
-      }
+  if(myId){
+    const prof=await dbG('profiles/'+myId);
+    if(prof?.topId&&prof?.divId){
+      jobs.push(dbS(`teams/${prof.topId}/divs/${prof.divId}/members/${myId}`,null));
     }
+    jobs.push(dbS('profiles/'+myId,null));
   }
   await Promise.all(jobs);
   showToast(`"${name}" 삭제됨`);loadAcctList();
@@ -5462,7 +5397,6 @@ function instantBootFromCache(){
   S.yr=t.getFullYear();S.mo=t.getMonth();
   S.tyr=t.getFullYear();S.tmo=t.getMonth();
   dgYr=t.getFullYear();dgMo=t.getMonth();
-  mealYr=t.getFullYear();mealMo=t.getMonth();
   applyTheme();
   initLocalHolidays();
   if(S.topId){
@@ -5493,8 +5427,7 @@ async function boot(){
     S.yr=t.getFullYear();S.mo=t.getMonth();
     S.tyr=t.getFullYear();S.tmo=t.getMonth();
     dgYr=t.getFullYear();dgMo=t.getMonth();
-    mealYr=t.getFullYear();mealMo=t.getMonth();
-    applyTheme();
+      applyTheme();
     initLocalHolidays();
     if(S.topId){
       const cachedDivs=ls.g('divs_cache_'+S.topId);
