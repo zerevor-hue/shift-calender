@@ -1755,28 +1755,33 @@ async function fetchExternalHolidaysForYear(yr){
 
 function _cleanLegacyWrongHolidays(obj){
   if(!obj||typeof obj!=='object')return;
-  // 과거 수동 입력 오타였던 2027년 10월 추석(실제는 2027년 9월 14~16일) 자동 정리
-  ['2027-10-14','2027-10-15','2027-10-16'].forEach(k=>{
-    if(obj[k]&&(obj[k].name==='추석'||obj[k].name==='추석 연휴'))delete obj[k];
+  const byYr={};
+  Object.keys(obj).forEach(k=>{
+    const yr=parseInt(k.slice(0,4),10);
+    if(!yr)return;
+    if(!byYr[yr])byYr[yr]=generateKoreanHolidaysForYear(yr);
+    const official=byYr[yr];
+    const item=obj[k];
+    if(!item)return;
+    // 공식 법정공휴일/대체공휴일 목록에 없는 잘못된 이전 공휴일(public/substitute) 캐시 자동 제거
+    if((item.type==='public'||item.type==='substitute')&&!official[k]){
+      delete obj[k];
+    }
   });
 }
 
 function initLocalHolidays(){
   const curYr=new Date().getFullYear();
   const targetYears=[curYr-1,curYr,curYr+1,curYr+2];
+  targetYears.forEach(y=>{
+    ensureYearHolidays(y);
+  });
   const cached=ls.g('holidays_cache');
   if(cached&&typeof cached==='object'){
     _cleanLegacyWrongHolidays(cached);
     Object.assign(holidays,cached);
-    targetYears.forEach(y=>{
-      const prefix=y+'-';
-      if(Object.keys(cached).some(k=>k.startsWith(prefix))){
-        _generatedHolidayYears.add(y);
-      }
-    });
   }
   targetYears.forEach(y=>{
-    ensureYearHolidays(y);
     applyFixedCompanyHolidays(holidays,y);
   });
 }
@@ -3302,6 +3307,10 @@ function getCalMonthShiftStats(yr,mo,workMode){
     const k=dkey(dt);
     const sh=getShift(dt);
     const isHd=!!holidays[k];
+    if(sh==='ds')st.ds++;
+    else if(sh==='ns')st.ns++;
+    else if(sh==='vc')st.vc++;
+    else if(!isHd&&sh&&st[sh]!==undefined)st[sh]++;
     if(isHd){
       if(mode==='day209'){
         if(sh==='ds')st.hd++;
@@ -3310,9 +3319,6 @@ function getCalMonthShiftStats(yr,mo,workMode){
         if(sh==='dr'||sh==='ds')st.hd++;
         else if(sh==='nr'||sh==='ns')st.hdn++;
       }
-      if(sh==='vc')st.vc++;
-    }else{
-      if(sh&&st[sh]!==undefined)st[sh]++;
     }
   }
   _salStatsMemoMap[mKey]=st;
