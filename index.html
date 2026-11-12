@@ -1245,8 +1245,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <input type="text" inputmode="numeric" id="sal-gift-pay" placeholder="0" style="padding:6px 8px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">기타 지급액 (상생·성과·소급 등)</div>
-          <input type="text" inputmode="numeric" id="sal-extra-pay" placeholder="0" style="padding:6px 8px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.6rem">기타 지급액 (클릭하여 합산 입력)</div>
+          <input type="text" id="sal-extra-pay" placeholder="클릭하여 입력" readonly style="padding:6px 8px;font-size:.76rem;cursor:pointer;font-weight:700" onclick="openSalExtraPopup()">
         </div>
       </div>
     </div>
@@ -1284,7 +1284,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
           <div>
-            <div class="lbl" style="font-size:.55rem">연장추가 횟수(평일대근)</div>
+            <div class="lbl" style="font-size:.55rem">연장추가 횟수(전월대근)</div>
             <input type="number" id="sal-eff-ot" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
           </div>
           <div>
@@ -1361,6 +1361,30 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     </div>
 
     <button class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
+  </div>
+</div>
+
+<!-- 기타 지급액 다중 항목(1. 2. 3. ...) 합산 입력 팝업 -->
+<div class="sov" id="sal-extra-sov" style="z-index:260">
+  <div class="sheet" style="max-height:85vh;overflow-y:auto">
+    <div class="shandle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="stitle-s" style="margin-bottom:0">기타 지급액 합산 입력</div>
+      <button type="button" class="btn sec sm" style="padding:4px 9px;font-size:.65rem" onclick="clearAllSalExtraRows()">전체 초기화</button>
+    </div>
+    <div style="font-size:.66rem;color:var(--tx3);margin-bottom:10px">
+      노사상생금, 성과급, 타결금, 임협소급분, 연차수당 등을 항목별로 입력하면 자동으로 전부 합산됩니다.
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:10px;background:var(--bg3);border:1px solid var(--bd2);border-radius:12px">
+      <span style="font-size:.75rem;font-weight:800;color:var(--tx2)">항목 합계</span>
+      <span id="sal-extra-sum-lbl" style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:900;color:var(--a)">0원</span>
+    </div>
+    <div id="sal-extra-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px"></div>
+    <button type="button" class="btn sec fw" style="margin-bottom:12px;padding:8px;font-size:.74rem;font-weight:800;border-style:dashed" onclick="addSalExtraRow()">+ 항목 추가</button>
+    <div class="fl">
+      <button type="button" class="btn sec fg" onclick="cs('sal-extra-sov')">취소</button>
+      <button type="button" class="btn pri fg" onclick="applySalExtraPopup()">합산 적용</button>
+    </div>
   </div>
 </div>
 
@@ -1784,6 +1808,7 @@ function initLocalHolidays(){
   targetYears.forEach(y=>{
     applyFixedCompanyHolidays(holidays,y);
   });
+  ls.s('holidays_cache',holidays);
 }
 
 async function loadHolidays(forceDb){
@@ -3168,7 +3193,7 @@ function dgGotoToday(){const t=new Date();dgYr=t.getFullYear();dgMo=t.getMonth()
 let salYr=0,salMo=0;
 let _salManualCountsDirty=false;
 function _salCfgKey(){return 'sal_cfg_v5_'+(S.myId||'local');}
-function _salHistKey(yr){return `sal_hist_v5_${S.myId||'local'}_${yr}`;}
+function _salHistKey(yr){return `sal_hist_v6_${S.myId||'local'}_${yr}`;}
 
 const SAL_MODE_PRESETS={
   shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:10.5,nightH:8},
@@ -3294,8 +3319,9 @@ function _getCalStateSig(){
 function getCalMonthShiftStats(yr,mo,workMode){
   ensureYearHolidays(yr);
   const mode=SAL_MODE_PRESETS[workMode]?workMode:(document.getElementById('sal-work-mode')?.value||'shift157');
-  if(!_salStatsMemoKey){
-    _salStatsMemoKey=_getCalStateSig();
+  const curSig=_getCalStateSig();
+  if(_salStatsMemoKey!==curSig){
+    _salStatsMemoKey=curSig;
     _salStatsMemoMap={};
   }
   const mKey=`${yr}_${mo}_${mode}`;
@@ -3402,7 +3428,10 @@ function computeSalaryAmounts(cfg,moData){
 
   const addOtPay=hourly>0?Math.round(hourly*addOtHours*1.5):0;
   const addHdPay=hourly>0?Math.round(hourly*addHdPayHours):0;
-  const addNtPay=hourly>0?(effNtCnt<=3?(unitNtPay*effNtCnt):Math.round(hourly*addNtHours*0.5)):0;
+  // 야간추가수당 = 전월 야간대근 정산분 + 당월 공휴일 야간 정산분 (각 정산 테이블별 원 단위 반올림 후 합산)
+  const addNtSubPay=hourly>0?Math.round(hourly*(nsCnt*nightH)*0.5):0;
+  const addNtHdPay=hourly>0?Math.round(hourly*(hdnCnt*nightH)*0.5):0;
+  const addNtPay=hourly>0?((effNtCnt===(nsCnt+hdnCnt))?(addNtSubPay+addNtHdPay):Math.round(hourly*addNtHours*0.5)):0;
 
   // 4) 지급합계
   const grossTotal=basePay+bonusPay+holidayBonusPay+baseOtPay+baseHdPay+baseNtPay+addOtPay+addHdPay+addNtPay+mealPay+techPay+welfarePay+giftPay+extraPay;
@@ -3489,6 +3518,79 @@ function _syncEffInputsFrom4Boxes(){
   document.getElementById('sal-eff-nt').value=ns+hdn;
 }
 
+let _salCurExtraItems=[];
+let _salExtraTempList=['','','',''];
+
+function _calcSalExtraTempSum(){
+  return _salExtraTempList.reduce((acc,v)=>acc+_num(v,0),0);
+}
+function _updateSalExtraSumUI(){
+  const el=document.getElementById('sal-extra-sum-lbl');
+  if(el)el.textContent=fmtWon(_calcSalExtraTempSum());
+}
+function renderSalExtraPopupRows(){
+  const box=document.getElementById('sal-extra-list');
+  if(!box)return;
+  box.innerHTML=_salExtraTempList.map((val,idx)=>`
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:.8rem;font-weight:800;color:var(--tx2);min-width:22px;text-align:right">${idx+1}.</span>
+      <input type="text" inputmode="numeric" value="${_fmtCommaVal(val)}" placeholder="금액 입력 (원)" style="flex:1;padding:8px 10px;font-size:.84rem;font-weight:800" oninput="onSalExtraItemInput(this,${idx})">
+      <button type="button" class="ibtn" style="width:28px;height:28px;font-size:.72rem;color:var(--tx3);flex-shrink:0" onclick="removeSalExtraRow(${idx})">✕</button>
+    </div>
+  `).join('');
+  _updateSalExtraSumUI();
+}
+function openSalExtraPopup(){
+  const curTotal=_readMoneyEl('sal-extra-pay',false);
+  const savedSum=_salCurExtraItems.reduce((a,b)=>a+_num(b,0),0);
+  let baseArr=[];
+  if(_salCurExtraItems.length>0&&savedSum===curTotal){
+    baseArr=_salCurExtraItems.map(v=>String(v));
+  }else if(curTotal>0){
+    baseArr=[String(curTotal)];
+  }
+  const rowCount=Math.max(4,baseArr.length);
+  _salExtraTempList=[];
+  for(let i=0;i<rowCount;i++)_salExtraTempList.push(baseArr[i]||'');
+  renderSalExtraPopupRows();
+  os('sal-extra-sov');
+}
+function onSalExtraItemInput(el,idx){
+  _formatMoneyInputEl(el);
+  const clean=String(el.value||'').replace(/[^\d]/g,'');
+  _salExtraTempList[idx]=clean?parseInt(clean,10):'';
+  _updateSalExtraSumUI();
+}
+function addSalExtraRow(){
+  _salExtraTempList.push('');
+  renderSalExtraPopupRows();
+  const box=document.getElementById('sal-extra-list');
+  const inputs=box?.querySelectorAll('input');
+  if(inputs&&inputs.length)inputs[inputs.length-1].focus();
+}
+function removeSalExtraRow(idx){
+  if(_salExtraTempList.length<=1){
+    _salExtraTempList[0]='';
+  }else if(_salExtraTempList.length<=4){
+    _salExtraTempList[idx]='';
+  }else{
+    _salExtraTempList.splice(idx,1);
+  }
+  renderSalExtraPopupRows();
+}
+function clearAllSalExtraRows(){
+  _salExtraTempList=['','','',''];
+  renderSalExtraPopupRows();
+}
+function applySalExtraPopup(){
+  const valid=_salExtraTempList.map(v=>_num(v,0)).filter(v=>v>0);
+  _salCurExtraItems=valid;
+  const total=valid.reduce((a,b)=>a+b,0);
+  _setMoneyEl('sal-extra-pay',total>0?total:'');
+  cs('sal-extra-sov');
+  calcSalary(true);
+}
+
 function openSalaryCalc(){
   const now=new Date();
   salYr=dgYr>0?dgYr:(S.yr>0?S.yr:now.getFullYear());
@@ -3553,7 +3655,7 @@ function onSalEffCountsInput(){
 }
 
 function loadSalMonthData(){
-  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월`;
+  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월 명세서`;
   const cfg=getSalCfg();
   const mode=document.getElementById('sal-work-mode')?.value||cfg.workMode||'shift157';
   const settleMode='prev_sub_cur_hd';
@@ -3587,6 +3689,7 @@ function loadSalMonthData(){
   const hbChk=document.getElementById('sal-holiday-bonus-chk');
   if(hbChk)hbChk.checked=!!savedMo?.holidayBonus;
   _setMoneyEl('sal-gift-pay',savedMo?.giftPay?savedMo.giftPay:'');
+  _salCurExtraItems=Array.isArray(savedMo?.extraItems)?savedMo.extraItems.map(v=>_num(v,0)).filter(v=>v>0):(savedMo?.extraPay>0?[_num(savedMo.extraPay,0)]:[]);
   _setMoneyEl('sal-extra-pay',savedMo?.extraPay?savedMo.extraPay:'');
   _setMoneyEl('sal-ded-meal',(savedMo?.dedMeal!==undefined&&savedMo?.dedMeal!=='')?savedMo.dedMeal:(cfg.dedMeal??''));
   _setMoneyEl('sal-ded-tax',savedMo?.customTax?savedMo.customTax:'');
@@ -3595,7 +3698,7 @@ function loadSalMonthData(){
 
 function resetSalCountsFromCal(){
   _salStatsMemoKey='';
-  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월`;
+  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월 명세서`;
   const mode=document.getElementById('sal-work-mode')?.value||'shift157';
   const settleMode='prev_sub_cur_hd';
   _updateSalSettleTitle(salYr,salMo,settleMode);
@@ -3690,6 +3793,7 @@ function readSalFormMoData(){
     holidayBonus:!!document.getElementById('sal-holiday-bonus-chk')?.checked,
     giftPay:_readMoneyEl('sal-gift-pay',false),
     extraPay:_readMoneyEl('sal-extra-pay',false),
+    extraItems:[..._salCurExtraItems],
     dedMeal:rawDedMeal===''?'':rawDedMeal,
     customTax:rawTax===''?'':rawTax
   };
@@ -3717,6 +3821,7 @@ function saveCurrentMonthSalary(){
     holidayBonus:moData.holidayBonus,
     giftPay:moData.giftPay,
     extraPay:moData.extraPay,
+    extraItems:moData.extraItems||[],
     dedMeal:moData.dedMeal,
     customTax:moData.customTax,
     updatedAt:Date.now()
@@ -3735,13 +3840,15 @@ function syncAllMonthsSalaryToCache(){
   const hist=getSalHist(salYr);
   for(let m=1;m<=maxMo;m++){
     const prev=hist[String(m)]||{};
-    const useSavedCounts=!!(prev?.manualCounts&&prev?.counts&&(!prev.workMode||prev.workMode===cfg.workMode));
+    const curCalSig=_getCalStateSig();
+    const useSavedCounts=!!(prev?.manualSaved&&prev?.manualCounts&&prev?.counts&&(!prev.workMode||prev.workMode===cfg.workMode)&&prev?.calSig===curCalSig);
     const baseCounts=useSavedCounts?prev.counts:getSalarySettledShiftStats(salYr,m-1,cfg.workMode,cfg.settleMode);
     const st=(m-1===salMo)?curMoData:{
       ...baseCounts,
       holidayBonus:!!prev.holidayBonus,
       giftPay:prev.giftPay||0,
       extraPay:prev.extraPay||0,
+      extraItems:prev.extraItems||[],
       dedMeal:prev.dedMeal??'',
       customTax:prev.customTax??''
     };
@@ -3759,6 +3866,7 @@ function syncAllMonthsSalaryToCache(){
       holidayBonus:!!st.holidayBonus,
       giftPay:st.giftPay||0,
       extraPay:st.extraPay||0,
+      extraItems:st.extraItems||[],
       dedMeal:st.dedMeal??'',
       customTax:st.customTax??'',
       updatedAt:Date.now()
@@ -3794,7 +3902,8 @@ function renderSalHistoryList(cfg,curMoData){
       effHd=calc.effHdCnt;
     }else{
       const liveSt=getSalarySettledShiftStats(salYr,m-1,cfg.workMode,cfg.settleMode);
-      const useSavedCounts=!!(saved?.manualCounts&&saved?.counts&&(!saved.workMode||saved.workMode===cfg.workMode));
+      const curCalSig=_getCalStateSig();
+      const useSavedCounts=!!(saved?.manualSaved&&saved?.manualCounts&&saved?.counts&&(!saved.workMode||saved.workMode===cfg.workMode)&&saved?.calSig===curCalSig);
       const st=useSavedCounts?saved.counts:liveSt;
       const mCfg=(saved?.manualSaved&&saved?.basePay>0)?{...cfg,basePay:saved.basePay}:cfg;
       if(_num(mCfg.basePay,0)>0||hasWage){
@@ -3815,7 +3924,7 @@ function renderSalHistoryList(cfg,curMoData){
       <div onclick="selectSalMonth(${m-1})" style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:10px;cursor:pointer;background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${isCur?'var(--tx2)':'var(--bd)'}">
         <div style="display:flex;align-items:center;gap:8px;min-width:0">
           <span style="font-weight:800;font-size:.78rem;color:var(--tx);min-width:32px">${m}월</span>
-          <span style="font-size:.63rem;color:var(--tx3);white-space:nowrap">평일대근 ${effOt}회${effHd?` · 공휴일 ${effHd}회`:''}</span>
+          <span style="font-size:.63rem;color:var(--tx3);white-space:nowrap">전월대근 ${effOt}회${effHd?` · 공휴일 ${effHd}회`:''}</span>
         </div>
         <div style="text-align:right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;color:var(--tx)">${gross>0?fmtWon(gross):'미입력'}</div>
@@ -3864,6 +3973,7 @@ function calcSalary(shouldSaveCfg){
         holidayBonus:moData.holidayBonus,
         giftPay:moData.giftPay,
         extraPay:moData.extraPay,
+        extraItems:moData.extraItems||[],
         dedMeal:moData.dedMeal,
         customTax:moData.customTax,
         updatedAt:Date.now()
@@ -3885,8 +3995,8 @@ function calcSalary(shouldSaveCfg){
   // 급여명세서와 1:1로 일치하는 개별 항목 분리 표시 (모든 항목 글자색 기본급과 동일한 var(--tx) 적용)
   const box=document.getElementById('sal-breakdown');
   const hdSubTxt=res.hdH>8
-    ?`공휴일 ${res.effHdCnt}회 (회당 8h×1.5 + ${res.hdH-8}h×2.0 = 17h분)`
-    :`공휴일 ${res.effHdCnt}회 (${res.addHdHours}h × 1.5배)`;
+    ?`당월 공휴일 ${res.effHdCnt}회 (회당 8h×1.5 + ${res.hdH-8}h×2.0 = 17h분)`
+    :`당월 공휴일 ${res.effHdCnt}회 (${res.addHdHours}h × 1.5배)`;
 
   const payRows=[
     {lbl:'기본급',sub:`통상임금 월액 ${fmtWon(res.ordMonthly)} (÷${res.divH}h)`,val:res.basePay},
@@ -3903,9 +4013,9 @@ function calcSalary(shouldSaveCfg){
     payRows.push({lbl:'휴일수당',sub:`고정 ${res.baseHdRawH}h × 1.5배`,val:res.baseHdPay});
   }
   payRows.push(
-    {lbl:'연장추가수당',sub:`평일대근 ${res.effOtCnt}회 (${res.addOtHours}h × 1.5배)`,val:res.addOtPay},
+    {lbl:'연장추가수당',sub:`전월 대근 ${res.effOtCnt}회 (${res.addOtHours}h × 1.5배)`,val:res.addOtPay},
     {lbl:'휴일추가수당',sub:hdSubTxt,val:res.addHdPay},
-    {lbl:'야간추가수당',sub:`추가야간 ${res.effNtCnt}회 (${res.addNtHours}h × 0.5배)`,val:res.addNtPay},
+    {lbl:'야간추가수당',sub:(res.effNtCnt===(res.nsCnt+res.hdnCnt)?`전월 야간대근 ${res.nsCnt}회 + 당월 공휴일야간 ${res.hdnCnt}회 (${res.addNtHours}h × 0.5배)`:`추가야간 ${res.effNtCnt}회 (${res.addNtHours}h × 0.5배)`),val:res.addNtPay},
     {lbl:'식대',sub:'비과세 식대 (통상임금 산입)',val:res.mealPay}
   );
   if(res.techPay>0){
@@ -3916,7 +4026,9 @@ function calcSalary(shouldSaveCfg){
     payRows.push({lbl:'상품권',sub:'당월 상품권 지급',val:res.giftPay});
   }
   if(res.extraPay>0){
-    payRows.push({lbl:'기타 지급액',sub:'노사상생금·성과급·타결금·소급분 등',val:res.extraPay});
+    const exCnt=(moData.extraItems||[]).filter(v=>v>0).length;
+    const exSub=exCnt>1?`총 ${exCnt}건 합산 (${(moData.extraItems||[]).filter(v=>v>0).map(v=>fmtWon(v)).join(' + ')})`:'노사상생금·성과급·타결금·소급분 등';
+    payRows.push({lbl:'기타 지급액',sub:exSub,val:res.extraPay});
   }
 
   const dedRows=[
@@ -6134,4 +6246,4 @@ if(window._fbReady){onFbReady();}
 else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady&&!_instantBooted){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='서버 연결 실패';e.style.display='';}},5000);}
 </script>
 </body>
-</html>
+            </html>
