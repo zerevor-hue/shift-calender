@@ -1301,29 +1301,29 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 
     <!-- 3. 공제 내역 입력 -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 항목 입력 (비워두면 자동 계산)</div>
+      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 항목 입력 (국민연금·건강보험은 명세서 금액 1회 입력 권장)</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
-          <div class="lbl" style="font-size:.58rem">국민연금</div>
-          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="자동(4.5%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">국민연금 (4.75%)</div>
+          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">건강보험</div>
-          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="자동(3.545%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">건강보험 (3.595%)</div>
+          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">장기요양보험료</div>
-          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(13.14%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" style="font-size:.58rem">장기요양 (13.14%)</div>
+          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(건보×13.14%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
-          <div class="lbl" style="font-size:.58rem">고용보험</div>
+          <div class="lbl" style="font-size:.58rem">고용보험 (0.9%)</div>
           <input type="text" inputmode="numeric" id="sal-ded-emp" placeholder="자동(0.9%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">노조조합비</div>
-          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="자동(조합비)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <div class="lbl" id="sal-lbl-union" style="font-size:.58rem">노조조합비 (1.42%)</div>
+          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="자동(통상×1.42%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
           <div class="lbl" style="font-size:.58rem">식사비 · 상조회비</div>
@@ -3196,8 +3196,8 @@ function _salCfgKey(){return 'sal_cfg_v5_'+(S.myId||'local');}
 function _salHistKey(yr){return `sal_hist_v6_${S.myId||'local'}_${yr}`;}
 
 const SAL_MODE_PRESETS={
-  shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:10.5,nightH:8},
-  day209:{divH:209,baseOtRawH:13,baseHdRawH:12,baseNtRawH:8,subH:10.5,hdH:6,nightH:6.5}
+  shift157:{divH:157,baseOtRawH:38,baseHdRawH:0,baseNtRawH:49,subH:10.5,hdH:10.5,nightH:8,unionRate:0.0142,unionRateTxt:'1.42%'},
+  day209:{divH:209,baseOtRawH:13,baseHdRawH:12,baseNtRawH:8,subH:10.5,hdH:6,nightH:6.5,unionRate:0.012,unionRateTxt:'1.2%'}
 };
 
 function _num(v,defVal=0){
@@ -3436,20 +3436,20 @@ function computeSalaryAmounts(cfg,moData){
   // 4) 지급합계
   const grossTotal=basePay+bonusPay+holidayBonusPay+baseOtPay+baseHdPay+baseNtPay+addOtPay+addHdPay+addNtPay+mealPay+techPay+welfarePay+giftPay+extraPay;
 
-  // 5) 공제내역 (김영남·오병준 명세서 기준 보수월액·노조비 공식 및 직접입력 우선 적용)
+  // 5) 공제내역 (2026년 요율: 국민연금 4.75%, 건강보험 3.595%, 장기요양 13.14%, 고용보험 0.9%, 노조조합비 통상임금×1.42%)
   const empTaxable=Math.max(0,grossTotal-mealPay);
-  // 고정 통상임금 대비 회사 평균 기준소득월액·보수월액 선형 보정식 (김영남 241,200/185,090 · 오병준 238,110/182,730)
-  const estPenStd=Math.min(6170000,Math.max(0,Math.round(ordMonthly*0.21318+4764400)));
-  const estHlthStd=Math.max(0,Math.round(ordMonthly*0.20656+4643900));
+  // 국민연금·건강보험은 개인별 기준소득월액·보수월액 기반이므로 직접입력 우선, 미입력 시 2026년 요율(4.75% / 3.595%) 기반 추정치 적용
+  const estPenStd=Math.min(6170000,Math.max(0,Math.round((ordMonthly*0.20175+4514137)/1000)*1000));
+  const estHlthStd=Math.max(0,Math.round(ordMonthly*0.20376+4578960));
 
-  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null&&cfg.dedPen!==undefined?_num(cfg.dedPen,0):Math.floor((estPenStd*0.045)/10)*10):0;
-  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null&&cfg.dedHlth!==undefined?_num(cfg.dedHlth,0):Math.floor((estHlthStd*0.03545)/10)*10):0;
+  const pension=hasIncome?(cfg.dedPen!==''&&cfg.dedPen!==null&&cfg.dedPen!==undefined?_num(cfg.dedPen,0):Math.floor((estPenStd*0.0475)/10)*10):0;
+  const health=hasIncome?(cfg.dedHlth!==''&&cfg.dedHlth!==null&&cfg.dedHlth!==undefined?_num(cfg.dedHlth,0):Math.floor((estHlthStd*0.03595)/10)*10):0;
   const care=hasIncome?(cfg.dedCare!==''&&cfg.dedCare!==null&&cfg.dedCare!==undefined?_num(cfg.dedCare,0):Math.floor((health*0.1314)/10)*10):0;
   const empIns=hasIncome?(cfg.dedEmp!==''&&cfg.dedEmp!==null&&cfg.dedEmp!==undefined?_num(cfg.dedEmp,0):Math.floor((empTaxable*0.009)/10)*10):0;
   const mealDed=hasIncome?_num(moData.dedMeal!==undefined&&moData.dedMeal!==''?moData.dedMeal:cfg.dedMeal,0):0;
-  // 노조조합비: 평달 (기본급 + 상여 + 기술수당) 기반 산식 (김영남 39,687원 / 오병준 35,112원, 임협·명절달 +32,200원)
-  const unionBase=basePay+bonusPay+techPay;
-  const autoUnion=Math.round(unionBase*0.0149206028+3139.67)+(extraPay>=1000000?32200:0);
+  // 노조조합비: 교대 1.42%, 일근 1.2% (통상임금 월액 기준 원 단위 반올림, 대액 일시금 달 +32,200원)
+  const unionRate=pPreset.unionRate||0.0142;
+  const autoUnion=Math.round(ordMonthly*unionRate)+(extraPay>=1000000?32200:0);
   const unionDues=hasIncome?(cfg.dedUnion!==''&&cfg.dedUnion!==null&&cfg.dedUnion!==undefined?_num(cfg.dedUnion,0):autoUnion):0;
 
   const incomeTax=hasIncome?_num(moData.customTax,0):0;
@@ -3498,6 +3498,10 @@ function _updateSalModeRuleText(mode){
   const p=SAL_MODE_PRESETS[mode]||SAL_MODE_PRESETS.shift157;
   const divLbl=document.getElementById('sal-div-h-lbl');
   if(divLbl)divLbl.textContent=p.divH;
+  const uLbl=document.getElementById('sal-lbl-union');
+  if(uLbl)uLbl.textContent=`노조조합비 (${p.unionRateTxt||'1.42%'})`;
+  const uInp=document.getElementById('sal-ded-union');
+  if(uInp)uInp.placeholder=`자동(통상×${p.unionRateTxt||'1.42%'})`;
   const hdRuleEl=document.getElementById('sal-hd-rule-lbl');
   if(hdRuleEl){
     if(mode==='day209'){
@@ -4032,11 +4036,11 @@ function calcSalary(shouldSaveCfg){
   }
 
   const dedRows=[
-    {lbl:'국민연금',sub:cfg.dedPen!==''?'직접 입력':'기준소득월액 × 4.5% (10원 미만 절사)',val:res.pension},
-    {lbl:'건강보험',sub:cfg.dedHlth!==''?'직접 입력':'보수월액 × 3.545% (10원 미만 절사)',val:res.health},
+    {lbl:'국민연금',sub:cfg.dedPen!==''?'직접 입력 (기준소득월액 × 4.75%)':'추정 기준소득월액 × 4.75% (명세서 금액 입력 권장)',val:res.pension},
+    {lbl:'건강보험',sub:cfg.dedHlth!==''?'직접 입력 (보수월액 × 3.595%)':'추정 보수월액 × 3.595% (명세서 금액 입력 권장)',val:res.health},
     {lbl:'장기요양보험료',sub:cfg.dedCare!==''?'직접 입력':'건강보험 × 13.14% (10원 미만 절사)',val:res.care},
     {lbl:'고용보험',sub:cfg.dedEmp!==''?'직접 입력':'(지급합계 - 식대) × 0.9% (10원 미만 절사)',val:res.empIns},
-    {lbl:'노조조합비',sub:cfg.dedUnion!==''?'직접 입력':'기본급·상여 연동 자동추정',val:res.unionDues}
+    {lbl:'노조조합비',sub:cfg.dedUnion!==''?'직접 입력':(`통상임금 월액 × ${res.workMode==='day209'?'1.2%':'1.42%'}`+(res.extraPay>=1000000?' (+일시금분 32,200원)':'')),val:res.unionDues}
   ];
   if(res.mealDed>0){
     dedRows.push({lbl:'식사비 · 상조회공제',sub:'식사비 및 상조회비 공제',val:res.mealDed});
@@ -6246,4 +6250,4 @@ if(window._fbReady){onFbReady();}
 else{window.addEventListener('fbReady',onFbReady,{once:true});setTimeout(()=>{if(!window._fbReady&&!_instantBooted){document.getElementById('splash').classList.add('h');document.getElementById('login-screen').classList.remove('h');const e=document.getElementById('lerr');e.textContent='서버 연결 실패';e.style.display='';}},5000);}
 </script>
 </body>
-            </html>
+</html>
