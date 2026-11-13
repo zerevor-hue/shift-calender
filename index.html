@@ -181,6 +181,7 @@ body:not(.light) .pri{background:var(--a);color:#000;border-color:var(--a)}
 .dan{background:rgba(239,68,68,.13);color:var(--red);border-color:rgba(239,68,68,.28)}
 .fw{width:100%}.sm{padding:7px 12px;font-size:.78rem;border-radius:999px}.fl{display:flex;gap:8px}.fg{flex:1}
 .form-g{margin-bottom:12px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .lbl{display:block;font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:5px}
 input,select,textarea{font-family:inherit;width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx);padding:11px 13px;border-radius:var(--rs);font-size:.9rem;outline:none;-webkit-appearance:none}
 input[type="checkbox"]{width:16px;height:16px;padding:0;margin:0;-webkit-appearance:checkbox;appearance:auto;accent-color:var(--a);cursor:pointer;flex-shrink:0}
@@ -272,7 +273,7 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
 .big-sh-nr{color:var(--n)}.big-sh-ns{color:var(--ns)}
 .big-sh-of{color:var(--red)}.big-sh-vc{color:var(--vac)}
 .m-slot{display:flex;align-items:center;width:100%;height:11px;min-width:0;overflow:hidden;padding:0;margin:0}
-.cm,.ce,.hd{display:inline-block;flex:0 0 auto;width:fit-content;font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;font-size:.6rem;border-radius:2.5px;padding:.5px 1.5px 0 1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:auto;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:10.5px;height:11px;letter-spacing:-.045em;margin:0}
+.cm,.ce,.hd{display:inline-block;flex:0 0 auto;width:fit-content;font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;font-size:.6rem;border-radius:2.5px;padding:.5px 2px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:10.5px;height:11px;letter-spacing:-.045em;margin:0}
 .hd{color:var(--red);background:var(--hd-bg);font-weight:800;border-left:2.5px solid var(--red);border-radius:1px 2.5px 2.5px 1px;padding:.5px 2px 0 2.5px}
 .dc.hday>.dr>.dn{color:var(--red)!important}
 .dc.hday.td>.dr>.dn{background:var(--red)!important;color:#fff!important}
@@ -437,7 +438,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <img id="splash-logo" src="data:image/webp;base64,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" alt="교대근무 달력" style="width:76px;height:76px;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.35);display:block">
   <div class="sp"></div>
   <div style="font-size:.8rem;color:var(--tx3)">연결 중...</div>
-  <a id="splash-apk-btn" href="download.html?auto=1"
+  <a id="splash-apk-btn" href="https://zerevor-hue.github.io/shift-calender/download.html?auto=1"
      style="margin-top:14px;padding:9px 16px;border-radius:999px;background:var(--bg2);border:1px solid var(--bd2);color:var(--a);font-size:.75rem;font-weight:800;text-decoration:none;box-shadow:var(--pill-sh);display:inline-flex;align-items:center;gap:6px">
     앱 다운로드 (ShiftCalendar.apk)
   </a>
@@ -452,19 +453,19 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   </div>
   <div class="lcard">
     <div class="form-g">
-      <div class="lbl">이름</div>
-      <input type="text" id="ln" placeholder="실명으로 입력해주세요." maxlength="10" style="text-align:center;font-size:1rem;font-weight:700" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
+      <label for="ln" class="lbl">이름</label>
+      <input type="text" id="ln" aria-label="이름" title="이름" placeholder="실명으로 입력해주세요." maxlength="10" style="text-align:center;font-size:1rem;font-weight:700" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
     </div>
     <div class="form-g" style="margin-bottom:0">
-      <div class="lbl">비밀번호</div>
-      <input type="password" id="lp" placeholder="비밀번호" maxlength="20" style="text-align:center" onkeydown="if(event.key==='Enter')doLogin()">
+      <label for="lp" class="lbl">비밀번호</label>
+      <input type="password" id="lp" aria-label="비밀번호" title="비밀번호" placeholder="비밀번호" maxlength="20" style="text-align:center" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div id="lerr" style="font-size:.7rem;color:var(--red);text-align:center;display:none;margin-top:2px"></div>
     <button class="btn pri fw" id="lbtn" onclick="doLogin()" style="margin-top:5px">로그인 / 가입</button>
     <div style="font-size:.67rem;color:var(--tx3);text-align:center;line-height:1.6">첫 로그인 시 자동으로 가입됩니다</div>
   </div>
   <div id="saved-accts" style="width:100%;max-width:340px;margin-top:4px"></div>
-  <a id="login-apk-btn" href="download.html?auto=1"
+  <a id="login-apk-btn" href="https://zerevor-hue.github.io/shift-calender/download.html?auto=1"
      style="width:100%;max-width:340px;margin-top:2px;padding:11px 16px;border-radius:var(--rs);background:var(--bg2);border:1px solid var(--bd2);color:var(--a);font-size:.8rem;font-weight:800;text-decoration:none;text-align:center;box-shadow:var(--pill-sh);display:block">
     안드로이드 앱 다운로드 · 설치 안내
   </a>
@@ -715,7 +716,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div class="stitle">팀 채팅</div>
       <div class="cbox" id="chat-box"></div>
       <div class="cinrow">
-        <textarea id="chat-in" placeholder="메시지..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+        <label for="chat-in" class="sr-only">메시지 입력</label><textarea id="chat-in" aria-label="메시지 입력" title="메시지 입력" placeholder="메시지..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
         <button class="csend" onclick="sendChat()">➤</button>
       </div>
     </div>
@@ -787,9 +788,9 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div id="fav-kw-wrap" style="display:none;margin-top:11px;padding-top:10px;border-top:1px solid var(--bd)">
       <!-- 선호 메뉴 입력 -->
       <div style="margin-bottom:10px">
-        <div class="lbl" style="font-size:.65rem;color:var(--a);margin-bottom:4px">선호 메뉴</div>
+        <label for="fav-meal-inp" class="lbl" style="font-size:.65rem;color:var(--a);margin-bottom:4px">선호 메뉴</label>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="fav-meal-inp" placeholder="예: 돈육, 까스, 떡갈비, 국밥" maxlength="12"
+          <input type="text" id="fav-meal-inp" aria-label="선호 메뉴" title="선호 메뉴" placeholder="예: 돈육, 까스, 떡갈비, 국밥" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addFavMealKeyword();}">
           <button type="button" class="btn pri sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addFavMealKeyword()">+ 추가</button>
@@ -798,9 +799,9 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
       <!-- 싫어하는 메뉴 입력 -->
       <div>
-        <div class="lbl" style="font-size:.65rem;color:var(--red);margin-bottom:4px">기피 메뉴</div>
+        <label for="hate-meal-inp" class="lbl" style="font-size:.65rem;color:var(--red);margin-bottom:4px">기피 메뉴</label>
         <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input type="text" id="hate-meal-inp" placeholder="예: 추어탕, 오복지, 오징어" maxlength="12"
+          <input type="text" id="hate-meal-inp" aria-label="기피 메뉴" title="기피 메뉴" placeholder="예: 추어탕, 오복지, 오징어" maxlength="12"
             style="flex:1;padding:6px 10px;font-size:.76rem"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addHateMealKeyword();}">
           <button type="button" class="btn dan sm" style="padding:6px 12px;font-size:.72rem;flex-shrink:0" onclick="addHateMealKeyword()">+ 추가</button>
@@ -827,7 +828,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       ✕
     </button>
   </div>
-  <img id="lightbox-img" onclick="event.stopPropagation()" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px;transform-origin:center center;transition:transform .08s ease-out;user-select:none;-webkit-user-drag:none">
+  <img id="lightbox-img" alt="확대 이미지" onclick="event.stopPropagation()" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px;transform-origin:center center;transition:transform .08s ease-out;user-select:none;-webkit-user-drag:none">
   <div style="position:absolute;bottom:max(18px,env(safe-area-inset-bottom,18px));color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;pointer-events:none">두 손가락으로 확대/축소 · 배경 터치 또는 뒤로가기로 닫기</div>
 </div>
 
@@ -877,8 +878,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="stitle">연차 설정</div>
     <div style="display:flex;align-items:center;gap:12px">
       <div style="flex:1">
-        <div class="lbl">연간 총 연차 일수</div>
-        <input type="number" id="vac-inp" min="0" max="365" placeholder="예: 15" style="font-size:1rem;font-weight:700;text-align:center" oninput="saveVac()">
+        <label for="vac-inp" class="lbl">연간 총 연차 일수</label>
+        <input type="number" id="vac-inp" aria-label="연간 총 연차 일수" title="연간 총 연차 일수" min="0" max="365" placeholder="예: 15" style="font-size:1rem;font-weight:700;text-align:center" oninput="saveVac()">
       </div>
       <div style="text-align:center;min-width:70px">
         <div style="font-size:.62rem;color:var(--tx3);margin-bottom:3px">사용/총</div>
@@ -926,7 +927,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         API 키를 한 번 등록해 두면 모든 팀원이 식단표 사진 등록 기능을 사용할 수 있습니다.
       </div>
       <div style="display:flex;gap:6px;margin-bottom:6px">
-        <input type="password" id="ocr-api-key-inp" placeholder="API 키 입력" style="flex:1;padding:7px 10px;font-size:.76rem;font-family:'JetBrains Mono',monospace">
+        <label for="ocr-api-key-inp" class="sr-only">식단표 인식 API 키</label><input type="password" id="ocr-api-key-inp" aria-label="식단표 인식 API 키" title="식단표 인식 API 키" placeholder="API 키 입력" style="flex:1;padding:7px 10px;font-size:.76rem;font-family:'JetBrains Mono',monospace">
         <button type="button" class="btn sec sm" onclick="toggleOcrKeyVis()" id="ocr-key-vis-btn" style="flex-shrink:0">보기</button>
       </div>
       <div class="fl" style="gap:6px">
@@ -965,8 +966,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
     </div>
     <div class="form-g">
-      <div class="lbl">메모 (줄바꿈으로 최대 3줄)</div>
-      <textarea id="day-memo" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
+      <label for="day-memo" class="lbl">메모 (줄바꿈으로 최대 3줄)</label>
+      <textarea id="day-memo" aria-label="메모" title="메모" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
     </div>
     <div class="form-g">
       <div class="lbl">메모 색상</div>
@@ -985,8 +986,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="shandle"></div>
     <div class="stitle-s">새 팀 만들기 <span class="abadge">관리자</span></div>
     <div class="form-g">
-      <div class="lbl">팀 이름</div>
-      <input type="text" id="nt-name" placeholder="예: 환경팀, 생산팀" maxlength="15">
+      <label for="nt-name" class="lbl">팀 이름</label>
+      <input type="text" id="nt-name" aria-label="팀 이름" title="팀 이름" placeholder="예: 환경팀, 생산팀" maxlength="15">
     </div>
     <div class="fl">
       <button class="btn sec fg" onclick="cs('new-top-sov')">취소</button>
@@ -1001,13 +1002,13 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="shandle"></div>
     <div class="stitle-s">새 하위팀 만들기 <span class="abadge">관리자</span></div>
     <div class="form-g">
-      <div class="lbl">하위팀 이름</div>
-      <input type="text" id="nd-name" placeholder="예: 1과, 통상근무" maxlength="15">
+      <label for="nd-name" class="lbl">하위팀 이름</label>
+      <input type="text" id="nd-name" aria-label="하위팀 이름" title="하위팀 이름" placeholder="예: 1과, 통상근무" maxlength="15">
     </div>
     <div class="stitle">교대 패턴 설정</div>
     <div class="form-g">
-      <div class="lbl">패턴 시작 날짜</div>
-      <input type="date" id="nd-start">
+      <label for="nd-start" class="lbl">패턴 시작 날짜</label>
+      <input type="date" id="nd-start" aria-label="패턴 시작 날짜" title="패턴 시작 날짜">
     </div>
     <div class="form-g">
       <div class="lbl">패턴 길이</div>
@@ -1059,16 +1060,16 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="shandle"></div>
     <div class="stitle-s" id="holiday-sh-title">공휴일 추가</div>
     <div class="form-g">
-      <div class="lbl">날짜</div>
-      <input type="date" id="hd-date">
+      <label for="hd-date" class="lbl">날짜</label>
+      <input type="date" id="hd-date" aria-label="공휴일 날짜" title="공휴일 날짜">
     </div>
     <div class="form-g">
-      <div class="lbl">이름</div>
-      <input type="text" id="hd-name" placeholder="예: 신정, 설날, 대체공휴일" maxlength="20">
+      <label for="hd-name" class="lbl">이름</label>
+      <input type="text" id="hd-name" aria-label="공휴일 이름" title="공휴일 이름" placeholder="예: 신정, 설날, 대체공휴일" maxlength="20">
     </div>
     <div class="form-g">
-      <div class="lbl">종류</div>
-      <select id="hd-type">
+      <label for="hd-type" class="lbl">종류</label>
+      <select id="hd-type" aria-label="공휴일 종류" title="공휴일 종류">
         <option value="public">공휴일</option>
         <option value="substitute">대체공휴일</option>
         <option value="company">회사·노조 기념일</option>
@@ -1091,17 +1092,17 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="shandle"></div>
     <div class="stitle-s" id="ev-sheet-title">일정 추가</div>
     <div class="form-g">
-      <div class="lbl">일정 제목</div>
-      <input type="text" id="ev-title" placeholder="예: 안전교육, 설비점검" maxlength="30">
+      <label for="ev-title" class="lbl">일정 제목</label>
+      <input type="text" id="ev-title" aria-label="일정 제목" title="일정 제목" placeholder="예: 안전교육, 설비점검" maxlength="30">
     </div>
     <div class="fl" style="margin-bottom:12px">
       <div class="fg form-g" style="margin-bottom:0">
-        <div class="lbl">시작일</div>
-        <input type="date" id="ev-start">
+        <label for="ev-start" class="lbl">시작일</label>
+        <input type="date" id="ev-start" aria-label="일정 시작일" title="일정 시작일">
       </div>
       <div class="fg form-g" style="margin-bottom:0">
-        <div class="lbl">종료일 (하루면 비워두기)</div>
-        <input type="date" id="ev-end">
+        <label for="ev-end" class="lbl">종료일 (하루면 비워두기)</label>
+        <input type="date" id="ev-end" aria-label="일정 종료일" title="일정 종료일">
       </div>
     </div>
     <div class="form-g">
@@ -1121,12 +1122,12 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div class="shandle"></div>
     <div class="stitle-s" id="mm-sheet-title">메모 추가</div>
     <div class="form-g">
-      <div class="lbl">날짜</div>
-      <input type="date" id="mm-date" onchange="onMemoSheetDateChange()">
+      <label for="mm-date" class="lbl">날짜</label>
+      <input type="date" id="mm-date" aria-label="메모 날짜" title="메모 날짜" onchange="onMemoSheetDateChange()">
     </div>
     <div class="form-g">
-      <div class="lbl">메모 (줄바꿈으로 최대 3줄)</div>
-      <textarea id="mm-text" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
+      <label for="mm-text" class="lbl">메모 (줄바꿈으로 최대 3줄)</label>
+      <textarea id="mm-text" aria-label="메모 내용" title="메모 내용" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
     </div>
     <div class="form-g">
       <div class="lbl">메모 색상</div>
@@ -1223,8 +1224,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <!-- 근무형태 선택 (4조2교대 157h / 일근제 209h) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:9px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2);white-space:nowrap;flex-shrink:0">근무 형태</span>
-        <select id="sal-work-mode" onchange="onSalModeChange(true)" style="flex:1;min-width:0;width:100%;background:var(--bg2);color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:6px 10px;font-size:.7rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <label for="sal-work-mode" style="font-size:.73rem;font-weight:800;color:var(--tx2);white-space:nowrap;flex-shrink:0">근무 형태</label>
+        <select id="sal-work-mode" aria-label="근무 형태" title="근무 형태" onchange="onSalModeChange(true)" style="flex:1;min-width:0;width:100%;background:var(--bg2);color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:6px 10px;font-size:.7rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
           <option value="shift157">4조 2교대 (157h · 연장38h / 야간49h)</option>
           <option value="day209">일근제 포괄 (209h · 연장13h / 휴일12h / 야간8h)</option>
         </select>
@@ -1244,22 +1245,22 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.61rem">기본급 (원)</div>
-          <input type="text" inputmode="numeric" id="sal-base-pay" placeholder="0" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
+          <label for="sal-base-pay" class="lbl" style="font-size:.61rem">기본급 (원)</label>
+          <input type="text" inputmode="numeric" id="sal-base-pay" aria-label="기본급 (원)" title="기본급 (원)" placeholder="0" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.61rem">통상시급 (자동 계산)</div>
-          <input type="text" id="sal-hourly" placeholder="자동 계산" style="padding:7px 9px;font-size:.82rem;font-weight:700;color:var(--tx2)" readonly>
+          <label for="sal-hourly" class="lbl" style="font-size:.61rem">통상시급 (자동 계산)</label>
+          <input type="text" id="sal-hourly" aria-label="통상시급 (자동 계산)" title="통상시급 (자동 계산)" placeholder="자동 계산" style="padding:7px 9px;font-size:.82rem;font-weight:700;color:var(--tx2)" readonly>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
-          <div class="lbl" style="font-size:.6rem">통상임금 포함항목 (식대·수당)</div>
-          <input type="text" id="sal-tech-pay" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalTechPopup()">
+          <label for="sal-tech-pay" class="lbl" style="font-size:.6rem">통상임금 포함항목 (식대·수당)</label>
+          <input type="text" id="sal-tech-pay" aria-label="통상임금 포함항목 (식대·수당)" title="통상임금 포함항목 (식대·수당)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalTechPopup()">
         </div>
         <div>
-          <div class="lbl" style="font-size:.6rem">통상임금 제외 항목 (복지·상품권·기타)</div>
-          <input type="text" id="sal-extra-pay" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalExtraPopup()">
+          <label for="sal-extra-pay" class="lbl" style="font-size:.6rem">통상임금 제외 항목 (복지·상품권·기타)</label>
+          <input type="text" id="sal-extra-pay" aria-label="통상임금 제외 항목 (복지·상품권·기타)" title="통상임금 제외 항목 (복지·상품권·기타)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalExtraPopup()">
         </div>
       </div>
       <input type="hidden" id="sal-meal-pay" value="200000">
@@ -1277,20 +1278,20 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
         <div>
-          <div class="lbl" id="sal-lbl-ds" style="font-size:.54rem">전월 주간대근</div>
-          <input type="number" id="sal-cnt-ds" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
+          <label for="sal-cnt-ds" class="lbl" id="sal-lbl-ds" style="font-size:.54rem">전월 주간대근</label>
+          <input type="number" id="sal-cnt-ds" aria-label="전월 주간대근" title="전월 주간대근" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" id="sal-lbl-ns" style="font-size:.54rem">전월 야간대근</div>
-          <input type="number" id="sal-cnt-ns" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
+          <label for="sal-cnt-ns" class="lbl" id="sal-lbl-ns" style="font-size:.54rem">전월 야간대근</label>
+          <input type="number" id="sal-cnt-ns" aria-label="전월 야간대근" title="전월 야간대근" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" id="sal-lbl-hd" style="font-size:.54rem">당월 공휴일(주)</div>
-          <input type="number" id="sal-cnt-hd" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
+          <label for="sal-cnt-hd" class="lbl" id="sal-lbl-hd" style="font-size:.54rem">당월 공휴일(주)</label>
+          <input type="number" id="sal-cnt-hd" aria-label="당월 공휴일(주)" title="당월 공휴일(주)" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
         <div>
-          <div class="lbl" id="sal-lbl-hdn" style="font-size:.54rem">당월 공휴일(야)</div>
-          <input type="number" id="sal-cnt-hdn" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
+          <label for="sal-cnt-hdn" class="lbl" id="sal-lbl-hdn" style="font-size:.54rem">당월 공휴일(야)</label>
+          <input type="number" id="sal-cnt-hdn" aria-label="당월 공휴일(야)" title="당월 공휴일(야)" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:6px">
@@ -1302,16 +1303,16 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
           <div>
-            <div class="lbl" style="font-size:.55rem">연장추가 횟수(전월대근)</div>
-            <input type="number" id="sal-eff-ot" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
+            <label for="sal-eff-ot" class="lbl" style="font-size:.55rem">연장추가 횟수(전월대근)</label>
+            <input type="number" id="sal-eff-ot" aria-label="연장추가 횟수(전월대근)" title="연장추가 횟수(전월대근)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.55rem">휴일추가 횟수(공휴일)</div>
-            <input type="number" id="sal-eff-hd" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
+            <label for="sal-eff-hd" class="lbl" style="font-size:.55rem">휴일추가 횟수(공휴일)</label>
+            <input type="number" id="sal-eff-hd" aria-label="휴일추가 횟수(공휴일)" title="휴일추가 횟수(공휴일)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.55rem">야간추가 횟수(추가야간)</div>
-            <input type="number" id="sal-eff-nt" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
+            <label for="sal-eff-nt" class="lbl" style="font-size:.55rem">야간추가 횟수(추가야간)</label>
+            <input type="number" id="sal-eff-nt" aria-label="야간추가 횟수(추가야간)" title="야간추가 횟수(추가야간)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
           </div>
         </div>
       </div>
@@ -1322,40 +1323,40 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 항목 입력 (국민연금·건강보험은 명세서 금액 1회 입력 권장)</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
-          <div class="lbl" style="font-size:.58rem">국민연금 (4.75%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-pen" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-pen" class="lbl" style="font-size:.58rem">국민연금 (4.75%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-pen" aria-label="국민연금 (4.75%)" title="국민연금 (4.75%)" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">건강보험 (3.595%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-hlth" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-hlth" class="lbl" style="font-size:.58rem">건강보험 (3.595%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-hlth" aria-label="건강보험 (3.595%)" title="건강보험 (3.595%)" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">장기요양 (13.14%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-care" placeholder="자동(건보×13.14%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-care" class="lbl" style="font-size:.58rem">장기요양 (13.14%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-care" aria-label="장기요양 (13.14%)" title="장기요양 (13.14%)" placeholder="자동(건보×13.14%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
-          <div class="lbl" style="font-size:.58rem">고용보험 (0.9%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-emp" placeholder="자동(0.9%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-emp" class="lbl" style="font-size:.58rem">고용보험 (0.9%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-emp" aria-label="고용보험 (0.9%)" title="고용보험 (0.9%)" placeholder="자동(0.9%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" id="sal-lbl-union" style="font-size:.58rem">노조조합비 (1.42%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-union" placeholder="자동(통상×1.42%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-union" class="lbl" id="sal-lbl-union" style="font-size:.58rem">노조조합비 (1.42%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-union" aria-label="노조조합비 (1.42%)" title="노조조합비 (1.42%)" placeholder="자동(통상×1.42%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">식사비 · 상조회비</div>
-          <input type="text" inputmode="numeric" id="sal-ded-meal" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-meal" class="lbl" style="font-size:.58rem">식사비 · 상조회비</label>
+          <input type="text" inputmode="numeric" id="sal-ded-meal" aria-label="식사비 · 상조회비" title="식사비 · 상조회비" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div>
-          <div class="lbl" style="font-size:.58rem">소득세</div>
-          <input type="text" inputmode="numeric" id="sal-ded-tax" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+          <label for="sal-ded-tax" class="lbl" style="font-size:.58rem">소득세</label>
+          <input type="text" inputmode="numeric" id="sal-ded-tax" aria-label="소득세" title="소득세" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
         </div>
         <div>
-          <div class="lbl" style="font-size:.58rem">지방소득세 (소득세 10%)</div>
-          <input type="text" inputmode="numeric" id="sal-ded-ltax" placeholder="0" style="padding:6px;font-size:.76rem;color:var(--tx2)" readonly>
+          <label for="sal-ded-ltax" class="lbl" style="font-size:.58rem">지방소득세 (소득세 10%)</label>
+          <input type="text" inputmode="numeric" id="sal-ded-ltax" aria-label="지방소득세 (소득세 10%)" title="지방소득세 (소득세 10%)" placeholder="0" style="padding:6px;font-size:.76rem;color:var(--tx2)" readonly>
         </div>
       </div>
     </div>
@@ -1420,11 +1421,11 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
       <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px">
         <div>
-          <div class="lbl" style="font-size:.63rem;color:var(--a)">기준 월요일</div>
-          <input type="date" id="mu-monday-date" onchange="onMuMondayChange()" style="padding:6px 9px;font-size:.8rem;font-weight:800">
+          <label for="mu-monday-date" class="lbl" style="font-size:.63rem;color:var(--a)">기준 월요일</label>
+          <input type="date" id="mu-monday-date" aria-label="기준 월요일" title="기준 월요일" onchange="onMuMondayChange()" style="padding:6px 9px;font-size:.8rem;font-weight:800">
         </div>
         <div>
-          <input type="file" id="mu-file-inp" accept="image/*" style="display:none" onchange="onMuFileSelected(event)">
+          <label for="mu-file-inp" class="sr-only">식단표 사진 파일</label><input type="file" id="mu-file-inp" aria-label="식단표 사진 파일" title="식단표 사진 파일" accept="image/*" style="display:none" onchange="onMuFileSelected(event)">
           <button type="button" class="btn pri" style="padding:8px 12px;font-size:.75rem;font-weight:800;white-space:nowrap" onclick="document.getElementById('mu-file-inp').click()">
             식단표 사진 선택
           </button>
@@ -1439,7 +1440,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <span style="font-size:.62rem;color:var(--tx3)">선택된 식단표 사진 (눌러서 확대)</span>
           <button type="button" class="btn sec sm" style="padding:2px 8px;font-size:.6rem" onclick="rerunMuOcr()">사진 다시 읽기</button>
         </div>
-        <img id="mu-preview-img" style="width:100%;max-height:130px;object-fit:contain;border-radius:8px;background:var(--bg2);cursor:zoom-in" onclick="if(this.src)openLightbox(this.src)">
+        <img id="mu-preview-img" alt="식단표 미리보기" style="width:100%;max-height:130px;object-fit:contain;border-radius:8px;background:var(--bg2);cursor:zoom-in" onclick="if(this.src)openLightbox(this.src)">
       </div>
     </div>
 
@@ -1456,40 +1457,40 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         <div style="font-size:.7rem;font-weight:800;color:var(--a);margin-bottom:6px">점심</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
           <div>
-            <div class="lbl" style="font-size:.58rem">밥</div>
-            <input type="text" id="mu-l-rice" placeholder="예: 잡곡밥&쌀밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-rice" class="lbl" style="font-size:.58rem">밥</label>
+            <input type="text" id="mu-l-rice" aria-label="중식 밥" title="중식 밥" placeholder="예: 잡곡밥&쌀밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.58rem">국 / 탕 / 찌개</div>
-            <input type="text" id="mu-l-soup" placeholder="예: 건새우두부탕" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-soup" class="lbl" style="font-size:.58rem">국 / 탕 / 찌개</label>
+            <input type="text" id="mu-l-soup" aria-label="중식 국/탕/찌개" title="중식 국/탕/찌개" placeholder="예: 건새우두부탕" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
           <div>
-            <div class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</div>
-            <input type="text" id="mu-l-main1" placeholder="예: 꽈리고추돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-main1" class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</label>
+            <input type="text" id="mu-l-main1" aria-label="중식 주요리 1" title="중식 주요리 1" placeholder="예: 꽈리고추돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</div>
-            <input type="text" id="mu-l-main2" placeholder="예: 청포묵김가루무침" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-main2" class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</label>
+            <input type="text" id="mu-l-main2" aria-label="중식 주요리 2" title="중식 주요리 2" placeholder="예: 청포묵김가루무침" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
           </div>
         </div>
         <div style="margin-bottom:6px">
-          <div class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</div>
-          <input type="text" id="mu-l-sides" placeholder="예: 샐러드, 양배추쌈&씨앗쌈장, 배추김치" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+          <label for="mu-l-sides" class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</label>
+          <input type="text" id="mu-l-sides" aria-label="중식 반찬·김치" title="중식 반찬·김치" placeholder="예: 샐러드, 양배추쌈&씨앗쌈장, 배추김치" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
           <div>
-            <div class="lbl" style="font-size:.56rem;color:#e879f9">플러스코너</div>
-            <input type="text" id="mu-l-plus" placeholder="비빔밥/잔치국수" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-plus" class="lbl" style="font-size:.56rem;color:#e879f9">플러스코너</label>
+            <input type="text" id="mu-l-plus" aria-label="중식 플러스코너" title="중식 플러스코너" placeholder="비빔밥/잔치국수" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.56rem;color:var(--as)">후식음료</div>
-            <input type="text" id="mu-l-drink" placeholder="매실차/요구르트" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-drink" class="lbl" style="font-size:.56rem;color:var(--as)">후식음료</label>
+            <input type="text" id="mu-l-drink" aria-label="중식 후식음료" title="중식 후식음료" placeholder="매실차/요구르트" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
           </div>
           <div>
-            <div class="lbl" style="font-size:.56rem;color:var(--vac)">포장샐러드</div>
-            <input type="text" id="mu-l-salad" placeholder="참치마요샐러드" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+            <label for="mu-l-salad" class="lbl" style="font-size:.56rem;color:var(--vac)">포장샐러드</label>
+            <input type="text" id="mu-l-salad" aria-label="중식 포장샐러드" title="중식 포장샐러드" placeholder="참치마요샐러드" style="padding:5px 6px;font-size:.72rem" oninput="syncMuDayFromInputs()">
           </div>
         </div>
       </div>
@@ -1505,45 +1506,45 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         <div id="mu-d-fields">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
             <div>
-              <div class="lbl" style="font-size:.58rem">밥</div>
-              <input type="text" id="mu-d-rice" placeholder="예: 잡곡밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-rice" class="lbl" style="font-size:.58rem">밥</label>
+              <input type="text" id="mu-d-rice" aria-label="석식 밥" title="석식 밥" placeholder="예: 잡곡밥" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
             </div>
             <div>
-              <div class="lbl" style="font-size:.58rem">국 / 탕 / 무침</div>
-              <input type="text" id="mu-d-soup" placeholder="예: 사골우거지국" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-soup" class="lbl" style="font-size:.58rem">국 / 탕 / 무침</label>
+              <input type="text" id="mu-d-soup" aria-label="석식 국/탕/무침" title="석식 국/탕/무침" placeholder="예: 사골우거지국" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
             <div>
-              <div class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</div>
-              <input type="text" id="mu-d-main1" placeholder="예: 추어탕 / 돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-main1" class="lbl" style="font-size:.58rem;color:#fb7185">주요리 1</label>
+              <input type="text" id="mu-d-main1" aria-label="석식 주요리 1" title="석식 주요리 1" placeholder="예: 추어탕 / 돈육볶음" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
             </div>
             <div>
-              <div class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</div>
-              <input type="text" id="mu-d-main2" placeholder="예: 콘게맛너겟&소스" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-main2" class="lbl" style="font-size:.58rem;color:#38bdf8">주요리 2</label>
+              <input type="text" id="mu-d-main2" aria-label="석식 주요리 2" title="석식 주요리 2" placeholder="예: 콘게맛너겟&소스" style="padding:5px 7px;font-size:.75rem;font-weight:700" oninput="syncMuDayFromInputs()">
             </div>
           </div>
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px">
             <div>
-              <div class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</div>
-              <input type="text" id="mu-d-sides" placeholder="예: 아삭이양파무침, 봄동겉절이" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-sides" class="lbl" style="font-size:.58rem">반찬 · 김치 (쉼표로 구분)</label>
+              <input type="text" id="mu-d-sides" aria-label="석식 반찬·김치" title="석식 반찬·김치" placeholder="예: 아삭이양파무침, 봄동겉절이" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
             </div>
             <div>
-              <div class="lbl" style="font-size:.58rem;color:#a3e635">플러스코너</div>
-              <input type="text" id="mu-d-plus" placeholder="셀프계란후라이" style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+              <label for="mu-d-plus" class="lbl" style="font-size:.58rem;color:#a3e635">플러스코너</label>
+              <input type="text" id="mu-d-plus" aria-label="석식 플러스코너" title="석식 플러스코너" placeholder="셀프계란후라이" style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
             </div>
           </div>
         </div>
         <div id="mu-d-note-wrap" style="display:none">
-          <div class="lbl" style="font-size:.58rem">미운영 안내 문구</div>
-          <input type="text" id="mu-d-note" placeholder="참 멋진 당신의 오늘을 응원합니다" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
+          <label for="mu-d-note" class="lbl" style="font-size:.58rem">미운영 안내 문구</label>
+          <input type="text" id="mu-d-note" aria-label="석식 미운영 안내 문구" title="석식 미운영 안내 문구" placeholder="참 멋진 당신의 오늘을 응원합니다" style="padding:5px 7px;font-size:.75rem" oninput="syncMuDayFromInputs()">
         </div>
       </div>
 
       <!-- 원산지 표기 -->
       <div>
-        <div class="lbl" style="font-size:.58rem">원산지 표기</div>
-        <input type="text" id="mu-origin" placeholder="쌀,흑미,현미:국내산 / 포기김치:국내산..." style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
+        <label for="mu-origin" class="lbl" style="font-size:.58rem">원산지 표기</label>
+        <input type="text" id="mu-origin" aria-label="원산지 표기" title="원산지 표기" placeholder="쌀,흑미,현미:국내산 / 포기김치:국내산..." style="padding:5px 7px;font-size:.72rem" oninput="syncMuDayFromInputs()">
       </div>
     </div>
 
@@ -2155,15 +2156,22 @@ function openTeamMgr(){renderAllTeams();os('team-mgr-sov');}
 // 위젯에 전체 데이터 전달 (연속 렌더링 시 디바운스로 메인스레드 병목 방지)
 let _widgetSyncTimer=null;
 let _lastSyncedWidgetJson='';
-function syncToWidget(){
+function syncToWidget(immediate){
   if(!window.Android||!S.myId)return;
   clearTimeout(_widgetSyncTimer);
-  _widgetSyncTimer=setTimeout(_doSyncToWidget,120);
+  if(immediate){
+    _doSyncToWidget();
+  }else{
+    _widgetSyncTimer=setTimeout(_doSyncToWidget,100);
+  }
 }
 function _doSyncToWidget(){
   if(!window.Android||!S.myId)return;
+  clearTimeout(_widgetSyncTimer);
+  _widgetSyncTimer=null;
   try{
     const tp=S.patCache[`${S.topId}_${S.divId}`];
+    const showEv=typeof isShowTeamEvents==='function' ? isShowTeamEvents() : true;
     const payload=JSON.stringify({
       patternStartKey: tp?.patternStart ? dkey(new Date(tp.patternStart)) : "",
       pattern: Array.isArray(tp?.pattern) ? tp.pattern : [],
@@ -2173,7 +2181,8 @@ function _doSyncToWidget(){
       topColor: S.topColor||'#f59e0b',
       divName: S.divName||'',
       allPats: window._allPatsCache || {},
-      events: (typeof isShowTeamEvents==='function'&&!isShowTeamEvents()) ? {} : (S.events || {}),
+      events: showEv ? (S.events || {}) : {},
+      showTeamEvents: showEv,
       holidays: holidays || {},
       calStyle: typeof getCalStyle==='function' ? getCalStyle() : 'default',
       weekStart: typeof getWeekStart==='function' ? getWeekStart() : 'sun',
@@ -2184,6 +2193,7 @@ function _doSyncToWidget(){
     window.Android.savePattern(payload);
   }catch(e){}
 }
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')_doSyncToWidget();});
 
 function applyCalHeaderBadge(){
   if(S.topId&&S.divId){
@@ -5998,7 +6008,7 @@ function setWeekStart(mode){
   renderSettings();
   if(S.topId&&S.divId)renderCal();
   if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();
-  syncToWidget();
+  syncToWidget(true);
   showToast(next==='mon'?'월요일 시작 달력으로 변경되었습니다':'일요일 시작 달력으로 변경되었습니다');
 }
 function getCalStyle(){
@@ -6014,7 +6024,7 @@ function setCalStyle(style){
   renderSettings();
   if(S.topId&&S.divId)renderCal();
   if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();
-  syncToWidget();
+  syncToWidget(true);
   showToast(next==='large'?'근무 크게(메모 1줄) 스타일로 변경되었습니다':'기본(메모 3줄) 스타일로 변경되었습니다');
 }
 function isShowTeamEvents(){
@@ -6033,7 +6043,7 @@ function setShowTeamEvents(show){
   renderEventList(S.events);
   if(!next&&calSubTab==='ev')switchCalSubTab('mm');
   if(S.topId&&S.divId)renderCal();
-  syncToWidget();
+  syncToWidget(true);
   showToast(next?'팀 이벤트를 표시합니다':'팀 이벤트를 숨겼습니다');
 }
 function renderSettings(){
@@ -6061,7 +6071,7 @@ function renderSettings(){
   const ocrCard=document.getElementById('ocr-key-card');
   if(ocrCard){ocrCard.style.display=isAdmin()?'':'none';}
 }
-function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();if(S.events)renderEventList(S.events);renderMemoList();if(S.topId&&S.divId)renderCal();syncToWidget();}
+function setTheme(m){document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]').setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');ls.s('theme',m);renderSettings();if(S.events)renderEventList(S.events);renderMemoList();if(S.topId&&S.divId)renderCal();if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();syncToWidget(true);}
 function applyTheme(){const m=ls.g('theme')==='dark'?'dark':'light';document.body.classList.toggle('light',m==='light');document.querySelector('meta[name="theme-color"]')?.setAttribute('content',m==='light'?'#f4f4f6':'#0f1117');}
 let _vacSaveTimer=null;
 function saveVac(){
