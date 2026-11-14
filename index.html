@@ -445,7 +445,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 </div>
 
 <div id="login-screen" class="h">
-  <img id="login-logo" alt="교대근무 달력" style="width:82px;height:82px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.35);display:block">
+  <img id="login-logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="교대근무 달력" style="width:82px;height:82px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.35);display:block">
   <script>document.getElementById('login-logo').src=document.getElementById('splash-logo').src;</script>
   <div style="text-align:center">
     <div style="font-size:1.35rem;font-weight:800;letter-spacing:-.03em">교대근무 달력</div>
@@ -828,7 +828,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       ✕
     </button>
   </div>
-  <img id="lightbox-img" alt="확대 이미지" onclick="event.stopPropagation()" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px;transform-origin:center center;transition:transform .08s ease-out;user-select:none;-webkit-user-drag:none">
+  <img id="lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="확대 이미지" onclick="event.stopPropagation()" style="max-width:96%;max-height:84vh;object-fit:contain;border-radius:8px;transform-origin:center center;transition:transform .08s ease-out;user-select:none;-webkit-user-drag:none">
   <div style="position:absolute;bottom:max(18px,env(safe-area-inset-bottom,18px));color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;pointer-events:none">두 손가락으로 확대/축소 · 배경 터치 또는 뒤로가기로 닫기</div>
 </div>
 
@@ -1194,7 +1194,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
       <div style="display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bd);border-radius:999px;padding:2px 6px;flex-shrink:0">
         <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(-1)">◀</button>
-        <span id="sal-ym-lbl" style="font-size:.75rem;font-weight:800;padding:0 4px">2026년 11월</span>
+        <span id="sal-ym-lbl" style="font-size:.72rem;font-weight:400;padding:0 4px;color:var(--tx2)">2026년 <b style="font-size:.92rem;font-weight:900;color:var(--tx)">11월</b> 명세서</span>
         <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(1)">▶</button>
       </div>
     </div>
@@ -1210,8 +1210,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         <span id="sal-deduct-total" style="font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:800;color:var(--tx2)">-0원</span>
       </div>
       <div style="display:flex;align-items:baseline;justify-content:space-between;padding-top:7px;border-top:1px dashed var(--bd)">
-        <span style="font-size:.76rem;font-weight:800;color:var(--tx)">차인지급액 (실수령액)</span>
-        <span id="sal-net-total" style="font-family:'JetBrains Mono',monospace;font-size:1.22rem;font-weight:900;color:var(--tx)">0원</span>
+        <span style="font-size:.75rem;font-weight:400;color:var(--tx)">차인지급액(실수령액 예상)</span>
+        <span id="sal-net-total" style="font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--tx)">0원</span>
       </div>
       <div id="sal-per-sub-info" style="margin-top:8px;padding:6px 9px;background:var(--bg2);border-radius:10px;font-size:.63rem;color:var(--tx2);display:grid;grid-template-columns:repeat(2,1fr);gap:4px 8px">
         <span>통상시급 <b id="sal-unit-hourly" style="color:var(--tx)">0원</b></span>
@@ -1255,11 +1255,11 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
-          <label for="sal-tech-pay" class="lbl" style="font-size:.6rem">통상임금 포함항목 (식대·수당)</label>
+          <label for="sal-tech-pay" class="lbl" style="font-size:.6rem">통상임금 <span style="color:#ef4444;font-weight:800">포함</span>항목 (식대·수당)</label>
           <input type="text" id="sal-tech-pay" aria-label="통상임금 포함항목 (식대·수당)" title="통상임금 포함항목 (식대·수당)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalTechPopup()">
         </div>
         <div>
-          <label for="sal-extra-pay" class="lbl" style="font-size:.6rem">통상임금 제외 항목 (복지·상품권·기타)</label>
+          <label for="sal-extra-pay" class="lbl" style="font-size:.6rem">통상임금 <span style="color:#ef4444;font-weight:800">제외</span>항목 (복지·상품권·기타)</label>
           <input type="text" id="sal-extra-pay" aria-label="통상임금 제외 항목 (복지·상품권·기타)" title="통상임금 제외 항목 (복지·상품권·기타)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalExtraPopup()">
         </div>
       </div>
@@ -1318,9 +1318,13 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
       </div>
     </div>
 
-    <!-- 3. 공제 내역 입력 -->
+    <!-- 3. 공제 내역 입력 (기본 접힘) -->
     <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="font-size:.73rem;font-weight:800;color:var(--tx2);margin-bottom:8px">공제 항목 입력 (국민연금·건강보험은 명세서 금액 1회 입력 권장)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer" onclick="toggleSalDedWrap()">
+        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">공제 항목 입력 <span style="font-size:.6rem;font-weight:600;color:var(--tx3)">(국민연금·건보 명세서 금액 입력 권장)</span></span>
+        <button type="button" id="sal-ded-toggle-btn" class="btn sec sm" style="padding:3px 8px;font-size:.62rem;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();toggleSalDedWrap()">펼치기 ▼</button>
+      </div>
+      <div id="sal-ded-wrap" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--bd)">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
         <div>
           <label for="sal-ded-pen" class="lbl" style="font-size:.58rem">국민연금 (4.75%)</label>
@@ -1359,6 +1363,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <input type="text" inputmode="numeric" id="sal-ded-ltax" aria-label="지방소득세 (소득세 10%)" title="지방소득세 (소득세 10%)" placeholder="0" style="padding:6px;font-size:.76rem;color:var(--tx2)" readonly>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- 4. 급여명세서 항목별 내역 -->
@@ -1388,7 +1393,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <div class="sheet" style="max-height:85vh;overflow-y:auto">
     <div class="shandle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div class="stitle-s" id="sal-extra-modal-title" style="margin-bottom:0">통상임금 제외 항목 합산 입력</div>
+      <div class="stitle-s" id="sal-extra-modal-title" style="margin-bottom:0">통상임금 <span style="color:#ef4444">제외</span>항목 합산 입력</div>
       <button type="button" class="btn sec sm" style="padding:4px 9px;font-size:.65rem" onclick="clearAllSalExtraRows()">전체 초기화</button>
     </div>
     <div id="sal-extra-modal-desc" style="font-size:.66rem;color:var(--tx3);margin-bottom:10px">
@@ -1440,7 +1445,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
           <span style="font-size:.62rem;color:var(--tx3)">선택된 식단표 사진 (눌러서 확대)</span>
           <button type="button" class="btn sec sm" style="padding:2px 8px;font-size:.6rem" onclick="rerunMuOcr()">사진 다시 읽기</button>
         </div>
-        <img id="mu-preview-img" alt="식단표 미리보기" style="width:100%;max-height:130px;object-fit:contain;border-radius:8px;background:var(--bg2);cursor:zoom-in" onclick="if(this.src)openLightbox(this.src)">
+        <img id="mu-preview-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="식단표 미리보기" style="width:100%;max-height:130px;object-fit:contain;border-radius:8px;background:var(--bg2);cursor:zoom-in" onclick="if(this.src&&!this.src.startsWith('data:image/gif'))openLightbox(this.src)">
       </div>
     </div>
 
@@ -3588,6 +3593,7 @@ function computeSalaryAmounts(cfg,moData){
 
 let _salModeDescOpen=false;
 let _salEffWrapOpen=false;
+let _salDedWrapOpen=false;
 function toggleSalModeDesc(){
   _salModeDescOpen=!_salModeDescOpen;
   const el=document.getElementById('sal-mode-desc');
@@ -3601,6 +3607,17 @@ function toggleSalEffWrap(){
   const btn=document.getElementById('sal-eff-toggle-btn');
   if(el)el.style.display=_salEffWrapOpen?'':'none';
   if(btn)btn.textContent=_salEffWrapOpen?'접기 ▲':'정산 횟수 상세 ▼';
+}
+function toggleSalDedWrap(){
+  _salDedWrapOpen=!_salDedWrapOpen;
+  const el=document.getElementById('sal-ded-wrap');
+  const btn=document.getElementById('sal-ded-toggle-btn');
+  if(el)el.style.display=_salDedWrapOpen?'':'none';
+  if(btn)btn.textContent=_salDedWrapOpen?'접기 ▲':'펼치기 ▼';
+}
+function _renderSalYmLabel(){
+  const el=document.getElementById('sal-ym-lbl');
+  if(el)el.innerHTML=`${salYr}년 <b style="font-size:.92rem;font-weight:900;color:var(--tx)">${salMo+1}월</b> 명세서`;
 }
 function _updateSalModeRuleText(mode){
   const p=SAL_MODE_PRESETS[mode]||SAL_MODE_PRESETS.shift157;
@@ -3710,17 +3727,32 @@ function onSalFixedPopInput(el,which){
   else _salPopFixedB=val;
   _updateSalExtraSumUI();
 }
+const TECH_ROW_LABELS=['1.기술수당','2.직책수당','3.행정수당'];
 function renderSalExtraPopupRows(){
   const box=document.getElementById('sal-extra-list');
   if(!box)return;
-  const ph=_salPopupMode==='tech'?'추가 수당 (예: 기술·직책·행정수당)':'추가 지급액 (예: 상생·성과·타결·소급분)';
-  box.innerHTML=_salExtraTempList.map((val,idx)=>`
-    <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:.8rem;font-weight:800;color:var(--tx2);min-width:22px;text-align:right">${idx+1}.</span>
-      <input type="text" inputmode="numeric" value="${_fmtCommaVal(val)}" placeholder="${ph}" style="flex:1;padding:8px 10px;font-size:.84rem;font-weight:800" oninput="onSalExtraItemInput(this,${idx})">
-      <button type="button" class="ibtn" style="width:28px;height:28px;font-size:.72rem;color:var(--tx3);flex-shrink:0" onclick="removeSalExtraRow(${idx})">✕</button>
-    </div>
-  `).join('');
+  if(_salPopupMode==='tech'){
+    box.innerHTML=_salExtraTempList.map((val,idx)=>{
+      const lbl=TECH_ROW_LABELS[idx]||`${idx+1}.추가수당`;
+      const ph=idx===0?'기술수당 금액':(idx===1?'직책수당 금액':(idx===2?'행정수당 금액':'추가 통상임금 수당'));
+      return `
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.76rem;font-weight:800;color:var(--tx2);min-width:74px;white-space:nowrap">${lbl}</span>
+          <input type="text" inputmode="numeric" aria-label="${lbl}" title="${lbl}" value="${_fmtCommaVal(val)}" placeholder="${ph}" style="flex:1;padding:8px 10px;font-size:.84rem;font-weight:800" oninput="onSalExtraItemInput(this,${idx})">
+          <button type="button" class="ibtn" style="width:28px;height:28px;font-size:.72rem;color:var(--tx3);flex-shrink:0" onclick="removeSalExtraRow(${idx})">✕</button>
+        </div>
+      `;
+    }).join('');
+  }else{
+    const ph='추가 지급액 (예: 상생·성과·타결·소급분)';
+    box.innerHTML=_salExtraTempList.map((val,idx)=>`
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:.8rem;font-weight:800;color:var(--tx2);min-width:22px;text-align:right">${idx+1}.</span>
+        <input type="text" inputmode="numeric" aria-label="${idx+1}번 제외 항목" title="${idx+1}번 제외 항목" value="${_fmtCommaVal(val)}" placeholder="${ph}" style="flex:1;padding:8px 10px;font-size:.84rem;font-weight:800" oninput="onSalExtraItemInput(this,${idx})">
+        <button type="button" class="ibtn" style="width:28px;height:28px;font-size:.72rem;color:var(--tx3);flex-shrink:0" onclick="removeSalExtraRow(${idx})">✕</button>
+      </div>
+    `).join('');
+  }
   _updateSalExtraSumUI();
 }
 function _openSalMultiSumPopup(mode){
@@ -3728,13 +3760,13 @@ function _openSalMultiSumPopup(mode){
   const titleEl=document.getElementById('sal-extra-modal-title');
   const descEl=document.getElementById('sal-extra-modal-desc');
   if(_salPopupMode==='tech'){
-    if(titleEl)titleEl.textContent='통상임금 포함항목 합산 입력';
-    if(descEl)descEl.textContent='식대(기본 200,000원)와 기술·직책·기술행정수당 등 통상임금(시급)에 포함되는 항목을 입력하면 자동 합산됩니다.';
+    if(titleEl)titleEl.innerHTML='통상임금 <span style="color:#ef4444">포함</span>항목 합산 입력';
+    if(descEl)descEl.textContent='식대(기본 200,000원)와 기술·직책·행정수당 등 통상임금(시급)에 포함되는 항목을 입력하면 자동 합산됩니다.';
     const mVal=_readMoneyEl('sal-meal-pay',false);
     _salPopFixedA=mVal>0?mVal:'';
     _salPopFixedB='';
   }else{
-    if(titleEl)titleEl.textContent='통상임금 제외 항목 합산 입력';
+    if(titleEl)titleEl.innerHTML='통상임금 <span style="color:#ef4444">제외</span>항목 합산 입력';
     if(descEl)descEl.textContent='복지수당(기본 370,000원), 상품권(지급·공제 동시 반영) 및 상생금·성과급·타결금·소급분 등을 입력하면 자동 합산됩니다.';
     const wVal=_readMoneyEl('sal-welfare-pay',false);
     const gVal=_readMoneyEl('sal-gift-pay',false);
@@ -3747,11 +3779,12 @@ function _openSalMultiSumPopup(mode){
   const savedSum=curItems.reduce((a,b)=>a+_num(b,0),0);
   let baseArr=[];
   if(curItems.length>0&&savedSum===curTotal){
-    baseArr=curItems.map(v=>String(v));
+    baseArr=curItems.map(v=>_num(v,0)>0?String(v):'');
   }else if(curTotal>0){
     baseArr=[String(curTotal)];
   }
-  const rowCount=Math.max(4,baseArr.length);
+  const minRows=_salPopupMode==='tech'?3:4;
+  const rowCount=Math.max(minRows,baseArr.length);
   _salExtraTempList=[];
   for(let i=0;i<rowCount;i++)_salExtraTempList.push(baseArr[i]||'');
   renderSalExtraFixedRows();
@@ -3774,9 +3807,8 @@ function addSalExtraRow(){
   if(inputs&&inputs.length)inputs[inputs.length-1].focus();
 }
 function removeSalExtraRow(idx){
-  if(_salExtraTempList.length<=1){
-    _salExtraTempList[0]='';
-  }else if(_salExtraTempList.length<=4){
+  const minRows=_salPopupMode==='tech'?3:4;
+  if(_salExtraTempList.length<=minRows||idx<minRows){
     _salExtraTempList[idx]='';
   }else{
     _salExtraTempList.splice(idx,1);
@@ -3786,25 +3818,29 @@ function removeSalExtraRow(idx){
 function clearAllSalExtraRows(){
   if(_salPopupMode==='tech'){
     _salPopFixedA=200000;
+    _salExtraTempList=['','',''];
   }else{
     _salPopFixedA=370000;
     _salPopFixedB='';
+    _salExtraTempList=['','','',''];
   }
-  _salExtraTempList=['','','',''];
   renderSalExtraFixedRows();
   renderSalExtraPopupRows();
 }
 function applySalExtraPopup(){
-  const valid=_salExtraTempList.map(v=>_num(v,0)).filter(v=>v>0);
-  const total=valid.reduce((a,b)=>a+b,0);
   if(_salPopupMode==='tech'){
-    _salCurTechItems=valid;
+    const rawList=_salExtraTempList.map(v=>_num(v,0));
+    while(rawList.length>3&&rawList[rawList.length-1]===0)rawList.pop();
+    const total=rawList.reduce((a,b)=>a+b,0);
+    _salCurTechItems=rawList;
     document.getElementById('sal-meal-pay').value=_num(_salPopFixedA,0);
     document.getElementById('sal-tech-only-pay').value=total;
     _syncSalGroupedDisplayInputs();
     cs('sal-extra-sov');
     onSalBaseChange();
   }else{
+    const valid=_salExtraTempList.map(v=>_num(v,0)).filter(v=>v>0);
+    const total=valid.reduce((a,b)=>a+b,0);
     _salCurExtraItems=valid;
     document.getElementById('sal-welfare-pay').value=_num(_salPopFixedA,0);
     document.getElementById('sal-gift-pay').value=_num(_salPopFixedB,0);
@@ -3827,7 +3863,7 @@ function openSalaryCalc(){
   _updateSalModeRuleText(mode);
 
   _setMoneyEl('sal-base-pay',cfg.basePay!==''&&cfg.basePay!==null?cfg.basePay:'');
-  _salCurTechItems=Array.isArray(cfg.techItems)?cfg.techItems.map(v=>_num(v,0)).filter(v=>v>0):(cfg.techPay>0?[_num(cfg.techPay,0)]:[]);
+  _salCurTechItems=(Array.isArray(cfg.techItems)&&cfg.techItems.some(v=>_num(v,0)>0))?cfg.techItems.map(v=>_num(v,0)):(cfg.techPay>0?[_num(cfg.techPay,0),0,0]:[0,0,0]);
   document.getElementById('sal-tech-only-pay').value=_num(cfg.techPay,0);
   document.getElementById('sal-meal-pay').value=(cfg.mealPay!==undefined&&cfg.mealPay!==null)?_num(cfg.mealPay,200000):200000;
   document.getElementById('sal-welfare-pay').value=(cfg.welfarePay!==undefined&&cfg.welfarePay!==null)?_num(cfg.welfarePay,370000):370000;
@@ -3880,7 +3916,7 @@ function onSalEffCountsInput(){
 }
 
 function loadSalMonthData(){
-  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월 명세서`;
+  _renderSalYmLabel();
   const cfg=getSalCfg();
   const mode=document.getElementById('sal-work-mode')?.value||cfg.workMode||'shift157';
   const settleMode='prev_sub_cur_hd';
@@ -3928,7 +3964,7 @@ function loadSalMonthData(){
 
 function resetSalCountsFromCal(){
   _salStatsMemoKey='';
-  document.getElementById('sal-ym-lbl').textContent=`${salYr}년 ${salMo+1}월 명세서`;
+  _renderSalYmLabel();
   const mode=document.getElementById('sal-work-mode')?.value||'shift157';
   const settleMode='prev_sub_cur_hd';
   _updateSalSettleTitle(salYr,salMo,settleMode);
@@ -4250,9 +4286,17 @@ function calcSalary(shouldSaveCfg){
     {lbl:'식대',sub:'비과세 식대 (통상임금 산입)',val:res.mealPay}
   );
   if(res.techPay>0){
-    const tList=(cfg.techItems||[]).filter(v=>v>0);
-    const tSub=tList.length>1?`총 ${tList.length}건 합산 (${tList.map(v=>fmtWon(v)).join(' + ')}) · 통상임금 산입`:'기술·직책·기술행정수당 등 (통상임금 산입)';
-    payRows.push({lbl:'통상임금 포함항목',sub:tSub,val:res.techPay});
+    const rawT=Array.isArray(cfg.techItems)?cfg.techItems:[];
+    const namedParts=[];
+    rawT.forEach((v,i)=>{
+      const n=_num(v,0);
+      if(n>0){
+        const nm=i===0?'기술수당':(i===1?'직책수당':(i===2?'행정수당':`추가수당${i-2}`));
+        namedParts.push(`${nm} ${fmtWon(n)}`);
+      }
+    });
+    const tSub=namedParts.length>0?`${namedParts.join(' + ')} (통상임금 산입)`:'기술·직책·행정수당 등 (통상임금 산입)';
+    payRows.push({lbl:'통상임금 <span style="color:#ef4444">포함</span>항목',sub:tSub,val:res.techPay});
   }
   payRows.push({lbl:'복지수당',sub:'월 복지수당 (통상임금 제외)',val:res.welfarePay});
   if(res.giftPay>0){
@@ -4261,7 +4305,7 @@ function calcSalary(shouldSaveCfg){
   if(res.extraPay>0){
     const exList=(moData.extraItems||[]).filter(v=>v>0);
     const exSub=exList.length>1?`총 ${exList.length}건 합산 (${exList.map(v=>fmtWon(v)).join(' + ')}) · 통상임금 제외`:'상생금·성과급·타결금·소급분 등 (통상임금 제외)';
-    payRows.push({lbl:'통상임금 제외 항목',sub:exSub,val:res.extraPay});
+    payRows.push({lbl:'통상임금 <span style="color:#ef4444">제외</span>항목',sub:exSub,val:res.extraPay});
   }
 
   const dedRows=[
