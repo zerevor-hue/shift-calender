@@ -319,7 +319,7 @@ body.light .cal-stab.on{background:#fff;color:var(--tx);box-shadow:0 2px 6px rgb
 .event-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;position:relative}
 .event-dot{width:8px;height:8px;border-radius:50%;background:var(--ev-tx);flex-shrink:0;margin-top:4px}
 .event-date{font-size:.65rem;font-weight:700;color:var(--tx3);white-space:nowrap}
-.event-title{font-size:.85rem;font-weight:700;flex:1}
+.event-title{font-size:.85rem;font-weight:700;flex:0 0 auto;width:fit-content;max-width:100%}
 .event-del{position:absolute;top:7px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,.15);color:var(--red);font-size:.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-family:inherit}
 
 .workers-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
@@ -965,14 +965,39 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
         <input type="radio" name="sh" id="sh-vc" value="vc" class="sopt"><label for="sh-vc" class="slbl sl-vc">연차</label>
       </div>
     </div>
-    <div class="form-g">
-      <label for="day-memo" class="lbl">메모 (줄바꿈으로 최대 3줄)</label>
-      <textarea id="day-memo" aria-label="메모" title="메모" rows="3" placeholder="메모1&#10;메모2&#10;메모3"></textarea>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+      <div class="cal-subtabs" style="flex:1">
+        <button type="button" class="cal-stab on" id="day-stab-mm" style="flex:1;justify-content:center" onclick="switchDaySheetTab('mm')">
+          <span>메모</span>
+          <span class="cal-stab-cnt" id="day-mm-cnt">0</span>
+        </button>
+        <button type="button" class="cal-stab" id="day-stab-ev" style="flex:1;justify-content:center" onclick="switchDaySheetTab('ev')">
+          <span>팀 이벤트</span>
+          <span class="cal-stab-cnt" id="day-ev-cnt">0</span>
+        </button>
+      </div>
     </div>
-    <div class="form-g">
-      <div class="lbl">메모 색상</div>
-      <div class="cpicker" id="memo-color-picker"></div>
+
+    <div id="day-panel-mm">
+      <div id="day-memo-existing" style="display:none;margin-bottom:8px"></div>
+      <div class="form-g">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label for="day-memo" class="lbl" style="margin-bottom:0">메모 작성 · 수정 (줄바꿈으로 최대 3줄)</label>
+          <button type="button" class="btn sec sm" style="padding:2px 7px;font-size:.6rem" onclick="clearDaySheetMemoInput()">전체 지우기</button>
+        </div>
+        <textarea id="day-memo" aria-label="메모" title="메모" rows="3" placeholder="메모1&#10;메모2&#10;메모3" oninput="renderDaySheetExistingMemos()"></textarea>
+      </div>
+      <div class="form-g">
+        <div class="lbl">메모 색상</div>
+        <div class="cpicker" id="memo-color-picker"></div>
+      </div>
     </div>
+
+    <div id="day-panel-ev" style="display:none;margin-bottom:12px">
+      <div id="day-ev-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <button type="button" class="btn sec fw" style="padding:8px;font-size:.74rem;font-weight:800;border-style:dashed" onclick="openEventSheetFromDay()">+ 이 날짜에 팀 이벤트 추가</button>
+    </div>
+
     <div class="fl">
       <button class="btn sec fg" onclick="cs('day-sov')">취소</button>
       <button class="btn pri fg" onclick="saveDaySheet()">저장</button>
@@ -1087,7 +1112,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 </div>
 
 <!-- 이벤트 추가/편집 시트 -->
-<div class="sov" id="new-event-sov">
+<div class="sov" id="new-event-sov" style="z-index:260">
   <div class="sheet">
     <div class="shandle"></div>
     <div class="stitle-s" id="ev-sheet-title">일정 추가</div>
@@ -1117,7 +1142,7 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 </div>
 
 <!-- 메모 추가/편집 시트 -->
-<div class="sov" id="memo-sov">
+<div class="sov" id="memo-sov" style="z-index:260">
   <div class="sheet">
     <div class="shandle"></div>
     <div class="stitle-s" id="mm-sheet-title">메모 추가</div>
@@ -1145,9 +1170,10 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
   <div class="sheet">
     <div class="shandle"></div>
     <div class="stitle-s" id="dg-st"></div>
-    <div style="font-size:.72rem;color:var(--tx3);margin-bottom:12px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
+    <div style="font-size:.72rem;color:var(--tx3);margin-bottom:10px;padding:7px 10px;background:var(--bg3);border-radius:var(--rs)">
       기본 근무: <span id="dg-base" style="color:var(--a);font-weight:700"></span>
     </div>
+    <div id="dg-day-posts-box" style="display:none;margin-bottom:10px"></div>
     <div class="form-g">
       <div class="lbl">근무 유형</div>
       <div class="spicker">
@@ -1812,8 +1838,9 @@ function _cleanLegacyWrongHolidays(obj){
     const official=byYr[yr];
     const item=obj[k];
     if(!item)return;
-    // 공식 법정공휴일/대체공휴일 목록에 없는 잘못된 이전 공휴일(public/substitute) 캐시 자동 제거
-    if((item.type==='public'||item.type==='substitute')&&!official[k]){
+    // 과거 음력 오차로 잘못 캐시된 명절(설날·추석·석가탄신일)만 선별 제거하고 관리자 등록·임시공휴일·선거일은 보존
+    const isLunarFest=item.name&&(item.name.includes('설날')||item.name.includes('추석')||item.name.includes('석가탄신일'));
+    if(!item.manual&&isLunarFest&&!official[k]){
       delete obj[k];
     }
   });
@@ -2203,7 +2230,7 @@ function _doSyncToWidget(){
       topColor: S.topColor||'#f59e0b',
       divName: S.divName||'',
       allPats: window._allPatsCache || {},
-      events: showEv ? (S.events || {}) : {},
+      events: showEv ? _getVisibleEventsMap(S.events) : {},
       showTeamEvents: showEv,
       holidays: holidays || {},
       calStyle: typeof getCalStyle==='function' ? getCalStyle() : 'default',
@@ -2312,7 +2339,7 @@ function renderCal(){
   const first=new Date(yr,mo,1),last=new Date(yr,mo+1,0);
   const mStartKey=dkey(first),mEndKey=dkey(last);
   const showTeamEv=isShowTeamEvents();
-  const monthEvents=(showTeamEv&&S.events)?Object.values(S.events).filter(ev=>ev&&ev.title&&ev.startDate<=mEndKey&&(ev.endDate||ev.startDate)>=mStartKey):[];
+  const monthEvents=(showTeamEv&&S.events)?Object.entries(S.events).filter(([evId,ev])=>ev&&ev.title&&!isEventHidden(evId)&&ev.startDate<=mEndKey&&(ev.endDate||ev.startDate)>=mStartKey).map(([,ev])=>ev):[];
   const yl=document.getElementById('cal-year-lbl');if(yl)yl.textContent=yr;
   document.getElementById('cal-month').textContent=`${mo+1}월`;
   const stats={dr:0,ds:0,nr:0,ns:0,of:0,vc:0};
@@ -2399,7 +2426,7 @@ function mkCell(date,other,todayKey,monthEvents){
     c.classList.add('hday');
     if(hd.type==='substitute')c.classList.add('hday-sub');
   }
-  const evList=isShowTeamEvents()?(monthEvents||(S.events?Object.values(S.events):[])):[];
+  const evList=isShowTeamEvents()?(monthEvents||Object.values(_getVisibleEventsMap(S.events))):[];
   const dayEvs=[];
   for(let i=0;i<evList.length;i++){
     const ev=evList[i];
@@ -2522,7 +2549,8 @@ function mkDgCell(date,other,todayKey){
   
   const mw=document.createElement('div');
   const posts=dgPostCache[k];
-  const hasPost=!!(posts && Object.keys(posts).length);
+  const postList=posts?Object.values(posts).filter(Boolean).sort((a,b)=>(a.closed?1:0)-(b.closed?1:0)):[];
+  const hasPost=postList.length>0;
   if(getCalStyle()==='large'){
     mw.className='mid-wrap big-mode';
     const shSlot=document.createElement('div');shSlot.className='big-sh-slot';
@@ -2539,11 +2567,12 @@ function mkDgCell(date,other,todayKey){
     mw.appendChild(shSlot);
     const mSlot=document.createElement('div');mSlot.className='m-slot';
     if(hasPost){
+      const p0=postList[0];
       const tag=document.createElement('div');
       tag.className='ce';
-      tag.style.cssText='color:var(--n);background:var(--n-bg);font-weight:800';
-      const bMeta=SM[Object.values(posts)[0]?.baseShift];
-      tag.textContent=`${bMeta?bMeta.s:''}대근요청`;
+      tag.style.cssText=p0.closed?'color:var(--vac);background:var(--vac-bg);font-weight:800':'color:var(--n);background:var(--n-bg);font-weight:800';
+      const bMeta=SM[resolveRequesterBaseShift(p0.baseShift,p0.uid,k)]||SM[p0.baseShift];
+      tag.textContent=`${bMeta?bMeta.s:''}${p0.closed?'대근완료':'대근요청'}`;
       mSlot.appendChild(tag);
     }else if(hd){
       const hEl=document.createElement('div');
@@ -2556,10 +2585,10 @@ function mkDgCell(date,other,todayKey){
     mw.className='mid-wrap';
     const dgLines=[];
     if(hd)dgLines.push({type:'hd',text:hd.name,sub:hd.type==='substitute'});
-    if(hasPost){
-      const bMeta=SM[Object.values(posts)[0]?.baseShift];
-      dgLines.push({type:'post',text:`${bMeta?bMeta.s:''}대근요청`});
-    }
+    postList.forEach(p=>{
+      const bMeta=SM[resolveRequesterBaseShift(p.baseShift,p.uid,k)]||SM[p.baseShift];
+      dgLines.push({type:'post',closed:!!p.closed,text:`${bMeta?bMeta.s:''}${p.closed?'대근완료':'대근요청'}`});
+    });
     for(let i=0;i<3;i++){
       const slot=document.createElement('div');slot.className='m-slot';
       const item=dgLines[i];
@@ -2569,7 +2598,7 @@ function mkDgCell(date,other,todayKey){
           tag.className='hd'+(item.sub?' hd-sub':'');
         }else{
           tag.className='ce';
-          tag.style.cssText='color:var(--n);background:var(--n-bg);font-weight:800';
+          tag.style.cssText=item.closed?'color:var(--vac);background:var(--vac-bg);font-weight:800':'color:var(--n);background:var(--n-bg);font-weight:800';
         }
         tag.textContent=item.text;
         slot.appendChild(tag);
@@ -2635,11 +2664,158 @@ function pickMemoColor(k){
   pickedMemoColor=k;
   renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
   applyFieldTagColor('day-memo',pickedMemoColor,'pink');
+  if(typeof renderDaySheetExistingMemos==='function')renderDaySheetExistingMemos();
 }
 function pickEventColor(k){
   pickedEventColor=k;
   renderColorPicker('ev-color-picker',pickedEventColor,pickEventColor);
   applyFieldTagColor('ev-title',pickedEventColor,'sky');
+}
+let _daySheetTab='mm';
+let _hiddenEvCacheUid=null;
+let _hiddenEvMap=null;
+function _ensureHiddenEvCache(){
+  const uidKey=S.myId||'local';
+  if(_hiddenEvCacheUid===uidKey&&_hiddenEvMap)return _hiddenEvMap;
+  _hiddenEvCacheUid=uidKey;
+  const saved=ls.g('hidden_ev_'+uidKey);
+  _hiddenEvMap=(saved&&typeof saved==='object')?saved:{};
+  return _hiddenEvMap;
+}
+function isEventHidden(evId){
+  if(!evId)return false;
+  const m=_ensureHiddenEvCache();
+  return !!m[evId];
+}
+function toggleHideTeamEvent(evId){
+  if(!evId)return;
+  const uidKey=S.myId||'local';
+  const m=_ensureHiddenEvCache();
+  if(m[evId])delete m[evId];
+  else m[evId]=true;
+  ls.s('hidden_ev_'+uidKey,m);
+  renderDaySheetEvents();
+  renderEventList(S.events);
+  if(S.topId&&S.divId)renderCal();
+  syncToWidget(true);
+  showToast(m[evId]?'해당 팀 이벤트를 달력에서 가렸습니다':'팀 이벤트 가리기를 해제했습니다');
+}
+function _getVisibleEventsMap(eventsObj){
+  if(!eventsObj||typeof eventsObj!=='object')return {};
+  const out={};
+  for(const [evId,ev] of Object.entries(eventsObj)){
+    if(ev&&!isEventHidden(evId))out[evId]=ev;
+  }
+  return out;
+}
+function switchDaySheetTab(tab){
+  _daySheetTab=(tab==='ev')?'ev':'mm';
+  const bMm=document.getElementById('day-stab-mm');
+  const bEv=document.getElementById('day-stab-ev');
+  const pMm=document.getElementById('day-panel-mm');
+  const pEv=document.getElementById('day-panel-ev');
+  if(bMm)bMm.classList.toggle('on',_daySheetTab==='mm');
+  if(bEv)bEv.classList.toggle('on',_daySheetTab==='ev');
+  if(pMm)pMm.style.display=_daySheetTab==='mm'?'':'none';
+  if(pEv)pEv.style.display=_daySheetTab==='ev'?'':'none';
+  if(_daySheetTab==='ev')renderDaySheetEvents();
+  else renderDaySheetExistingMemos();
+}
+function renderDaySheetExistingMemos(){
+  const box=document.getElementById('day-memo-existing');
+  const inp=document.getElementById('day-memo');
+  const cntEl=document.getElementById('day-mm-cnt');
+  const raw=(inp?.value||'').trim();
+  const lines=raw?raw.split(/\n+/).map(s=>s.trim()).filter(Boolean):[];
+  if(cntEl)cntEl.textContent=lines.length;
+  if(!box)return;
+  if(!lines.length){
+    box.style.display='none';
+    box.innerHTML='';
+    return;
+  }
+  const pal=getTagPalette(pickedMemoColor||'pink','pink');
+  box.style.display='block';
+  box.innerHTML='<div class="lbl" style="margin-bottom:4px">현재 작성된 메모 줄 (✕ 클릭 시 개별 삭제)</div><div style="display:flex;flex-wrap:wrap;gap:5px">'+lines.map((line,idx)=>`
+    <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:7px;background:${pal.bg};color:${pal.tx};font-size:.76rem;font-weight:700;max-width:100%">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${idx+1}. ${escHtml(line)}</span>
+      <button type="button" onclick="removeDaySheetMemoLine(${idx})" style="background:none;border:none;color:${pal.tx};font-size:.72rem;font-weight:900;padding:0 2px;cursor:pointer;line-height:1">✕</button>
+    </div>
+  `).join('')+'</div>';
+}
+async function _persistDaySheetMemoNow(){
+  if(!editDate)return;
+  const k=dkey(editDate);
+  const memo=(document.getElementById('day-memo')?.value||'').trim();
+  if(memo){
+    if(!S.ov[k])S.ov[k]={};
+    S.ov[k].memo=memo;
+    S.ov[k].memoColor=pickedMemoColor||'pink';
+    S.ov[k].memoUpdatedAt=Date.now();
+  }else if(S.ov[k]){
+    delete S.ov[k].memo;
+    delete S.ov[k].memoColor;
+    delete S.ov[k].memoUpdatedAt;
+    if(!S.ov[k].shift)delete S.ov[k];
+  }
+  renderCal();
+  await saveProfile();
+}
+function removeDaySheetMemoLine(lineIdx){
+  const inp=document.getElementById('day-memo');
+  if(!inp)return;
+  const lines=(inp.value||'').trim().split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  lines.splice(lineIdx,1);
+  inp.value=lines.join('\n');
+  renderDaySheetExistingMemos();
+  _persistDaySheetMemoNow();
+}
+function clearDaySheetMemoInput(){
+  const inp=document.getElementById('day-memo');
+  if(inp)inp.value='';
+  renderDaySheetExistingMemos();
+  _persistDaySheetMemoNow();
+}
+function renderDaySheetEvents(){
+  const box=document.getElementById('day-ev-list');
+  const cntEl=document.getElementById('day-ev-cnt');
+  if(!editDate)return;
+  const dtKey=dkey(editDate);
+  const allEvs=S.events?Object.entries(S.events).filter(([,ev])=>ev&&ev.title&&dtKey>=ev.startDate&&dtKey<=(ev.endDate||ev.startDate)):[];
+  if(cntEl)cntEl.textContent=allEvs.length;
+  if(!box)return;
+  if(!allEvs.length){
+    box.innerHTML='<div style="text-align:center;padding:14px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx3);font-size:.76rem">이 날짜에 등록된 팀 이벤트가 없습니다</div>';
+    return;
+  }
+  box.innerHTML=allEvs.map(([evId,ev])=>{
+    const pal=getTagPalette(ev.color||'sky','sky');
+    const hidden=isEventHidden(evId);
+    const canEdit=(ev.createdById===S.myId||isAdmin());
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;background:var(--bg3);border:1px solid ${hidden?'var(--bd)':'var(--bd2)'};border-radius:var(--rs);opacity:${hidden?'0.6':'1'}">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+            <span class="event-title tag-${pal.k}" style="color:${pal.tx};background:${pal.bg};display:inline-block;padding:2px 8px;border-radius:6px;font-size:.78rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(ev.title||'')}</span>
+            ${hidden?'<span style="font-size:.6rem;font-weight:800;color:var(--red);background:var(--bg2);padding:1px 5px;border-radius:4px">가림</span>':''}
+          </div>
+          <div style="font-size:.62rem;color:var(--tx3);margin-top:3px">${formatDateRange(ev.startDate,ev.endDate)}${ev.createdBy?' · '+escHtml(ev.createdBy):''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <button type="button" class="btn ${hidden?'pri':'sec'} sm" style="padding:4px 8px;font-size:.65rem" onclick="toggleHideTeamEvent('${evId}')">${hidden?'가림 해제':'가리기'}</button>
+          ${canEdit?`<button type="button" class="btn sec sm" style="padding:4px 7px;font-size:.65rem" onclick="openEventSheet('${evId}')">수정</button><button type="button" class="btn dan sm" style="padding:4px 7px;font-size:.65rem" onclick="deleteEventFromDaySheet('${evId}')">✕</button>`:""}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function openEventSheetFromDay(){
+  const dtKey=editDate?dkey(editDate):dkey(new Date());
+  openEventSheet('',dtKey);
+}
+async function deleteEventFromDaySheet(evId){
+  await deleteEvent(evId);
+  renderDaySheetEvents();
 }
 function openDaySheet(date){
   editDate=date;
@@ -2653,6 +2829,9 @@ function openDaySheet(date){
   document.getElementById('day-memo').value=memo;
   renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
   applyFieldTagColor('day-memo',pickedMemoColor,'pink');
+  renderDaySheetExistingMemos();
+  renderDaySheetEvents();
+  switchDaySheetTab('mm');
   os('day-sov');
 }
 async function saveDaySheet(){
@@ -2662,8 +2841,11 @@ async function saveDaySheet(){
   if(sh===bSh&&!memo){delete S.ov[k];}
   else{
     if(!S.ov[k])S.ov[k]={};
-    if(sh&&sh!==bSh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
-    else if(sh===bSh){delete S.ov[k].shift;delete S.ov[k].manualShift;delete S.ov[k].fromRecruit;}
+    if(sh&&sh!==bSh){
+      if(S.ov[k].shift!==sh){delete S.ov[k].fromRecruit;delete S.ov[k].fromMyRecruit;}
+      S.ov[k].shift=sh;S.ov[k].manualShift=true;
+    }
+    else if(sh===bSh){delete S.ov[k].shift;delete S.ov[k].manualShift;delete S.ov[k].fromRecruit;delete S.ov[k].fromMyRecruit;}
     if(memo){
       const changed=(S.ov[k].memo!==memo)||(S.ov[k].memoColor!==(pickedMemoColor||'pink'));
       S.ov[k].memo=memo;
@@ -2741,7 +2923,22 @@ async function saveMemoSheet(){
   const targetKey=document.getElementById('mm-date').value;
   const text=document.getElementById('mm-text').value.trim();
   if(!targetKey){showToast('날짜를 선택해주세요');return;}
-  if(!text){showToast('메모 내용을 입력해주세요');return;}
+  if(!text){
+    const delKey=editMemoOrigKey||targetKey;
+    if(S.ov?.[delKey]?.memo){
+      delete S.ov[delKey].memo;
+      delete S.ov[delKey].memoColor;
+      delete S.ov[delKey].memoUpdatedAt;
+      if(!S.ov[delKey].shift)delete S.ov[delKey];
+      editMemoOrigKey='';
+      cs('memo-sov');
+      refreshCal();
+      showToast('메모가 삭제되었습니다');
+      await saveProfile();
+      return;
+    }
+    showToast('메모 내용을 입력해주세요');return;
+  }
   if(editMemoOrigKey&&editMemoOrigKey!==targetKey&&S.ov?.[editMemoOrigKey]){
     delete S.ov[editMemoOrigKey].memo;
     delete S.ov[editMemoOrigKey].memoColor;
@@ -2775,7 +2972,7 @@ let _lastMemoRenderSig='';
 function renderMemoList(forceRebuild){
   const box=document.getElementById('memo-list');
   if(!box)return;
-  let memoSig=memoListExpanded?'1:':'0:';
+  let memoSig=`${memoListExpanded?'1':'0'}_${document.body.classList.contains('light')?'L':'D'}_${S.topId||''}_${S.divId||''}:`;
   for(const [k,v] of Object.entries(S.ov||{})){
     if(v&&typeof v.memo==='string'&&v.memo.trim()!==''){
       memoSig+=`${k}_${v.memo}_${v.memoColor||''}_${v.shift||''}|`;
@@ -2864,6 +3061,7 @@ function startEventListen(forceRestart){
     S.events=nextEv;
     ls.s('events_cache_'+S.topId,S.events);
     renderEventList(S.events);
+    if(document.getElementById('day-sov')?.classList.contains('op'))renderDaySheetEvents();
     if(prevSig!==nextSig){
       if(window._parsedPats)renderCal();
       else refreshCal();
@@ -2892,15 +3090,24 @@ function renderEventList(events){
   const visibleList=eventListExpanded?list:list.slice(0,3);
   visibleList.forEach(([evId,ev])=>{
     const pal=getTagPalette(ev.color||'sky','sky');
+    const hidden=isEventHidden(evId);
     const item=document.createElement('div');item.className='event-item';
+    if(hidden)item.style.opacity='0.6';
     const dot=document.createElement('div');dot.className='event-dot';
     dot.style.background=pal.hex;
-    const txt=document.createElement('div');txt.style.cssText='flex:1;min-width:0';
-    txt.innerHTML=`<div class="event-date">${formatDateRange(ev.startDate,ev.endDate)}</div><div class="event-title tag-${pal.k}" style="color:${pal.tx};background:${pal.bg};display:inline-block;padding:2px 8px;border-radius:6px;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(ev.title||'')}</div><div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${ev.createdBy||''}</div>`;
+    const txt=document.createElement('div');txt.style.cssText='flex:1;min-width:0;padding-right:52px';
+    txt.innerHTML=`<div class="event-date">${formatDateRange(ev.startDate,ev.endDate)}${hidden?' <span style="color:var(--red);font-weight:800">[가림]</span>':''}</div><div class="event-title tag-${pal.k}" style="color:${pal.tx};background:${pal.bg};display:inline-block;padding:2px 8px;border-radius:6px;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(ev.title||'')}</div><div style="font-size:.62rem;color:var(--tx3);margin-top:2px">${ev.createdBy||''}</div>`;
     item.appendChild(dot);item.appendChild(txt);
+    const hideBtn=document.createElement('button');
+    hideBtn.type='button';
+    hideBtn.className='btn sec sm';
+    hideBtn.style.cssText=`position:absolute;top:10px;right:${(ev.createdById===S.myId||isAdmin())?'32px':'8px'};padding:2px 6px;font-size:.6rem`;
+    hideBtn.textContent=hidden?'표시':'가리기';
+    hideBtn.onclick=(e)=>{e.stopPropagation();toggleHideTeamEvent(evId);};
+    item.appendChild(hideBtn);
     if(ev.createdById===S.myId||isAdmin()){
       item.style.cursor='pointer';
-      item.onclick=(e)=>{if(e.target.closest('.event-del'))return;openEventSheet(evId);};
+      item.onclick=(e)=>{if(e.target.closest('.event-del')||e.target.closest('button'))return;openEventSheet(evId);};
       const del=document.createElement('button');del.className='event-del';del.textContent='✕';
       del.onclick=(e)=>{e.stopPropagation();deleteEvent(evId);};item.appendChild(del);
     }
@@ -2922,14 +3129,14 @@ function formatDateRange(s,e){
   return `${fmt(s)} ~ ${fmt(e)}`;
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function openEventSheet(evId){
+function openEventSheet(evId,defaultDateKey){
   if(!S.topId){showToast('팀에 참여한 후 일정을 추가할 수 있습니다');return;}
   editEventId=evId||'';
   const ev=editEventId&&S.events?S.events[editEventId]:null;
   document.getElementById('ev-sheet-title').textContent=ev?'일정 수정':'일정 추가';
   document.getElementById('ev-save-btn').textContent=ev?'저장':'추가';
   document.getElementById('ev-title').value=ev?(ev.title||''):'';
-  document.getElementById('ev-start').value=ev?(ev.startDate||''):dkey(new Date());
+  document.getElementById('ev-start').value=ev?(ev.startDate||''):(defaultDateKey||dkey(new Date()));
   document.getElementById('ev-end').value=ev&&ev.endDate&&ev.endDate!==ev.startDate?ev.endDate:'';
   pickedEventColor=ev?.color||'sky';
   renderColorPicker('ev-color-picker',pickedEventColor,pickEventColor);
@@ -2949,24 +3156,29 @@ async function addEvent(){
     const prev=S.events[editEventId];
     const updated={...prev,title,startDate,endDate:endDate||startDate,color,updatedAt:Date.now()};
     S.events[editEventId]=updated;
+    ls.s('events_cache_'+S.topId,S.events);
     await dbS('events/'+S.topId+'/'+editEventId,updated);
     editEventId='';
-    renderEventList(S.events);renderCal();
+    renderEventList(S.events);renderDaySheetEvents();renderCal();
     cs('new-event-sov');showToast('일정이 수정되었습니다');
   }else{
     const newObj={title,startDate,endDate:endDate||startDate,color,createdBy:S.myName,createdById:S.myId,createdAt:Date.now()};
     const res=await dbP('events/'+S.topId,newObj);
     if(!S.events)S.events={};
     S.events[res?.key||('ev_'+Date.now())]=newObj;
-    renderEventList(S.events);renderCal();
+    ls.s('events_cache_'+S.topId,S.events);
+    renderEventList(S.events);renderDaySheetEvents();renderCal();
     cs('new-event-sov');showToast('일정이 추가되었습니다');
   }
 }
 async function deleteEvent(evId){
   if(!(await askConfirm('이벤트를 삭제하시겠어요?')))return;
   if(S.events)delete S.events[evId];
+  if(S.topId)ls.s('events_cache_'+S.topId,S.events||{});
+  const m=_ensureHiddenEvCache();
+  if(m[evId]){delete m[evId];ls.s('hidden_ev_'+(S.myId||'local'),m);}
   await dbS('events/'+S.topId+'/'+evId,null);
-  renderEventList(S.events);renderCal();
+  renderEventList(S.events);renderDaySheetEvents();renderCal();
   showToast('삭제됨');
 }
 
@@ -3116,7 +3328,7 @@ async function openDivInfo(topId,divId,divName,topName,topColor){
   document.getElementById('di-admin-btns').style.display=isAdmin()?'':'none';
   os('div-info-sov');
 }
-['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov','meal-upload-sov','confirm-sov'].forEach(id=>{
+['div-info-sov','new-top-sov','new-div-sov','day-sov','new-event-sov','memo-sov','team-mgr-sov','dg-sov','dgd-sov','holiday-sov','sal-sov','sal-extra-sov','meal-upload-sov','confirm-sov'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){if(e.target===this)cs(id);});
 });
 
@@ -4147,6 +4359,8 @@ function syncAllMonthsSalaryToCache(){
       netTotal:res.netTotal,
       totalDeduct:res.totalDeduct,
       workMode:cfg.workMode,
+      settleMode:cfg.settleMode,
+      calSig:curCalSig,
       counts:{ds:st.ds,ns:st.ns,hd:st.hd,hdn:st.hdn||0,effOt:res.effOtCnt,effHd:res.effHdCnt,effNt:res.effNtCnt},
       manualCounts:(m-1===salMo)?_salManualCountsDirty:!!prev.manualCounts,
       manualSaved:!!prev.manualSaved,
@@ -4387,12 +4601,36 @@ function calcSalary(shouldSaveCfg){
 
 async function openDgSheet(date){
   dgEditDate=date;
+  const k=dkey(date);
   const bSh=getBaseShift(date),sh=getShift(date)||bSh||'dr';
   document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
   document.getElementById('dg-base').textContent=bSh?SM[bSh].l:'미설정';
   const dgVcLbl=document.querySelector('label[for="dg-sh-vc"]');
   if(dgVcLbl)dgVcLbl.innerHTML=isDayWorkFri(date)?'반차<br><span style="font-size:.55rem;opacity:.85">(0.5일)</span>':'연차';
   document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
+  const pBox=document.getElementById('dg-day-posts-box');
+  if(pBox){
+    const dayPosts=dgPostCache[k]?Object.entries(dgPostCache[k]).filter(([,p])=>!!p):[];
+    if(dayPosts.length){
+      pBox.style.display='';
+      pBox.innerHTML='<div class="lbl" style="margin-bottom:5px">이 날의 대근 요청</div>'+dayPosts.map(([pId,p])=>{
+        const rBase=resolveRequesterBaseShift(p.baseShift,p.uid,k);
+        const bm=SM[rBase]||SM[p.baseShift];
+        const cnt=Object.keys(p.applicants||{}).length;
+        return `<div onclick="cs('dg-sov');openDgDetailSheet('${k}','${pId}',dgPostCache['${k}']['${pId}'])" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border:1px solid ${p.closed?'var(--vac)':'var(--bd2)'};border-radius:var(--rs);margin-bottom:5px;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:.8rem;font-weight:800">${p.name||'?'}</span>
+            ${bm?`<span class="cb ${bm.c}" style="font-size:.62rem">${bm.l}</span>`:""}
+            <span style="font-size:.62rem;font-weight:800;color:${p.closed?'var(--vac)':'var(--a)'}">${p.closed?'✓ 확정완료':`모집중 (지원 ${cnt})`}</span>
+          </div>
+          <span style="font-size:.68rem;font-weight:800;color:var(--a)">상세 보기 ▶</span>
+        </div>`;
+      }).join('');
+    }else{
+      pBox.style.display='none';
+      pBox.innerHTML='';
+    }
+  }
   os('dg-sov');
 }
 
@@ -4405,11 +4643,15 @@ async function saveDgMyShift(){
       delete S.ov[k].shift;
       delete S.ov[k].manualShift;
       delete S.ov[k].fromRecruit;
+      delete S.ov[k].fromMyRecruit;
       if(!S.ov[k].memo)delete S.ov[k];
     }
   }else{
     if(!S.ov[k])S.ov[k]={};
-    if(sh){S.ov[k].shift=sh;S.ov[k].manualShift=true;}
+    if(sh){
+      if(S.ov[k].shift!==sh){delete S.ov[k].fromRecruit;delete S.ov[k].fromMyRecruit;}
+      S.ov[k].shift=sh;S.ov[k].manualShift=true;
+    }
   }
   _salStatsMemoKey='';cs('dg-sov');renderDgCal();refreshCal();updateVacSum();showToast('저장되었습니다');await saveProfile();
 }
@@ -4473,12 +4715,15 @@ async function confirmDgRequest(){
   if(!(await askConfirm(`${dateStr} ${m.l} 대근 요청을 등록할까요?`)))return;
   if(!S.ov[k])S.ov[k]={};
   S.ov[k].shift='vc';
+  S.ov[k].fromMyRecruit=true;
+  delete S.ov[k].manualShift;
+  _salStatsMemoKey='';
   await saveProfile();
   await dbP(`recruits/${S.topId}/${k}`,{
     uid:S.myId,name:S.myName,color:S.myColor,
     baseShift:reqShift,closed:false,applicants:{},createdAt:Date.now(),
   });
-  cs('dg-sov');renderDgCal();refreshCal();
+  cs('dg-sov');renderDgCal();refreshCal();updateVacSum();
   showToast(`${dateStr} ${m.l} 대근 요청이 등록되었습니다`);
 }
 
@@ -4497,6 +4742,7 @@ function startDgRecruitListen(){
     let myOvChanged=false;
     const syncedMap=S.myId?(ls.g('dg_synced_'+S.myId)||{}):{};
     let syncedMapDirty=false;
+    const activeAcceptedPostIds=new Set();
     if(allPosts){
       Object.entries(allPosts).forEach(([dateKey,posts])=>{
         if(!posts)return;
@@ -4506,11 +4752,11 @@ function startDgRecruitListen(){
           if(!post)return;
           const myApp=post.applicants?.[S.myId];
           if(myApp?.status==='accepted'){
+            activeAcceptedPostIds.add(postId);
             const targetSub=resolveSubWorkerShift(post.baseShift,post.uid,dateKey);
             if(targetSub==='ds'||targetSub==='ns'){
               const curSh=S.ov[dateKey]?.shift;
-              const isManual=!!S.ov[dateKey]?.manualShift;
-              if(!syncedMap[postId]&&(!isManual||(curSh==='vc'&&!S.ov[dateKey]?.fromRecruit))){
+              if(!syncedMap[postId]){
                 if(curSh!==targetSub||S.ov[dateKey]?.fromRecruit!==postId){
                   if(!S.ov[dateKey])S.ov[dateKey]={};
                   S.ov[dateKey].shift=targetSub;
@@ -4526,14 +4772,34 @@ function startDgRecruitListen(){
         });
       });
     }
+    // 대근 요청이 삭제·취소된 경우 대근자로 자동 반영되었던 근무(fromRecruit)도 자동으로 원복
+    if(S.myId&&S.ov){
+      for(const [dateKey,ovEntry] of Object.entries(S.ov)){
+        const recId=ovEntry?.fromRecruit;
+        if(recId&&!activeAcceptedPostIds.has(recId)){
+          delete ovEntry.shift;
+          delete ovEntry.fromRecruit;
+          delete ovEntry.manualShift;
+          if(!ovEntry.memo)delete S.ov[dateKey];
+          if(syncedMap[recId]){delete syncedMap[recId];syncedMapDirty=true;}
+          myOvChanged=true;
+        }
+      }
+    }
     if(syncedMapDirty&&S.myId)ls.s('dg_synced_'+S.myId,syncedMap);
     if(myOvChanged){
+      _salStatsMemoKey='';
       await saveProfile();
       renderCal();
+      updateVacSum();
     }
     if(document.getElementById('page-dg')?.classList.contains('on')){
       renderDgRecruitList(allPosts);
       renderDgCal();
+    }
+    if(document.getElementById('dgd-sov')?.classList.contains('on')&&dgDetailKey&&dgDetailPostId){
+      const updatedPost=allPosts?.[dgDetailKey]?.[dgDetailPostId];
+      if(updatedPost)openDgDetailSheet(dgDetailKey,dgDetailPostId,updatedPost);
     }
   });
 }
@@ -4632,14 +4898,28 @@ function openDgDetailSheet(dateKey,postId,post){
   }
   const btnArea=document.getElementById('dgd-btn-area');btnArea.innerHTML='';
   if(isClosed){
-    btnArea.innerHTML='<div style="text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px">마감된 요청입니다</div>';
+    const msg=document.createElement('div');
+    msg.style.cssText='text-align:center;padding:10px;color:var(--vac);font-size:.82rem;font-weight:700;background:var(--vac-bg);border-radius:var(--rs);margin-bottom:8px';
+    msg.textContent='마감된 요청입니다';
+    btnArea.appendChild(msg);
+    if(isOwner||isAdmin()){
+      const b=document.createElement('button');b.className='btn dan fw';b.style.marginBottom='8px';
+      b.textContent='대근 확정 취소 · 요청 삭제';b.onclick=dgDeletePost;btnArea.appendChild(b);
+    }
   } else if(!isOwner){
-    const alreadyApplied=!!applicants[S.myId];
-    if(!alreadyApplied){
+    const myAp=applicants[S.myId];
+    if(!myAp){
       const b=document.createElement('button');b.className='btn pri fw';b.style.marginBottom='8px';
       b.textContent='지원하기';b.onclick=dgApply;btnArea.appendChild(b);
+    } else if(myAp.status==='pending'){
+      const b=document.createElement('button');b.className='btn dan fw';b.style.marginBottom='8px';
+      b.textContent='지원 취소';b.onclick=dgCancelApply;btnArea.appendChild(b);
     } else {
-      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem;margin-bottom:8px">이미 지원한 요청입니다</div>';
+      btnArea.innerHTML='<div style="text-align:center;padding:8px;color:var(--tx3);font-size:.78rem;margin-bottom:8px">이미 처리된 지원 내역입니다</div>';
+    }
+    if(isAdmin()){
+      const b=document.createElement('button');b.className='btn dan sm fw';b.style.marginBottom='8px';
+      b.textContent='요청 삭제 (관리자)';b.onclick=dgDeletePost;btnArea.appendChild(b);
     }
   } else {
     const b=document.createElement('button');b.className='btn dan fw';b.style.marginBottom='8px';
@@ -4650,25 +4930,66 @@ function openDgDetailSheet(dateKey,postId,post){
 
 async function dgApply(){
   if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
+  const freshPost=await dbG(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`);
+  if(!freshPost||freshPost.closed){
+    showToast('이미 마감되었거나 삭제된 요청입니다');
+    cs('dgd-sov');
+    return;
+  }
   await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}/applicants/${S.myId}`,
     {name:S.myName,color:S.myColor,status:'pending',appliedAt:Date.now()});
   showToast('지원했습니다');cs('dgd-sov');
 }
 
+async function dgCancelApply(){
+  if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
+  await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}/applicants/${S.myId}`,null);
+  showToast('지원을 취소했습니다');cs('dgd-sov');
+}
+
 async function dgRespond(uid,status){
   if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
   const postPath=`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`;
+  const latestPost=(await dbG(postPath))||dgDetailPost;
+  if(!latestPost){
+    showToast('삭제된 대근 요청입니다');
+    cs('dgd-sov');
+    return;
+  }
   if(status==='accepted'){
-    const [divs,prof]=await Promise.all([
+    if(latestPost.closed){
+      showToast('이미 마감된 대근 요청입니다');
+      cs('dgd-sov');
+      return;
+    }
+    const [divs,prof,reqProf]=await Promise.all([
       dbG('teams/'+S.topId+'/divs'),
-      dbG('profiles/'+uid)
+      dbG('profiles/'+uid),
+      latestPost.uid&&latestPost.uid!==S.myId?dbG('profiles/'+latestPost.uid):Promise.resolve(null)
     ]);
     if(divs)applyDivsToCache(divs);
     const writes=[dbS(`${postPath}/applicants/${uid}/status`,'accepted')];
-    const subShift=resolveSubWorkerShift(dgDetailPost?.baseShift,dgDetailPost?.uid,dgDetailKey,divs);
-    const fixedBase=resolveRequesterBaseShift(dgDetailPost?.baseShift,dgDetailPost?.uid,dgDetailKey,divs);
-    if((fixedBase==='dr'||fixedBase==='nr')&&dgDetailPost?.baseShift!==fixedBase){
+    const subShift=resolveSubWorkerShift(latestPost?.baseShift,latestPost?.uid,dgDetailKey,divs);
+    const fixedBase=resolveRequesterBaseShift(latestPost?.baseShift,latestPost?.uid,dgDetailKey,divs);
+    if((fixedBase==='dr'||fixedBase==='nr')&&latestPost?.baseShift!==fixedBase){
       writes.push(dbS(`${postPath}/baseShift`,fixedBase));
+    }
+    // 요청자(연차/휴무) 및 수락된 대근자(주대/야대) 양쪽 프로필·팀원 근무표 동시 반영
+    if(latestPost.uid===S.myId){
+      if(!S.ov[dgDetailKey])S.ov[dgDetailKey]={};
+      if(S.ov[dgDetailKey].shift!=='vc'&&S.ov[dgDetailKey].shift!=='of'){
+        S.ov[dgDetailKey].shift='vc';
+        S.ov[dgDetailKey].fromMyRecruit=true;
+        writes.push(saveProfile());
+      }
+    }else if(reqProf&&latestPost.uid){
+      const rOv=reqProf.ov||{};
+      if(!rOv[dgDetailKey])rOv[dgDetailKey]={};
+      if(rOv[dgDetailKey].shift!=='vc'&&rOv[dgDetailKey].shift!=='of'){
+        rOv[dgDetailKey].shift='vc';
+        rOv[dgDetailKey].fromMyRecruit=true;
+        writes.push(dbS('profiles/'+latestPost.uid+'/ov',rOv));
+      }
     }
     if(subShift==='ds'||subShift==='ns'){
       if(prof){
@@ -4676,6 +4997,7 @@ async function dgRespond(uid,status){
         if(!ov[dgDetailKey])ov[dgDetailKey]={};
         ov[dgDetailKey].shift=subShift;
         ov[dgDetailKey].fromRecruit=dgDetailPostId;
+        delete ov[dgDetailKey].manualShift;
         writes.push(dbS('profiles/'+uid+'/ov',ov));
       }
       if(divs){
@@ -4685,6 +5007,7 @@ async function dgRespond(uid,status){
             if(!memOv[dgDetailKey])memOv[dgDetailKey]={};
             memOv[dgDetailKey].shift=subShift;
             memOv[dgDetailKey].fromRecruit=dgDetailPostId;
+            delete memOv[dgDetailKey].manualShift;
             writes.push(dbS(`teams/${S.topId}/divs/${divId}/members/${uid}/ov`,memOv));
             break;
           }
@@ -4694,11 +5017,11 @@ async function dgRespond(uid,status){
         if(!S.ov[dgDetailKey])S.ov[dgDetailKey]={};
         S.ov[dgDetailKey].shift=subShift;
         S.ov[dgDetailKey].fromRecruit=dgDetailPostId;
+        delete S.ov[dgDetailKey].manualShift;
         writes.push(saveProfile());
-        refreshCal();renderDgCal();
       }
     }
-    const applicants=dgDetailPost?.applicants||{};
+    const applicants=latestPost?.applicants||{};
     for(const [apUid] of Object.entries(applicants)){
       if(apUid!==uid){
         writes.push(dbS(`${postPath}/applicants/${apUid}/status`,'rejected'));
@@ -4706,6 +5029,8 @@ async function dgRespond(uid,status){
     }
     writes.push(dbS(`${postPath}/closed`,true));
     await Promise.all(writes);
+    _salStatsMemoKey='';
+    refreshCal();renderDgCal();updateVacSum();
     showToast('대근이 확정되었습니다');
   } else {
     await dbS(`${postPath}/applicants/${uid}/status`,'rejected');
@@ -4715,16 +5040,91 @@ async function dgRespond(uid,status){
 }
 
 async function dgDeletePost(){
-  if(!(await askConfirm('대근 요청을 삭제하시겠어요?')))return;
+  const isClosed=!!dgDetailPost?.closed;
+  const msg=isClosed
+    ?'이미 확정된 대근 요청입니다. 삭제하면 요청자와 대근자의 근무가 원래대로 복구됩니다. 삭제할까요?'
+    :'대근 요청을 삭제하시겠어요? (자동 등록된 연차도 원래 근무로 복구됩니다)';
+  if(!(await askConfirm(msg)))return;
   if(!dgDetailKey||!dgDetailPostId||!S.topId)return;
+  const postPath=`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`;
+  const latestPost=(await dbG(postPath))||dgDetailPost;
+  const writes=[dbS(postPath,null)];
+
+  // 1) 수락된 대근자가 있었으면 해당 대근자의 프로필 및 팀원 근무표에서 fromRecruit 원복
+  const applicants=latestPost?.applicants||{};
+  const acceptedUids=Object.entries(applicants).filter(([,ap])=>ap?.status==='accepted').map(([u])=>u);
+  if(acceptedUids.length>0){
+    const divs=await dbG('teams/'+S.topId+'/divs');
+    for(const acUid of acceptedUids){
+      const acProf=await dbG('profiles/'+acUid);
+      if(acProf?.ov?.[dgDetailKey]?.fromRecruit===dgDetailPostId){
+        delete acProf.ov[dgDetailKey].shift;
+        delete acProf.ov[dgDetailKey].fromRecruit;
+        delete acProf.ov[dgDetailKey].manualShift;
+        if(!acProf.ov[dgDetailKey].memo)delete acProf.ov[dgDetailKey];
+        writes.push(dbS('profiles/'+acUid+'/ov',acProf.ov));
+      }
+      if(divs){
+        for(const [divId,div] of Object.entries(divs)){
+          const mOv=div?.members?.[acUid]?.ov;
+          if(mOv?.[dgDetailKey]?.fromRecruit===dgDetailPostId){
+            delete mOv[dgDetailKey].shift;
+            delete mOv[dgDetailKey].fromRecruit;
+            delete mOv[dgDetailKey].manualShift;
+            if(!mOv[dgDetailKey].memo)delete mOv[dgDetailKey];
+            writes.push(dbS(`teams/${S.topId}/divs/${divId}/members/${acUid}/ov`,mOv));
+            break;
+          }
+        }
+      }
+      if(acUid===S.myId&&S.ov[dgDetailKey]?.fromRecruit===dgDetailPostId){
+        delete S.ov[dgDetailKey].shift;
+        delete S.ov[dgDetailKey].fromRecruit;
+        delete S.ov[dgDetailKey].manualShift;
+        if(!S.ov[dgDetailKey].memo)delete S.ov[dgDetailKey];
+        writes.push(saveProfile());
+      }
+    }
+  }
+
+  // 2) 요청자 본인의 자동 연차(vc) 원복
+  const reqUid=latestPost?.uid;
+  if(reqUid===S.myId){
+    if(S.ov[dgDetailKey]&&(S.ov[dgDetailKey].fromMyRecruit||(!S.ov[dgDetailKey].manualShift&&S.ov[dgDetailKey].shift==='vc'))){
+      delete S.ov[dgDetailKey].shift;
+      delete S.ov[dgDetailKey].fromMyRecruit;
+      if(!S.ov[dgDetailKey].memo)delete S.ov[dgDetailKey];
+      writes.push(saveProfile());
+    }
+  }else if(reqUid){
+    const [reqProf,divs]=await Promise.all([dbG('profiles/'+reqUid),dbG('teams/'+S.topId+'/divs')]);
+    if(reqProf?.ov?.[dgDetailKey]&&(reqProf.ov[dgDetailKey].fromMyRecruit||(!reqProf.ov[dgDetailKey].manualShift&&reqProf.ov[dgDetailKey].shift==='vc'))){
+      delete reqProf.ov[dgDetailKey].shift;
+      delete reqProf.ov[dgDetailKey].fromMyRecruit;
+      if(!reqProf.ov[dgDetailKey].memo)delete reqProf.ov[dgDetailKey];
+      writes.push(dbS('profiles/'+reqUid+'/ov',reqProf.ov));
+      if(divs){
+        for(const [divId,div] of Object.entries(divs)){
+          if(div?.members?.[reqUid]){
+            writes.push(dbS(`teams/${S.topId}/divs/${divId}/members/${reqUid}/ov`,reqProf.ov));
+            break;
+          }
+        }
+      }
+    }
+  }
+
   if(dgPostCache[dgDetailKey]){
     delete dgPostCache[dgDetailKey][dgDetailPostId];
     if(!Object.keys(dgPostCache[dgDetailKey]).length)delete dgPostCache[dgDetailKey];
   }
-  await dbS(`recruits/${S.topId}/${dgDetailKey}/${dgDetailPostId}`,null);
+  await Promise.all(writes);
+  _salStatsMemoKey='';
+  refreshCal();
   renderDgCal();
   renderDgRecruitList(dgPostCache);
-  showToast('삭제됨');cs('dgd-sov');
+  updateVacSum();
+  showToast('대근 요청이 삭제되고 근무가 복구되었습니다');cs('dgd-sov');
 }
 
 const MEAL_IMG_TTL_MS=35*24*60*60*1000; // 이달(약 5주·35일) 식단표 원본 이미지 보관 후 자동 삭제
@@ -6591,7 +6991,10 @@ async function onFbReady(){
         return;
       }
       const profData=remoteProf||ls.g('prof_'+S.myId);
-      if(profData)Object.assign(S,profData);
+      if(profData){
+        if(remoteProf)S.ov=remoteProf.ov||{};
+        Object.assign(S,profData);
+      }
       const nextProfSig=JSON.stringify({ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,divId:S.divId});
       window._profChangedOnBoot=(prevProfSig!==nextProfSig);
       if(S.myId)ls.s('prof_'+S.myId,{myName:S.myName,myColor:S.myColor,ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,topName:S.topName,topColor:S.topColor,divId:S.divId,divName:S.divName,favMeals:Array.isArray(S.favMeals)?S.favMeals:[],hateMeals:Array.isArray(S.hateMeals)?S.hateMeals:[]});
