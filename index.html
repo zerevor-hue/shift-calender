@@ -2054,13 +2054,29 @@ function getBaseShift(date,topId,divId){
 }
 function getShift(date){return S.ov[dkey(date)]?.shift||getBaseShift(date);}
 function getMemberShift(date,memberOv,topId,divId){return memberOv?.[dkey(date)]?.shift||getBaseShift(date,topId,divId);}
+function isDayWorkDiv(divName){
+  const nm=String(divName!==undefined?divName:(S.divName||window._divsRawCache?.[S.divId]?.name||'')).trim();
+  return nm.includes('일근');
+}
+function isDayWorkFri(dateOrKey,divName){
+  if(!isDayWorkDiv(divName))return false;
+  if(typeof dateOrKey==='string'){
+    const parts=dateOrKey.split('-');
+    if(parts.length<3)return false;
+    const d=new Date(parseInt(parts[0],10),parseInt(parts[1],10)-1,parseInt(parts[2],10));
+    return d.getDay()===5;
+  }
+  return (dateOrKey instanceof Date)&&!isNaN(dateOrKey)&&dateOrKey.getDay()===5;
+}
 function countUsedVac(){
   const now=new Date(),yrPrefix=now.getFullYear()+'-';
   let uv=0;
   for(const [k,v] of Object.entries(S.ov||{})){
-    if(k.startsWith(yrPrefix)&&v?.shift==='vc')uv++;
+    if(k.startsWith(yrPrefix)&&v?.shift==='vc'){
+      uv+=isDayWorkFri(k)?0.5:1;
+    }
   }
-  return uv;
+  return Math.round(uv*10)/10;
 }
 function countQuarterSub(){
   const now=new Date();
@@ -2072,9 +2088,10 @@ function countQuarterSub(){
   for(const [k,v] of Object.entries(S.ov||{})){
     if(k>=qStartKey&&k<=qEndKey){
       if(v?.shift==='ds'||v?.shift==='ns')cnt++;
-      else if(v?.shift==='vc')qVac++;
+      else if(v?.shift==='vc')qVac+=isDayWorkFri(k)?0.5:1;
     }
   }
+  qVac=Math.round(qVac*10)/10;
   return {cnt,max:10+qVac,qVac,qNum:qIdx+1};
 }
 function updateQuarterSubUI(){
@@ -2345,7 +2362,7 @@ function mkCell(date,other,todayKey,monthEvents){
   if(sh){
     const b=document.createElement('div');
     b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
-    b.textContent=CL[sh];
+    b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
     if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
     cbSlot.appendChild(b);
   }
@@ -2420,7 +2437,7 @@ function mkCell(date,other,todayKey,monthEvents){
     const shSlot=document.createElement('div');shSlot.className='big-sh-slot';
     if(sh){
       const BIG_LBL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연차'};
-      const lbl=BIG_LBL[sh]||'';
+      const lbl=(sh==='vc'&&isDayWorkFri(date))?'반차':(BIG_LBL[sh]||'');
       if(lbl){
         const bEl=document.createElement('div');
         bEl.className=`big-sh big-sh-${sh}`+(lbl.length>1?' big-sh-2':'');
@@ -2474,7 +2491,7 @@ function mkDgCell(date,other,todayKey){
   if(sh){
     const b=document.createElement('div');
     b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
-    b.textContent=CL[sh];
+    b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
     if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
     cbSlot.appendChild(b);
   }
@@ -2511,7 +2528,7 @@ function mkDgCell(date,other,todayKey){
     const shSlot=document.createElement('div');shSlot.className='big-sh-slot';
     if(sh){
       const BIG_LBL={dr:'주',ds:'주대',nr:'야',ns:'야대',of:'휴',vc:'연차'};
-      const lbl=BIG_LBL[sh]||'';
+      const lbl=(sh==='vc'&&isDayWorkFri(date))?'반차':(BIG_LBL[sh]||'');
       if(lbl){
         const bEl=document.createElement('div');
         bEl.className=`big-sh big-sh-${sh}`+(lbl.length>1?' big-sh-2':'');
@@ -2630,6 +2647,8 @@ function openDaySheet(date){
   pickedMemoColor=S.ov[k]?.memoColor||'pink';
   document.getElementById('day-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
   document.getElementById('day-base').textContent=bSh?SM[bSh].l:'미설정';
+  const vcLbl=document.querySelector('label[for="sh-vc"]');
+  if(vcLbl)vcLbl.innerHTML=isDayWorkFri(date)?'반차<br><span style="font-size:.55rem;opacity:.85">(0.5일)</span>':'연차';
   document.querySelectorAll('input[name="sh"]').forEach(r=>r.checked=r.value===sh);
   document.getElementById('day-memo').value=memo;
   renderColorPicker('memo-color-picker',pickedMemoColor,pickMemoColor);
@@ -3195,7 +3214,7 @@ function renderTodayWorkers(divs){
     other.forEach(w=>{
       const chip=document.createElement('div');
       chip.style.cssText='display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.72rem;font-weight:700;background:var(--vac-bg);color:var(--vac)';
-      chip.textContent=w.name;row.appendChild(chip);
+      chip.textContent=(isDayWorkFri(today,w.divName)?`${w.name}(반차)`:w.name);row.appendChild(chip);
     });
     box.appendChild(row);
   }
@@ -3228,7 +3247,8 @@ function renderMonthTable(members){
     for(let d=1;d<=last.getDate();d++){
       const dt=new Date(yr,mo,d),sh=getMemberShift(dt,m.ov,topId,divId);
       const td=document.createElement('td');
-      td.innerHTML=sh?`<span class="tc ${SM[sh].tc}">${TL[sh]}</span>`:`<span class="tc tc-x">-</span>`;
+      const tcTxt=(sh==='vc'&&isDayWorkFri(dt,S.divName))?'반':(sh?TL[sh]:'-');
+      td.innerHTML=sh?`<span class="tc ${SM[sh].tc}">${tcTxt}</span>`:`<span class="tc tc-x">-</span>`;
       tr.appendChild(td);
     }
     frag.appendChild(tr);
@@ -4370,6 +4390,8 @@ async function openDgSheet(date){
   const bSh=getBaseShift(date),sh=getShift(date)||bSh||'dr';
   document.getElementById('dg-st').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 (${['일','월','화','수','목','금','토'][date.getDay()]})`;
   document.getElementById('dg-base').textContent=bSh?SM[bSh].l:'미설정';
+  const dgVcLbl=document.querySelector('label[for="dg-sh-vc"]');
+  if(dgVcLbl)dgVcLbl.innerHTML=isDayWorkFri(date)?'반차<br><span style="font-size:.55rem;opacity:.85">(0.5일)</span>':'연차';
   document.querySelectorAll('input[name="dg-sh"]').forEach(r=>r.checked=r.value===sh);
   os('dg-sov');
 }
