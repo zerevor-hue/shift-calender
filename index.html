@@ -265,13 +265,25 @@ body:not(.light) .dc.td .dn{background:var(--a);color:#000}
 
 /* 3행·4행·5행: 메모1 / 메모2 / 메모3 (글자 크기에 딱 맞춘 컴팩트 컬러 테두리 + 3줄 고정 슬롯) */
 .mid-wrap{display:grid;grid-template-rows:repeat(3,11px);gap:0;width:100%;height:33px;min-width:0;margin:0;overflow:hidden}
-.mid-wrap.big-mode{display:grid;grid-template-rows:22px 11px;gap:0;width:100%;height:33px;min-width:0;margin:0;overflow:hidden}
-.big-sh-slot{display:flex;align-items:center;justify-content:center;width:100%;height:22px;min-width:0;overflow:hidden}
-.big-sh{font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;font-size:1.26rem;font-weight:900;line-height:1;letter-spacing:-.03em;display:inline-flex;align-items:center;justify-content:center;user-select:none}
-.big-sh.big-sh-2{font-size:.98rem;letter-spacing:-.05em}
-.big-sh-dr{color:var(--a)}.big-sh-ds{color:var(--as)}
-.big-sh-nr{color:var(--n)}.big-sh-ns{color:var(--ns)}
-.big-sh-of{color:var(--red)}.big-sh-vc{color:var(--vac)}
+.dc.large-cell{grid-template-rows:15px 48px;gap:1px;padding:2px 2px 2px}
+.dr.dr-large{display:flex;align-items:center;justify-content:space-between;gap:2px;width:100%;height:15px;padding:0 3px;border-radius:3.5px;overflow:hidden;box-sizing:border-box}
+.dc.hday .dr.dr-large{background:var(--hd-bg)}
+.dc.hday.hday-sub .dr.dr-large{background:var(--sub-hd-bg)}
+.dr.dr-large .dn{width:auto;height:14px;font-size:.76rem;font-weight:800;transform:none;letter-spacing:-.02em;justify-content:flex-start;flex-shrink:0}
+.dr.dr-large .dn.d2{font-size:.74rem;transform:none;letter-spacing:-.03em}
+.dc.td .dr.dr-large .dn{width:auto;min-width:16px;height:14px;padding:0 3.5px;font-size:.72rem;border-radius:4px;transform:none}
+.hd-top{font-size:.55rem;font-weight:800;color:var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1;letter-spacing:-.04em;min-width:0;flex:1;text-align:right}
+.hd-top.hd-top-sub{color:var(--a)}
+.mid-wrap.big-mode{display:grid;grid-template-rows:26px 11px 11px;gap:0;width:100%;height:48px;min-width:0;margin:0;overflow:hidden}
+.big-sh-slot{display:flex;align-items:center;justify-content:center;width:100%;height:26px;min-width:0;overflow:hidden}
+.big-sh{font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;width:25px;height:25px;border-radius:50%;font-size:.92rem;font-weight:900;line-height:1;letter-spacing:-.03em;display:inline-flex;align-items:center;justify-content:center;user-select:none;box-sizing:border-box}
+.big-sh.big-sh-2{font-size:.66rem;letter-spacing:-.06em}
+.big-sh-dr{background:var(--a-bg);color:var(--a);box-shadow:inset 0 0 0 1px rgba(245,158,11,.28)}
+.big-sh-ds{background:var(--ds-bg);color:var(--as);box-shadow:inset 0 0 0 1.4px currentColor}
+.big-sh-nr{background:var(--n-bg);color:var(--n);box-shadow:inset 0 0 0 1px rgba(129,140,248,.28)}
+.big-sh-ns{background:var(--ns-bg);color:var(--ns);box-shadow:inset 0 0 0 1.4px currentColor}
+.big-sh-of{background:transparent;color:var(--red);width:auto;height:auto;border-radius:0;font-size:.98rem;font-weight:800}
+.big-sh-vc{background:var(--vac-bg);color:var(--vac);box-shadow:inset 0 0 0 1.4px currentColor}
 .m-slot{display:flex;align-items:center;width:100%;height:11px;min-width:0;overflow:hidden;padding:0;margin:0}
 .cm,.ce,.hd{display:inline-block;flex:0 0 auto;width:fit-content;font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;font-size:.6rem;border-radius:2.5px;padding:.5px 2px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-width:0;font-weight:700;box-sizing:border-box;line-height:10.5px;height:11px;letter-spacing:-.045em;margin:0}
 .hd{color:var(--red);background:var(--hd-bg);font-weight:800;border-left:2.5px solid var(--red);border-radius:1px 2.5px 2.5px 1px;padding:.5px 2px 0 2.5px}
@@ -855,8 +867,8 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
       <span style="font-size:.8rem;font-weight:700;color:var(--tx);white-space:nowrap">달력 모양</span>
       <div class="fl" style="flex:0 0 192px;gap:6px">
-        <button id="btn-cstyle-default" class="btn sm fg pri" style="padding:6px 8px;font-size:.72rem" onclick="setCalStyle('default')">기본(3줄)</button>
-        <button id="btn-cstyle-large" class="btn sm fg" style="padding:6px 8px;font-size:.72rem" onclick="setCalStyle('large')">근무크게(1줄)</button>
+        <button id="btn-cstyle-default" class="btn sm fg pri" style="padding:6px 8px;font-size:.72rem" onclick="setCalStyle('default')">기본</button>
+        <button id="btn-cstyle-large" class="btn sm fg" style="padding:6px 8px;font-size:.72rem" onclick="setCalStyle('large')">간편</button>
       </div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -2380,52 +2392,63 @@ function mkCell(date,other,todayKey,monthEvents){
   const dtKey = dkey(date);
   if(!other && dtKey===(todayKey||dkey(new Date())))c.classList.add('td');
   const sh=other?null:getShift(date),isOv=!other && !!S.ov[dtKey]?.shift;
-  
-  // 1·2행 상단 영역: 좌측(1·2행 병합) 날짜 | 우측 1행 근무뱃지 | 우측 2행 주간팀/야간팀
-  const row=document.createElement('div');row.className='dr';
-  const dnEl=document.createElement('div');dnEl.className='dn'+(!other&&date.getDate()>=10?' d2':'');
-  dnEl.textContent=other?'':date.getDate();
-  const cbSlot=document.createElement('div');cbSlot.className='cb-slot';
-  if(sh){
-    const b=document.createElement('div');
-    b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
-    b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
-    if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
-    cbSlot.appendChild(b);
-  }
-  const sw=document.createElement('div');sw.className='stk-wrap';
-  if(!other){
-    let dtMs = date.getTime();
-    let dayTeam='', nightTeam='';
-    if(window._parsedPats){
-      for(let p of window._parsedPats){
-        let diff = Math.round((dtMs - p.startMs)/86400000);
-        if(p.len>0){
-          let s = p.pat[((diff % p.len) + p.len) % p.len];
-          if(s==='dr'||s==='ds') dayTeam = p.name;
-          if(s==='nr'||s==='ns') nightTeam = p.name;
-        }
-      }
-    }
-    if(dayTeam && nightTeam){
-      sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span> <span class="stk stk-n">${nightTeam}</span>`;
-    }else if(dayTeam){
-      sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span>`;
-    }else if(nightTeam){
-      sw.innerHTML=`<span class="stk stk-n">${nightTeam}</span>`;
-    }
-  }
-  row.appendChild(dnEl);
-  row.appendChild(cbSlot);
-  row.appendChild(sw);
-  c.appendChild(row);
-  if(other) return c;
-
-  const hd=holidays[dtKey];
+  const isLargeStyle=(getCalStyle()==='large');
+  if(isLargeStyle)c.classList.add('large-cell');
+  const hd=!other?holidays[dtKey]:null;
   if(hd){
     c.classList.add('hday');
     if(hd.type==='substitute')c.classList.add('hday-sub');
   }
+
+  const row=document.createElement('div');
+  row.className=isLargeStyle?'dr dr-large':'dr';
+  const dnEl=document.createElement('div');dnEl.className='dn'+(!other&&date.getDate()>=10?' d2':'');
+  dnEl.textContent=other?'':date.getDate();
+  row.appendChild(dnEl);
+
+  if(isLargeStyle){
+    if(hd){
+      const hdEl=document.createElement('div');
+      hdEl.className='hd-top'+(hd.type==='substitute'?' hd-top-sub':'');
+      hdEl.textContent=hd.name;
+      row.appendChild(hdEl);
+    }
+  }else{
+    const cbSlot=document.createElement('div');cbSlot.className='cb-slot';
+    if(sh){
+      const b=document.createElement('div');
+      b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
+      b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
+      if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
+      cbSlot.appendChild(b);
+    }
+    const sw=document.createElement('div');sw.className='stk-wrap';
+    if(!other){
+      let dtMs = date.getTime();
+      let dayTeam='', nightTeam='';
+      if(window._parsedPats){
+        for(let p of window._parsedPats){
+          let diff = Math.round((dtMs - p.startMs)/86400000);
+          if(p.len>0){
+            let s = p.pat[((diff % p.len) + p.len) % p.len];
+            if(s==='dr'||s==='ds') dayTeam = p.name;
+            if(s==='nr'||s==='ns') nightTeam = p.name;
+          }
+        }
+      }
+      if(dayTeam && nightTeam){
+        sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span> <span class="stk stk-n">${nightTeam}</span>`;
+      }else if(dayTeam){
+        sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span>`;
+      }else if(nightTeam){
+        sw.innerHTML=`<span class="stk stk-n">${nightTeam}</span>`;
+      }
+    }
+    row.appendChild(cbSlot);
+    row.appendChild(sw);
+  }
+  c.appendChild(row);
+  if(other) return c;
   const evList=isShowTeamEvents()?(monthEvents||Object.values(_getVisibleEventsMap(S.events))):[];
   const dayEvs=[];
   for(let i=0;i<evList.length;i++){
@@ -2473,17 +2496,20 @@ function mkCell(date,other,todayKey,monthEvents){
       }
     }
     mw.appendChild(shSlot);
-    const mSlot=document.createElement('div');mSlot.className='m-slot';
-    // 1줄 슬롯 우선순위: 개인메모 > 공휴일 > 팀일정
-    const oneItem=dayMemos[0]||(hd?{type:'hd',text:hd.name,sub:hd.type==='substitute'}:null)||dayEvs[0];
-    if(oneItem)mSlot.appendChild(_buildSlotEl(oneItem));
-    mw.appendChild(mSlot);
+    // 간편 모드 하단 2줄 슬롯: 개인메모 최우선 표시 후 남은 칸에 팀 이벤트 표시
+    const simpLines=[...dayMemos,...dayEvs];
+    for(let i=0;i<2;i++){
+      const mSlot=document.createElement('div');mSlot.className='m-slot';
+      const item=simpLines[i];
+      if(item)mSlot.appendChild(_buildSlotEl(item));
+      mw.appendChild(mSlot);
+    }
   }else{
-    // 3행·4행·5행: 메모1 / 메모2 / 메모3 (공휴일·팀이벤트·개인메모 순서로 최대 3줄 고정 슬롯)
+    // 기본 모드 3행·4행·5행(3줄 슬롯): 공휴일 -> 개인메모(우선) -> 팀이벤트 순서로 표시
     const lines=[];
     if(hd)lines.push({type:'hd', text:hd.name, sub:hd.type==='substitute'});
-    dayEvs.forEach(x=>lines.push(x));
     dayMemos.forEach(x=>lines.push(x));
+    dayEvs.forEach(x=>lines.push(x));
     mw.className='mid-wrap';
     for(let i=0;i<3;i++){
       const slot=document.createElement('div');slot.className='m-slot';
@@ -2511,40 +2537,52 @@ function mkDgCell(date,other,todayKey){
     if(hd.type==='substitute')c.classList.add('hday-sub');
   }
   const sh=getShift(date),isOv=!!S.ov[k]?.shift;
-  const row=document.createElement('div');row.className='dr';
+  const isLargeStyle=(getCalStyle()==='large');
+  if(isLargeStyle)c.classList.add('large-cell');
+  const row=document.createElement('div');
+  row.className=isLargeStyle?'dr dr-large':'dr';
   const dnEl=document.createElement('div');dnEl.className='dn'+(date.getDate()>=10?' d2':'');
   dnEl.textContent=date.getDate();
-  const cbSlot=document.createElement('div');cbSlot.className='cb-slot';
-  if(sh){
-    const b=document.createElement('div');
-    b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
-    b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
-    if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
-    cbSlot.appendChild(b);
-  }
-  let dtMs = date.getTime();
-  let dayTeam='', nightTeam='';
-  if(window._parsedPats){
-    for(let p of window._parsedPats){
-      let diff = Math.round((dtMs - p.startMs)/86400000);
-      if(p.len>0){
-        let s = p.pat[((diff % p.len) + p.len) % p.len];
-        if(s==='dr'||s==='ds') dayTeam = p.name;
-        if(s==='nr'||s==='ns') nightTeam = p.name;
+  row.appendChild(dnEl);
+  if(isLargeStyle){
+    if(hd){
+      const hdEl=document.createElement('div');
+      hdEl.className='hd-top'+(hd.type==='substitute'?' hd-top-sub':'');
+      hdEl.textContent=hd.name;
+      row.appendChild(hdEl);
+    }
+  }else{
+    const cbSlot=document.createElement('div');cbSlot.className='cb-slot';
+    if(sh){
+      const b=document.createElement('div');
+      b.className=`cb ${sh==='of'?'cb-of':SM[sh].c}`;
+      b.textContent=(sh==='vc'&&isDayWorkFri(date))?'반':CL[sh];
+      if(isOv||sh==='vc')b.style.boxShadow='inset 0 0 0 1px currentColor';
+      cbSlot.appendChild(b);
+    }
+    let dtMs = date.getTime();
+    let dayTeam='', nightTeam='';
+    if(window._parsedPats){
+      for(let p of window._parsedPats){
+        let diff = Math.round((dtMs - p.startMs)/86400000);
+        if(p.len>0){
+          let s = p.pat[((diff % p.len) + p.len) % p.len];
+          if(s==='dr'||s==='ds') dayTeam = p.name;
+          if(s==='nr'||s==='ns') nightTeam = p.name;
+        }
       }
     }
+    const sw=document.createElement('div');sw.className='stk-wrap';
+    if(dayTeam && nightTeam){
+      sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span> <span class="stk stk-n">${nightTeam}</span>`;
+    }else if(dayTeam){
+      sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span>`;
+    }else if(nightTeam){
+      sw.innerHTML=`<span class="stk stk-n">${nightTeam}</span>`;
+    }
+    row.appendChild(cbSlot);
+    row.appendChild(sw);
   }
-  const sw=document.createElement('div');sw.className='stk-wrap';
-  if(dayTeam && nightTeam){
-    sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span> <span class="stk stk-n">${nightTeam}</span>`;
-  }else if(dayTeam){
-    sw.innerHTML=`<span class="stk stk-d">${dayTeam}</span>`;
-  }else if(nightTeam){
-    sw.innerHTML=`<span class="stk stk-n">${nightTeam}</span>`;
-  }
-  row.appendChild(dnEl);
-  row.appendChild(cbSlot);
-  row.appendChild(sw);
   c.appendChild(row);
   
   const mw=document.createElement('div');
@@ -2565,22 +2603,19 @@ function mkDgCell(date,other,todayKey){
       }
     }
     mw.appendChild(shSlot);
-    const mSlot=document.createElement('div');mSlot.className='m-slot';
-    if(hasPost){
-      const p0=postList[0];
-      const tag=document.createElement('div');
-      tag.className='ce';
-      tag.style.cssText=p0.closed?'color:var(--vac);background:var(--vac-bg);font-weight:800':'color:var(--n);background:var(--n-bg);font-weight:800';
-      const bMeta=SM[resolveRequesterBaseShift(p0.baseShift,p0.uid,k)]||SM[p0.baseShift];
-      tag.textContent=`${bMeta?bMeta.s:''}${p0.closed?'대근완료':'대근요청'}`;
-      mSlot.appendChild(tag);
-    }else if(hd){
-      const hEl=document.createElement('div');
-      hEl.className='hd'+(hd.type==='substitute'?' hd-sub':'');
-      hEl.textContent=hd.name;
-      mSlot.appendChild(hEl);
+    for(let i=0;i<2;i++){
+      const mSlot=document.createElement('div');mSlot.className='m-slot';
+      const pItem=postList[i];
+      if(pItem){
+        const tag=document.createElement('div');
+        tag.className='ce';
+        tag.style.cssText=pItem.closed?'color:var(--vac);background:var(--vac-bg);font-weight:800':'color:var(--n);background:var(--n-bg);font-weight:800';
+        const bMeta=SM[resolveRequesterBaseShift(pItem.baseShift,pItem.uid,k)]||SM[pItem.baseShift];
+        tag.textContent=`${bMeta?bMeta.s:''}${pItem.closed?'대근완료':'대근요청'}`;
+        mSlot.appendChild(tag);
+      }
+      mw.appendChild(mSlot);
     }
-    mw.appendChild(mSlot);
   }else{
     mw.className='mid-wrap';
     const dgLines=[];
@@ -6491,7 +6526,7 @@ function setCalStyle(style){
   if(S.topId&&S.divId)renderCal();
   if(document.getElementById('page-dg')?.classList.contains('on'))renderDgCal();
   syncToWidget(true);
-  showToast(next==='large'?'근무 크게(메모 1줄) 스타일로 변경되었습니다':'기본(메모 3줄) 스타일로 변경되었습니다');
+  showToast(next==='large'?'간편 달력 스타일로 변경되었습니다':'기본 달력 스타일로 변경되었습니다');
 }
 function isShowTeamEvents(){
   _ensurePrefCache();
