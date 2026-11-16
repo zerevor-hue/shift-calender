@@ -443,6 +443,623 @@ body.light .wk-item.main2{color:#1d4ed8}
 body.light .wk-item.fav-hit{background:#fef3c7!important;color:#b45309!important;border:1px solid #d97706}
 .wk-item.hate-hit{background:rgba(244,63,94,.20)!important;color:#fb7185!important;font-weight:800!important;border:1px dashed #f43f5e;text-decoration:line-through}
 body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!important;border:1px dashed #e11d48}
+
+/* === 월급 계산기 (2-Screen 신규 디자인: 명세서 메인 뷰 + 급여 기준 설정 뷰) === */
+#sal-sov .sal-sheet {
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 0 0 24px 0;
+  background: #f3f5f9;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+body:not(.light) #sal-sov .sal-sheet {
+  background: #0d1117;
+  color: #f8fafc;
+}
+#sal-sov .sal-top-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(243, 245, 249, 0.94);
+  backdrop-filter: blur(10px);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+}
+body:not(.light) #sal-sov .sal-top-header {
+  background: rgba(13, 17, 23, 0.94);
+  border-bottom-color: rgba(48, 54, 61, 0.85);
+}
+#sal-sov .sal-month-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#sal-sov .sal-month-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+body:not(.light) #sal-sov .sal-month-btn {
+  background: #161b22;
+  border-color: #30363d;
+  color: #f8fafc;
+}
+#sal-sov .sal-month-btn:active {
+  background: #e2e8f0;
+}
+#sal-sov .sal-current-month-label {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  min-width: 112px;
+  text-align: center;
+  color: #334155;
+}
+body:not(.light) #sal-sov .sal-current-month-label {
+  color: #cbd5e1;
+}
+#sal-sov .sal-settings-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+body:not(.light) #sal-sov .sal-settings-pill-btn {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #60a5fa;
+}
+#sal-sov .sal-settings-pill-btn:active {
+  transform: scale(0.97);
+}
+#sal-sov .sal-view-section {
+  padding: 12px 16px 8px;
+  display: none;
+  animation: salFadeIn 0.18s ease;
+}
+#sal-sov .sal-view-section.active {
+  display: block;
+}
+@keyframes salFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#sal-sov .sal-setup-alert {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+body:not(.light) #sal-sov .sal-setup-alert {
+  background: rgba(217, 119, 6, 0.16);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+#sal-sov .sal-summary-card {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  margin-bottom: 14px;
+}
+#sal-sov .sal-applied-basis-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+#sal-sov .sal-summary-title {
+  font-size: 12.5px;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-bottom: 3px;
+}
+#sal-sov .sal-net-pay-amount {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.6px;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+#sal-sov .sal-summary-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+#sal-sov .sal-split-box {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+#sal-sov .sal-split-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+#sal-sov .sal-split-val-pay {
+  font-size: 15px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+#sal-sov .sal-split-val-deduct {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f87171;
+}
+#sal-sov .sal-unit-strip {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 11px;
+  color: #cbd5e1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 8px;
+}
+#sal-sov .sal-unit-strip b {
+  color: #ffffff;
+  font-weight: 700;
+}
+#sal-sov .sal-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 13px;
+}
+body:not(.light) #sal-sov .sal-card {
+  background: #161b22;
+  border-color: #30363d;
+  box-shadow: none;
+}
+#sal-sov .sal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 11px;
+  gap: 6px;
+}
+#sal-sov .sal-card-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+body:not(.light) #sal-sov .sal-card-title {
+  color: #f8fafc;
+}
+#sal-sov .sal-card-sub-total {
+  font-size: 14px;
+  font-weight: 800;
+}
+#sal-sov .sal-text-blue { color: #2563eb; }
+body:not(.light) #sal-sov .sal-text-blue { color: #60a5fa; }
+#sal-sov .sal-text-red { color: #ef4444; }
+body:not(.light) #sal-sov .sal-text-red { color: #f87171; }
+#sal-sov .sal-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  vertical-align: middle;
+}
+#sal-sov .sal-badge-auto {
+  background: #e2e8f0;
+  color: #475569;
+}
+body:not(.light) #sal-sov .sal-badge-auto {
+  background: #21262d;
+  color: #94a3b8;
+}
+#sal-sov .sal-badge-cal {
+  background: #eff6ff;
+  color: #2563eb;
+}
+body:not(.light) #sal-sov .sal-badge-cal {
+  background: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+}
+#sal-sov .sal-badge-holiday {
+  background: #ecfdf5;
+  color: #10b981;
+}
+body:not(.light) #sal-sov .sal-badge-holiday {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+#sal-sov .sal-badge-ordinary {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+body:not(.light) #sal-sov .sal-badge-ordinary {
+  background: rgba(37, 99, 235, 0.22);
+  color: #93c5fd;
+}
+#sal-sov .sal-badge-non-ordinary {
+  background: #f1f5f9;
+  color: #64748b;
+}
+body:not(.light) #sal-sov .sal-badge-non-ordinary {
+  background: #21262d;
+  color: #94a3b8;
+}
+#sal-sov .sal-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 10px;
+}
+body:not(.light) #sal-sov .sal-item-row {
+  border-bottom-color: #21262d;
+}
+#sal-sov .sal-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+#sal-sov .sal-item-row.clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 6px;
+  margin: 0 -6px;
+  transition: background 0.15s;
+}
+#sal-sov .sal-item-row.clickable:active {
+  background: #f8fafc;
+}
+body:not(.light) #sal-sov .sal-item-row.clickable:active {
+  background: #21262d;
+}
+#sal-sov .sal-item-info {
+  flex: 1;
+  min-width: 0;
+}
+#sal-sov .sal-item-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+body:not(.light) #sal-sov .sal-item-name {
+  color: #f8fafc;
+}
+#sal-sov .sal-item-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+body:not(.light) #sal-sov .sal-item-desc {
+  color: #94a3b8;
+}
+#sal-sov .sal-val-locked {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  min-width: 118px;
+  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+body:not(.light) #sal-sov .sal-val-locked {
+  background: #0d1117;
+  color: #e2e8f0;
+  border-color: #30363d;
+}
+#sal-sov .sal-lock-icon {
+  font-size: 11px;
+  opacity: 0.65;
+}
+#sal-sov .sal-input-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 132px;
+  flex-shrink: 0;
+}
+#sal-sov .sal-input-wrap input {
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 25px 7px 9px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+body:not(.light) #sal-sov .sal-input-wrap input {
+  background: #0d1117;
+  border-color: #30363d;
+  color: #f8fafc;
+}
+#sal-sov .sal-input-wrap input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+#sal-sov .sal-input-unit {
+  position: absolute;
+  right: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  pointer-events: none;
+}
+#sal-sov .sal-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+#sal-sov .sal-cal-cell {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+body:not(.light) #sal-sov .sal-cal-cell {
+  background: #0d1117;
+  border-color: #30363d;
+}
+#sal-sov .sal-cal-cell-label {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+body:not(.light) #sal-sov .sal-cal-cell-label {
+  color: #cbd5e1;
+}
+#sal-sov .sal-cal-cell-input {
+  width: 50px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13.5px;
+  font-weight: 800;
+  text-align: right;
+  color: #2563eb;
+}
+body:not(.light) #sal-sov .sal-cal-cell-input {
+  background: #161b22;
+  border-color: #30363d;
+  color: #60a5fa;
+}
+#sal-sov .sal-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 11px;
+  color: #64748b;
+  margin: 4px 0 12px;
+}
+#sal-sov .sal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+#sal-sov .sal-dot-input {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+}
+#sal-sov .sal-dot-auto {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+#sal-sov .sal-settings-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+#sal-sov .sal-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 4px 0;
+}
+body:not(.light) #sal-sov .sal-back-btn {
+  color: #f8fafc;
+}
+#sal-sov .sal-segment-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+}
+body:not(.light) #sal-sov .sal-segment-control {
+  background: #0d1117;
+}
+#sal-sov .sal-segment-btn {
+  border: none;
+  background: transparent;
+  padding: 10px 8px;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+#sal-sov .sal-segment-btn.active {
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+body:not(.light) #sal-sov .sal-segment-btn.active {
+  background: #21262d;
+}
+#sal-sov .sal-seg-title {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+body:not(.light) #sal-sov .sal-seg-title {
+  color: #f8fafc;
+}
+#sal-sov .sal-segment-btn.active .sal-seg-title {
+  color: #2563eb;
+}
+body:not(.light) #sal-sov .sal-segment-btn.active .sal-seg-title {
+  color: #60a5fa;
+}
+#sal-sov .sal-seg-sub {
+  display: block;
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+body:not(.light) #sal-sov .sal-seg-sub {
+  color: #94a3b8;
+}
+#sal-sov .sal-ordinary-preview-box {
+  margin-top: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+body:not(.light) #sal-sov .sal-ordinary-preview-box {
+  background: rgba(37, 99, 235, 0.14);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+#sal-sov .sal-ordinary-preview-label {
+  font-size: 12px;
+  color: #1e40af;
+  font-weight: 700;
+}
+body:not(.light) #sal-sov .sal-ordinary-preview-label {
+  color: #93c5fd;
+}
+#sal-sov .sal-ordinary-preview-sub {
+  font-size: 11px;
+  color: #3b82f6;
+  margin-top: 2px;
+}
+body:not(.light) #sal-sov .sal-ordinary-preview-sub {
+  color: #60a5fa;
+}
+#sal-sov .sal-ordinary-preview-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2563eb;
+}
+body:not(.light) #sal-sov .sal-ordinary-preview-val {
+  color: #60a5fa;
+}
+#sal-sov .sal-save-primary-btn {
+  width: 100%;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  margin-top: 4px;
+  transition: transform 0.1s, background 0.15s;
+}
+#sal-sov .sal-save-primary-btn:active {
+  transform: scale(0.98);
+  background: #1d4ed8;
+}
+#sal-sov .sal-mini-link-btn {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+body:not(.light) #sal-sov .sal-mini-link-btn {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #60a5fa;
+}
+
 </style>
 </head>
 <body class="light">
@@ -1232,206 +1849,516 @@ body.light .wk-item.hate-hit{background:#ffe4e6!important;color:#be123c!importan
 
 <!-- 교대·일근 맞춤형 월급 계산기 시트 -->
 <div class="sov" id="sal-sov">
-  <div class="sheet" style="max-height:90vh;overflow-y:auto">
-    <div class="shandle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px">
-      <div style="display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap">
-        <div class="stitle-s" style="margin-bottom:0;white-space:nowrap">급여 계산기</div>
-        <span style="font-size:.6rem;font-weight:800;color:#ef4444;white-space:nowrap">※ 입력 자료는 개인 휴대폰 캐시에만 저장</span>
+  <div class="sheet sal-sheet">
+    <!-- 상단 고정 헤더 -->
+    <header class="sal-top-header">
+      <div class="sal-month-selector">
+        <button type="button" class="sal-month-btn" aria-label="이전 달" title="이전 달" onclick="changeSalMonth(-1)">&lt;</button>
+        <div class="sal-current-month-label" id="sal-ym-lbl">2026년 <b style="font-size:1.02rem;font-weight:900">11월</b> 명세서</div>
+        <button type="button" class="sal-month-btn" aria-label="다음 달" title="다음 달" onclick="changeSalMonth(1)">&gt;</button>
       </div>
-      <div style="display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bd);border-radius:999px;padding:2px 6px;flex-shrink:0">
-        <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(-1)">◀</button>
-        <span id="sal-ym-lbl" style="font-size:.72rem;font-weight:400;padding:0 4px;color:var(--tx2)">2026년 <b style="font-size:.92rem;font-weight:900;color:var(--tx)">11월</b> 명세서</span>
-        <button type="button" class="ibtn" style="height:24px;min-width:24px;padding:0 5px;font-size:.7rem" onclick="changeSalMonth(1)">▶</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button type="button" class="sal-settings-pill-btn" id="sal-open-settings-btn" onclick="toggleSalViewMode()">
+          <span>⚙️</span>
+          <span id="sal-top-mode-btn-lbl">급여 기준 설정</span>
+        </button>
+        <button type="button" class="sal-month-btn" aria-label="급여 계산기 닫기" title="닫기" onclick="cs('sal-sov')" style="font-size:13px">✕</button>
       </div>
+    </header>
+
+    <!-- =========================================================
+         [화면 1] 메인 화면 : 월별 급여 명세서 및 변동 항목 입력
+         ========================================================= -->
+    <div id="sal-main-view" class="sal-view-section active">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px">
+        <span style="font-size:11px;font-weight:700;color:#ef4444">※ 입력 자료는 개인 휴대폰 캐시에만 저장됩니다</span>
+      </div>
+
+      <!-- 기본급 미설정 시 안내 배너 -->
+      <div id="sal-setup-alert" class="sal-setup-alert" style="display:none" onclick="switchSalView('settings')">
+        <span>💡 아직 기본급과 고정수당이 설정되지 않았습니다.</span>
+        <strong>설정하기 &gt;</strong>
+      </div>
+
+      <!-- 최상단 실수령액 요약 카드 -->
+      <section class="sal-summary-card">
+        <div class="sal-applied-basis-badge" id="sal-applied-basis-badge">
+          4조 2교대 (157H) · 통상시급 0원 기준
+        </div>
+        <div class="sal-summary-title">차인지급액(실수령액 예상)</div>
+        <div class="sal-net-pay-amount" id="sal-net-total">0원</div>
+        <div class="sal-summary-split">
+          <div class="sal-split-box">
+            <div class="sal-split-label">지급총액</div>
+            <div class="sal-split-val-pay" id="sal-gross-total">+0원</div>
+          </div>
+          <div class="sal-split-box">
+            <div class="sal-split-label">공제총액</div>
+            <div class="sal-split-val-deduct" id="sal-deduct-total">-0원</div>
+          </div>
+        </div>
+        <div id="sal-per-sub-info" class="sal-unit-strip">
+          <span>통상시급 <b id="sal-unit-hourly">0원</b></span>
+          <span>휴일추가 1회 <b id="sal-unit-hd">+0원</b></span>
+          <span>연장추가 1회 <b id="sal-unit-ds">+0원</b></span>
+          <span>야간추가 1회 <b id="sal-unit-nt">+0원</b></span>
+        </div>
+      </section>
+
+      <!-- 1. 근무 실적 집계 (캘린더 연동 영역) -->
+      <section class="sal-card">
+        <div class="sal-card-header">
+          <div class="sal-card-title">
+            <span id="sal-cnt-sec-title">근무 실적 집계</span>
+            <span class="sal-badge sal-badge-cal">캘린더 연동</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:11px" onclick="resetSalCountsFromCal()">불러오기</button>
+          </div>
+        </div>
+        <div class="sal-cal-grid">
+          <div class="sal-cal-cell">
+            <label for="sal-cnt-ds" class="sal-cal-cell-label" id="sal-lbl-ds">전월 주간대근</label>
+            <div style="display:inline-flex;align-items:center;gap:3px">
+              <input type="number" step="1" min="0" max="31" class="sal-cal-cell-input" id="sal-cnt-ds" aria-label="전월 주간대근" title="전월 주간대근" oninput="onSalCountsManualInput()" />
+              <span style="font-size:11px;font-weight:700;color:#64748b">회</span>
+            </div>
+          </div>
+          <div class="sal-cal-cell">
+            <label for="sal-cnt-ns" class="sal-cal-cell-label" id="sal-lbl-ns">전월 야간대근</label>
+            <div style="display:inline-flex;align-items:center;gap:3px">
+              <input type="number" step="1" min="0" max="31" class="sal-cal-cell-input" id="sal-cnt-ns" aria-label="전월 야간대근" title="전월 야간대근" oninput="onSalCountsManualInput()" />
+              <span style="font-size:11px;font-weight:700;color:#64748b">회</span>
+            </div>
+          </div>
+          <div class="sal-cal-cell">
+            <label for="sal-cnt-hd" class="sal-cal-cell-label" id="sal-lbl-hd">당월 공휴일(주)</label>
+            <div style="display:inline-flex;align-items:center;gap:3px">
+              <input type="number" step="1" min="0" max="31" class="sal-cal-cell-input" id="sal-cnt-hd" aria-label="당월 공휴일(주)" title="당월 공휴일(주)" oninput="onSalCountsManualInput()" />
+              <span style="font-size:11px;font-weight:700;color:#64748b">회</span>
+            </div>
+          </div>
+          <div class="sal-cal-cell">
+            <label for="sal-cnt-hdn" class="sal-cal-cell-label" id="sal-lbl-hdn">당월 공휴일(야)</label>
+            <div style="display:inline-flex;align-items:center;gap:3px">
+              <input type="number" step="1" min="0" max="31" class="sal-cal-cell-input" id="sal-cnt-hdn" aria-label="당월 공휴일(야)" title="당월 공휴일(야)" oninput="onSalCountsManualInput()" />
+              <span style="font-size:11px;font-weight:700;color:#64748b">회</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 지급 내역 -->
+      <section class="sal-card">
+        <div class="sal-card-header">
+          <div class="sal-card-title">지급 내역</div>
+          <div class="sal-card-sub-total sal-text-blue" id="sal-pay-sec-total">0원</div>
+        </div>
+
+        <!-- 고정 항목 요약 링크 (클릭 시 급여 기준 설정 화면으로 이동) -->
+        <div class="sal-item-row clickable" onclick="switchSalView('settings')">
+          <div class="sal-item-info">
+            <div class="sal-item-name">기본급 및 고정수당 합계 &gt;</div>
+            <div class="sal-item-desc" id="sal-fixed-allowance-desc">기본급 + 식대 + 기술·직책·행정 + 복지수당</div>
+          </div>
+          <div class="sal-val-locked">
+            <span class="sal-lock-icon">⚙️</span>
+            <span id="sal-out-fixed-total">0원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <span>상여금</span>
+              <span class="sal-badge sal-badge-auto">자동</span>
+              <span class="sal-badge sal-badge-holiday" id="sal-hb-auto-badge" style="display:none">명절 가산</span>
+            </div>
+            <div class="sal-item-desc">월할 상여(10%) 및 명절 상여(40%) 자동 반영</div>
+          </div>
+          <div class="sal-val-locked">
+            <span class="sal-lock-icon">🔒</span>
+            <span id="sal-out-bonus">0원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <span>고정 연장·야간수당</span>
+              <span class="sal-badge sal-badge-auto">자동</span>
+            </div>
+            <div class="sal-item-desc" id="sal-fixed-ot-desc">근무형태별 고정 시간 기준 산출</div>
+          </div>
+          <div class="sal-val-locked">
+            <span class="sal-lock-icon">🔒</span>
+            <span id="sal-out-fixed-ot">0원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <span>연장·휴일·야간 추가수당</span>
+              <span class="sal-badge sal-badge-cal">캘린더 연동</span>
+            </div>
+            <div class="sal-item-desc" id="sal-extra-ot-desc">대근·공휴일·야간 실적 × 통상시급</div>
+          </div>
+          <div class="sal-val-locked">
+            <span class="sal-lock-icon">🔒</span>
+            <span id="sal-out-extra-ot">0원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-in-gift" class="sal-item-name" style="cursor:pointer">상품권</label>
+            <div class="sal-item-desc">해당 월 지급 시 직접 입력 (공제 동시 반영)</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-in-gift" aria-label="상품권" title="상품권" placeholder="0" oninput="onSalMainGiftInput(this)" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <label for="sal-in-incentive" style="cursor:pointer">성과급 · 기타 <span style="color:#ef4444">제외</span>수당</label>
+              <button type="button" class="sal-mini-link-btn" onclick="openSalExtraPopup()">다중 합산 &gt;</button>
+            </div>
+            <div class="sal-item-desc" id="sal-incentive-desc">경영평가·상생금·타결금·소급분 등 직접 입력</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-in-incentive" aria-label="성과급 및 기타 제외수당" title="성과급 및 기타 제외수당" placeholder="0" oninput="onSalMainIncentiveInput(this)" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 공제 내역 (기본 접힘) -->
+      <section class="sal-card">
+        <div class="sal-card-header" style="margin-bottom:0;cursor:pointer" onclick="toggleSalMainDedWrap()">
+          <div class="sal-card-title">
+            <span>공제 내역</span>
+            <span id="sal-main-ded-toggle-lbl" style="font-size:11px;font-weight:600;color:#64748b">펼치기 ▼</span>
+          </div>
+          <div class="sal-card-sub-total sal-text-red" id="sal-ded-sec-total">0원</div>
+        </div>
+        <div id="sal-main-ded-wrap" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+          <button type="button" class="sal-mini-link-btn" onclick="switchSalView('settings', true)">고정공제 직접입력 &gt;</button>
+        </div>
+
+        <div class="sal-item-row clickable" onclick="switchSalView('settings', true)">
+          <div class="sal-item-info">
+            <div class="sal-item-name">국민연금 <span class="sal-badge sal-badge-auto" id="sal-badge-pen">4.75%</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-pen">0원</span></div>
+        </div>
+
+        <div class="sal-item-row clickable" onclick="switchSalView('settings', true)">
+          <div class="sal-item-info">
+            <div class="sal-item-name">건강보험 <span class="sal-badge sal-badge-auto" id="sal-badge-hlth">3.595%</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-hlth">0원</span></div>
+        </div>
+
+        <div class="sal-item-row clickable" onclick="switchSalView('settings', true)">
+          <div class="sal-item-info">
+            <div class="sal-item-name">장기요양보험 <span class="sal-badge sal-badge-auto" id="sal-badge-care">건보 13.14%</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-care">0원</span></div>
+        </div>
+
+        <div class="sal-item-row clickable" onclick="switchSalView('settings', true)">
+          <div class="sal-item-info">
+            <div class="sal-item-name">고용보험 <span class="sal-badge sal-badge-auto" id="sal-badge-emp">0.9%</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-emp">0원</span></div>
+        </div>
+
+        <div class="sal-item-row clickable" onclick="switchSalView('settings', true)">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <span>노조조합비</span>
+              <span class="sal-badge sal-badge-auto" id="sal-union-rate-badge">교대 1.42%</span>
+            </div>
+            <div class="sal-item-desc">통상임금 기준 근무형태별 요율 자동 적용</div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-union">0원</span></div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-ded-meal" class="sal-item-name" style="cursor:pointer">식사비 · 상조회비</label>
+            <div class="sal-item-desc">당월 식사비 및 상조회비 공제액 입력</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-ded-meal" aria-label="식사비 · 상조회비" title="식사비 · 상조회비" placeholder="0" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-ded-tax" class="sal-item-name" style="cursor:pointer">소득세</label>
+            <div class="sal-item-desc">간이세액표 기준 명세서 금액 입력</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-ded-tax" aria-label="소득세" title="소득세" placeholder="0" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">지방소득세 <span class="sal-badge sal-badge-auto">소득세 10%</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-ltax">0원</span></div>
+          <input type="hidden" id="sal-ded-ltax" value="0" />
+        </div>
+
+        <div class="sal-item-row" id="sal-row-gift-ded" style="display:none">
+          <div class="sal-item-info">
+            <div class="sal-item-name">상품권 공제 <span class="sal-badge sal-badge-auto">지급액 동시 차감</span></div>
+          </div>
+          <div class="sal-val-locked"><span class="sal-lock-icon">🔒</span><span id="sal-out-gift-ded">0원</span></div>
+        </div>
+        </div>
+      </section>
+
+      <!-- 입력칸 구분 범례 -->
+      <div class="sal-legend-bar">
+        <div class="sal-legend-item"><span class="sal-dot-input"></span> 매월 직접 입력</div>
+        <div class="sal-legend-item"><span class="sal-dot-auto"></span> 기준·캘린더 자동 계산</div>
+      </div>
+
+      <!-- 4. 급여명세서 항목별 상세 내역 (접기/펼치기 지원 + 이달 저장) -->
+      <section class="sal-card">
+        <div class="sal-card-header" style="margin-bottom:6px">
+          <div class="sal-card-title" style="cursor:pointer" onclick="toggleSalBreakdownWrap()">
+            <span>급여명세서 상세 내역</span>
+            <span id="sal-bd-toggle-lbl" style="font-size:11px;font-weight:600;color:#64748b">펼치기 ▼</span>
+          </div>
+          <button type="button" class="btn pri sm" style="padding:5px 10px;font-size:11.5px;border-radius:8px" onclick="saveCurrentMonthSalary()">이 달 내역 저장</button>
+        </div>
+        <div id="sal-breakdown-wrap" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #cbd5e1">
+          <div id="sal-breakdown" style="display:flex;flex-direction:column;gap:4px;font-size:.73rem"></div>
+        </div>
+      </section>
+
+      <!-- 5. 금년도 월별 급여 내역 (기본 접힘) -->
+      <section class="sal-card">
+        <div class="sal-card-header" style="margin-bottom:0;cursor:pointer" onclick="toggleSalHistWrap()">
+          <div class="sal-card-title">
+            <span id="sal-hist-title">금년도 지급내역</span>
+            <span id="sal-hist-toggle-lbl" style="font-size:11px;font-weight:600;color:#64748b">펼치기 ▼</span>
+          </div>
+          <button type="button" class="btn sec sm" style="padding:4px 9px;font-size:11px" onclick="event.stopPropagation();syncAllMonthsSalaryToCache()">전체 월 갱신 ↺</button>
+        </div>
+        <div id="sal-hist-wrap" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1">
+          <div id="sal-history-list" style="display:flex;flex-direction:column;gap:5px;font-size:.74rem"></div>
+        </div>
+      </section>
+
+      <button type="button" class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
     </div>
 
-    <!-- 상단 지급합계 / 공제합계 / 차인지급액(실수령액) 배너 -->
-    <div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:16px;padding:13px 14px;margin-bottom:10px">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
-        <span style="font-size:.74rem;font-weight:800;color:var(--tx2)">지급합계</span>
-        <span id="sal-gross-total" style="font-family:'JetBrains Mono',monospace;font-size:1.22rem;font-weight:900;color:var(--tx)">0원</span>
+    <!-- =========================================================
+         [화면 2] 급여 기준 설정 화면 : 초기 1회 설정 고정 항목
+         ========================================================= -->
+    <div id="sal-settings-view" class="sal-view-section">
+      <div class="sal-settings-header-bar">
+        <button type="button" class="sal-back-btn" onclick="switchSalView('main')">
+          <span>←</span>
+          <span>명세서로 돌아가기</span>
+        </button>
       </div>
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:.71rem;font-weight:700;color:var(--tx3)">공제합계</span>
-        <span id="sal-deduct-total" style="font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:800;color:var(--tx2)">-0원</span>
-      </div>
-      <div style="display:flex;align-items:baseline;justify-content:space-between;padding-top:7px;border-top:1px dashed var(--bd)">
-        <span style="font-size:.75rem;font-weight:400;color:var(--tx)">차인지급액(실수령액 예상)</span>
-        <span id="sal-net-total" style="font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:400;color:var(--tx)">0원</span>
-      </div>
-      <div id="sal-per-sub-info" style="margin-top:8px;padding:6px 9px;background:var(--bg2);border-radius:10px;font-size:.63rem;color:var(--tx2);display:grid;grid-template-columns:repeat(2,1fr);gap:4px 8px">
-        <span>통상시급 <b id="sal-unit-hourly" style="color:var(--tx)">0원</b></span>
-        <span>휴일추가 1회 <b id="sal-unit-hd" style="color:var(--tx)">+0원</b></span>
-        <span>연장추가 1회 <b id="sal-unit-ds" style="color:var(--tx)">+0원</b></span>
-        <span>야간추가 1회 <b id="sal-unit-nt" style="color:var(--tx)">+0원</b></span>
-      </div>
-    </div>
 
-    <!-- 근무형태 선택 (4조2교대 157h / 일근제 209h) -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:9px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <label for="sal-work-mode" style="font-size:.73rem;font-weight:800;color:var(--tx2);white-space:nowrap;flex-shrink:0">근무 형태</label>
-        <select id="sal-work-mode" aria-label="근무 형태" title="근무 형태" onchange="onSalModeChange(true)" style="flex:1;min-width:0;width:100%;background:var(--bg2);color:var(--tx);border:1px solid var(--bd2);border-radius:8px;padding:6px 10px;font-size:.7rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <!-- 1. 근무 형태 선택 -->
+      <div class="sal-card">
+        <div class="sal-card-header">
+          <div class="sal-card-title">1. 근무 형태 기준</div>
+        </div>
+        <div class="sal-segment-control">
+          <button type="button" class="sal-segment-btn active" id="sal-seg-shift" onclick="selectSalWorkModeSegment('shift157')">
+            <span class="sal-seg-title">교대근무 (4조 2교대)</span>
+            <span class="sal-seg-sub">통상 157시간 · 조합비 1.42%</span>
+          </button>
+          <button type="button" class="sal-segment-btn" id="sal-seg-day" onclick="selectSalWorkModeSegment('day209')">
+            <span class="sal-seg-title">일근근무</span>
+            <span class="sal-seg-sub">통상 209시간 · 조합비 1.20%</span>
+          </button>
+        </div>
+        <select id="sal-work-mode" aria-label="근무 형태" title="근무 형태" onchange="onSalModeChange(true)" style="display:none">
           <option value="shift157">4조 2교대 (157h · 연장38h / 야간49h)</option>
           <option value="day209">일근제 포괄 (209h · 연장13h / 휴일12h / 야간8h)</option>
         </select>
-        <button type="button" id="sal-mode-desc-btn" class="btn sec sm" style="padding:5px 8px;font-size:.62rem;white-space:nowrap;flex-shrink:0" onclick="toggleSalModeDesc()">설명 ▼</button>
       </div>
-      <div id="sal-mode-desc" style="display:none;margin-top:7px;font-size:.61rem;color:var(--tx3);line-height:1.45;background:var(--bg2);padding:6px 8px;border-radius:8px">
-        • <b>통상시급</b>: <span style="font-family:'JetBrains Mono',monospace">(기본급 + 기술수당 + 식대 + 기본급×2/12) ÷ <span id="sal-div-h-lbl">157</span>h</span><br>
-        • <span id="sal-hd-rule-lbl"><b>1회 기준</b>: 연장추가 10.5h×1.5배(15.75h) · 휴일추가 17h(8h×1.5+2.5h×2.0) · 야간추가 8h×0.5배(4h)</span>
-      </div>
-    </div>
 
-    <!-- 1. 지급 항목 입력 -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2);white-space:nowrap">지급 항목 입력</span>
-        <span id="sal-hb-auto-badge" style="display:none;font-size:.63rem;font-weight:800;color:var(--a);padding:3px 8px;background:var(--bg2);border:1px solid var(--bd2);border-radius:999px;white-space:nowrap">명절상여(40%) 자동 적용달</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <label for="sal-base-pay" class="lbl" style="font-size:.61rem">기본급 (원)</label>
-          <input type="text" inputmode="numeric" id="sal-base-pay" aria-label="기본급 (원)" title="기본급 (원)" placeholder="0" style="padding:7px 9px;font-size:.84rem;font-weight:800" oninput="onSalBaseChange(this)">
-        </div>
-        <div>
-          <label for="sal-hourly" class="lbl" style="font-size:.61rem">통상시급 (자동 계산)</label>
-          <input type="text" id="sal-hourly" aria-label="통상시급 (자동 계산)" title="통상시급 (자동 계산)" placeholder="자동 계산" style="padding:7px 9px;font-size:.82rem;font-weight:700;color:var(--tx2)" readonly>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          <label for="sal-tech-pay" class="lbl" style="font-size:.6rem">통상임금 <span style="color:#ef4444;font-weight:800">포함</span>항목 (식대·수당)</label>
-          <input type="text" id="sal-tech-pay" aria-label="통상임금 포함항목 (식대·수당)" title="통상임금 포함항목 (식대·수당)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalTechPopup()">
-        </div>
-        <div>
-          <label for="sal-extra-pay" class="lbl" style="font-size:.6rem">통상임금 <span style="color:#ef4444;font-weight:800">제외</span>항목 (복지·상품권·기타)</label>
-          <input type="text" id="sal-extra-pay" aria-label="통상임금 제외 항목 (복지·상품권·기타)" title="통상임금 제외 항목 (복지·상품권·기타)" placeholder="클릭하여 입력" readonly style="padding:7px 9px;font-size:.78rem;cursor:pointer;font-weight:700" onclick="openSalExtraPopup()">
-        </div>
-      </div>
-      <input type="hidden" id="sal-meal-pay" value="200000">
-      <input type="hidden" id="sal-tech-only-pay" value="0">
-      <input type="hidden" id="sal-welfare-pay" value="370000">
-      <input type="hidden" id="sal-gift-pay" value="0">
-      <input type="hidden" id="sal-extra-only-pay" value="0">
-    </div>
-
-    <!-- 2. 대근 · 공휴일 근무 횟수 및 수당별 정산 횟수 (대근 익월 지급 반영) -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px">
-        <span id="sal-cnt-sec-title" style="font-size:.73rem;font-weight:800;color:var(--tx2)">대근(전월) · 공휴일(당월) 횟수</span>
-        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.62rem;white-space:nowrap;flex-shrink:0" onclick="resetSalCountsFromCal()">불러오기</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
-        <div>
-          <label for="sal-cnt-ds" class="lbl" id="sal-lbl-ds" style="font-size:.54rem">전월 주간대근</label>
-          <input type="number" id="sal-cnt-ds" aria-label="전월 주간대근" title="전월 주간대근" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
-        </div>
-        <div>
-          <label for="sal-cnt-ns" class="lbl" id="sal-lbl-ns" style="font-size:.54rem">전월 야간대근</label>
-          <input type="number" id="sal-cnt-ns" aria-label="전월 야간대근" title="전월 야간대근" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
-        </div>
-        <div>
-          <label for="sal-cnt-hd" class="lbl" id="sal-lbl-hd" style="font-size:.54rem">당월 공휴일(주)</label>
-          <input type="number" id="sal-cnt-hd" aria-label="당월 공휴일(주)" title="당월 공휴일(주)" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
-        </div>
-        <div>
-          <label for="sal-cnt-hdn" class="lbl" id="sal-lbl-hdn" style="font-size:.54rem">당월 공휴일(야)</label>
-          <input type="number" id="sal-cnt-hdn" aria-label="당월 공휴일(야)" title="당월 공휴일(야)" min="0" max="31" style="padding:6px 4px;font-size:.82rem;font-weight:800;text-align:center" oninput="onSalCountsManualInput()">
-        </div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:6px">
-        <button type="button" id="sal-eff-toggle-btn" class="btn sec sm" style="padding:3px 8px;font-size:.6rem" onclick="toggleSalEffWrap()">정산 횟수 상세 ▼</button>
-      </div>
-      <div id="sal-eff-wrap" style="display:none;margin-top:6px;padding-top:7px;border-top:1px dashed var(--bd)">
-        <div style="font-size:.59rem;color:var(--tx3);margin-bottom:5px">
-          ※ 아래 <b>명세서 정산 횟수</b>는 위 4칸 입력 시 자동 합산되며, 급여 마감일(이월) 차이가 있을 때 개별 수정도 가능합니다.
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-          <div>
-            <label for="sal-eff-ot" class="lbl" style="font-size:.55rem">연장추가 횟수(전월대근)</label>
-            <input type="number" id="sal-eff-ot" aria-label="연장추가 횟수(전월대근)" title="연장추가 횟수(전월대근)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
-          </div>
-          <div>
-            <label for="sal-eff-hd" class="lbl" style="font-size:.55rem">휴일추가 횟수(공휴일)</label>
-            <input type="number" id="sal-eff-hd" aria-label="휴일추가 횟수(공휴일)" title="휴일추가 횟수(공휴일)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
-          </div>
-          <div>
-            <label for="sal-eff-nt" class="lbl" style="font-size:.55rem">야간추가 횟수(추가야간)</label>
-            <input type="number" id="sal-eff-nt" aria-label="야간추가 횟수(추가야간)" title="야간추가 횟수(추가야간)" min="0" max="31" style="padding:5px 4px;font-size:.78rem;font-weight:800;text-align:center" oninput="onSalEffCountsInput()">
+      <!-- 2. 기본급 및 통상임금 포함 항목 -->
+      <div class="sal-card">
+        <div class="sal-card-header">
+          <div class="sal-card-title">
+            <span>2. 기본급 및 통상임금 <span style="color:#ef4444">포함</span>항목</span>
+            <span class="sal-badge sal-badge-ordinary">통상시급 반영</span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- 3. 공제 내역 입력 (기본 접힘) -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer" onclick="toggleSalDedWrap()">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">공제 항목 입력 <span style="font-size:.6rem;font-weight:600;color:var(--tx3)">(국민연금·건보 명세서 금액 입력 권장)</span></span>
-        <button type="button" id="sal-ded-toggle-btn" class="btn sec sm" style="padding:3px 8px;font-size:.62rem;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();toggleSalDedWrap()">펼치기 ▼</button>
-      </div>
-      <div id="sal-ded-wrap" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--bd)">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
-        <div>
-          <label for="sal-ded-pen" class="lbl" style="font-size:.58rem">국민연금 (4.75%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-pen" aria-label="국민연금 (4.75%)" title="국민연금 (4.75%)" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-base-pay" class="sal-item-name" style="cursor:pointer">기본급</label>
+            <div class="sal-item-desc">상여금 및 통상시급·조합비 산출 기준</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-base-pay" aria-label="기본급 (원)" title="기본급 (원)" placeholder="0" oninput="onSalBaseChange(this)" />
+            <span class="sal-input-unit">원</span>
+          </div>
         </div>
-        <div>
-          <label for="sal-ded-hlth" class="lbl" style="font-size:.58rem">건강보험 (3.595%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-hlth" aria-label="건강보험 (3.595%)" title="건강보험 (3.595%)" placeholder="직접입력 권장" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-        <div>
-          <label for="sal-ded-care" class="lbl" style="font-size:.58rem">장기요양 (13.14%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-care" aria-label="장기요양 (13.14%)" title="장기요양 (13.14%)" placeholder="자동(건보×13.14%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px">
-        <div>
-          <label for="sal-ded-emp" class="lbl" style="font-size:.58rem">고용보험 (0.9%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-emp" aria-label="고용보험 (0.9%)" title="고용보험 (0.9%)" placeholder="자동(0.9%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-        <div>
-          <label for="sal-ded-union" class="lbl" id="sal-lbl-union" style="font-size:.58rem">노조조합비 (1.42%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-union" aria-label="노조조합비 (1.42%)" title="노조조합비 (1.42%)" placeholder="자동(통상×1.42%)" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-        <div>
-          <label for="sal-ded-meal" class="lbl" style="font-size:.58rem">식사비 · 상조회비</label>
-          <input type="text" inputmode="numeric" id="sal-ded-meal" aria-label="식사비 · 상조회비" title="식사비 · 상조회비" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div>
-          <label for="sal-ded-tax" class="lbl" style="font-size:.58rem">소득세</label>
-          <input type="text" inputmode="numeric" id="sal-ded-tax" aria-label="소득세" title="소득세" placeholder="0" style="padding:6px;font-size:.76rem" oninput="_formatMoneyInputEl(this);calcSalary(true)">
-        </div>
-        <div>
-          <label for="sal-ded-ltax" class="lbl" style="font-size:.58rem">지방소득세 (소득세 10%)</label>
-          <input type="text" inputmode="numeric" id="sal-ded-ltax" aria-label="지방소득세 (소득세 10%)" title="지방소득세 (소득세 10%)" placeholder="0" style="padding:6px;font-size:.76rem;color:var(--tx2)" readonly>
-        </div>
-      </div>
-      </div>
-    </div>
 
-    <!-- 4. 급여명세서 항목별 내역 -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.73rem;font-weight:800;color:var(--tx2)">급여명세서 항목별 내역</span>
-        <button type="button" class="btn pri sm" style="padding:4px 9px;font-size:.65rem" onclick="saveCurrentMonthSalary()">이 달 내역 저장</button>
-      </div>
-      <div id="sal-breakdown" style="display:flex;flex-direction:column;gap:4px;font-size:.73rem"></div>
-    </div>
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-set-meal" class="sal-item-name" style="cursor:pointer">식대 (비과세)</label>
+            <div class="sal-item-desc">매월 고정 지급 식대 (기본 200,000원)</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-set-meal" aria-label="식대 (비과세)" title="식대 (비과세)" placeholder="200,000" oninput="onSalSettingsFixedInput(this,'meal')" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
 
-    <!-- 5. 최하단: 1월 ~ 현재까지 저장된 월별 급여 내역 (기기 캐시) -->
-    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 12px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span id="sal-hist-title" style="font-size:.73rem;font-weight:800;color:var(--tx2)">월별 급여 내역</span>
-        <button type="button" class="btn sec sm" style="padding:3px 8px;font-size:.62rem" onclick="syncAllMonthsSalaryToCache()">전체 월 갱신 ↺</button>
-      </div>
-      <div id="sal-history-list" style="display:flex;flex-direction:column;gap:5px;font-size:.74rem"></div>
-    </div>
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">
+              <label for="sal-set-tech" style="cursor:pointer">기술·직책·행정수당</label>
+              <button type="button" class="sal-mini-link-btn" onclick="openSalTechPopup()">1·2·3 상세입력 &gt;</button>
+            </div>
+            <div class="sal-item-desc" id="sal-tech-sub-desc">통상임금에 포함되는 고정 수당 합계</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-set-tech" aria-label="기술·직책·행정수당" title="기술·직책·행정수당" placeholder="0" oninput="onSalSettingsFixedInput(this,'tech')" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
 
-    <button class="btn sec fw" onclick="cs('sal-sov')">닫기</button>
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <div class="sal-item-name">연간 상여금 비율 (통상임금 산입)</div>
+            <div class="sal-item-desc">기본급 기준 연 200% (월할 기본급×2/12 자동 반영)</div>
+          </div>
+          <div class="sal-val-locked" style="min-width:90px">
+            <span class="sal-lock-icon">🔒</span>
+            <span>200%</span>
+          </div>
+        </div>
+
+        <!-- 실시간 통상시급 프리뷰 -->
+        <div class="sal-ordinary-preview-box">
+          <div>
+            <div class="sal-ordinary-preview-label">산출 통상시급</div>
+            <div class="sal-ordinary-preview-sub" id="sal-ordinary-formula-desc">통상임금 합계 ÷ 157시간</div>
+          </div>
+          <div class="sal-ordinary-preview-val" id="sal-preview-ordinary-hourly">0원</div>
+        </div>
+        <input type="hidden" id="sal-hourly" value="" />
+        <input type="hidden" id="sal-tech-pay" value="" />
+        <input type="hidden" id="sal-extra-pay" value="" />
+        <input type="hidden" id="sal-meal-pay" value="200000" />
+        <input type="hidden" id="sal-tech-only-pay" value="0" />
+        <input type="hidden" id="sal-welfare-pay" value="370000" />
+        <input type="hidden" id="sal-gift-pay" value="0" />
+        <input type="hidden" id="sal-extra-only-pay" value="0" />
+      </div>
+
+      <!-- 3. 통상임금 제외 고정 항목 -->
+      <div class="sal-card">
+        <div class="sal-card-header">
+          <div class="sal-card-title">
+            <span>3. 통상임금 <span style="color:#ef4444">제외</span> 고정수당</span>
+            <span class="sal-badge sal-badge-non-ordinary">통상시급 미반영</span>
+          </div>
+        </div>
+
+        <div class="sal-item-row">
+          <div class="sal-item-info">
+            <label for="sal-set-welfare" class="sal-item-name" style="cursor:pointer">복지수당</label>
+            <div class="sal-item-desc">통상시급 계산에서는 제외되고 지급액에 합산 (기본 370,000원)</div>
+          </div>
+          <div class="sal-input-wrap">
+            <input type="text" inputmode="numeric" id="sal-set-welfare" aria-label="복지수당" title="복지수당" placeholder="370,000" oninput="onSalSettingsFixedInput(this,'welfare')" />
+            <span class="sal-input-unit">원</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 4대보험 · 조합비 고정 공제액 직접 입력 (선택) -->
+      <div class="sal-card" id="sal-ded-settings-card">
+        <div class="sal-card-header" style="margin-bottom:4px;cursor:pointer" onclick="toggleSalDedWrap()">
+          <div class="sal-card-title">
+            <span>4. 4대보험 · 조합비 직접 입력 (선택)</span>
+          </div>
+          <button type="button" id="sal-ded-toggle-btn" class="btn sec sm" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();toggleSalDedWrap()">펼치기 ▼</button>
+        </div>
+        <div style="font-size:11px;color:#64748b">비워두면 2026년 요율로 자동 계산되며, 급여명세서 금액을 직접 고정할 수도 있습니다.</div>
+        <div id="sal-ded-wrap" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1">
+          <div class="sal-item-row">
+            <div class="sal-item-info">
+              <label for="sal-ded-pen" class="sal-item-name" style="cursor:pointer">국민연금 (4.75%)</label>
+              <div class="sal-item-desc">미입력 시 기준소득월액 추정치 자동 적용</div>
+            </div>
+            <div class="sal-input-wrap">
+              <input type="text" inputmode="numeric" id="sal-ded-pen" aria-label="국민연금 (4.75%)" title="국민연금 (4.75%)" placeholder="자동 계산" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+              <span class="sal-input-unit">원</span>
+            </div>
+          </div>
+          <div class="sal-item-row">
+            <div class="sal-item-info">
+              <label for="sal-ded-hlth" class="sal-item-name" style="cursor:pointer">건강보험 (3.595%)</label>
+              <div class="sal-item-desc">미입력 시 보수월액 추정치 자동 적용</div>
+            </div>
+            <div class="sal-input-wrap">
+              <input type="text" inputmode="numeric" id="sal-ded-hlth" aria-label="건강보험 (3.595%)" title="건강보험 (3.595%)" placeholder="자동 계산" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+              <span class="sal-input-unit">원</span>
+            </div>
+          </div>
+          <div class="sal-item-row">
+            <div class="sal-item-info">
+              <label for="sal-ded-care" class="sal-item-name" style="cursor:pointer">장기요양보험 (건보 13.14%)</label>
+              <div class="sal-item-desc">미입력 시 건강보험료 × 13.14% 자동 계산</div>
+            </div>
+            <div class="sal-input-wrap">
+              <input type="text" inputmode="numeric" id="sal-ded-care" aria-label="장기요양 (13.14%)" title="장기요양 (13.14%)" placeholder="자동 계산" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+              <span class="sal-input-unit">원</span>
+            </div>
+          </div>
+          <div class="sal-item-row">
+            <div class="sal-item-info">
+              <label for="sal-ded-emp" class="sal-item-name" style="cursor:pointer">고용보험 (0.9%)</label>
+              <div class="sal-item-desc">미입력 시 과세급여 × 0.9% 자동 계산</div>
+            </div>
+            <div class="sal-input-wrap">
+              <input type="text" inputmode="numeric" id="sal-ded-emp" aria-label="고용보험 (0.9%)" title="고용보험 (0.9%)" placeholder="자동 계산" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+              <span class="sal-input-unit">원</span>
+            </div>
+          </div>
+          <div class="sal-item-row">
+            <div class="sal-item-info">
+              <label for="sal-ded-union" class="sal-item-name" id="sal-lbl-union" style="cursor:pointer">노조조합비 (1.42%)</label>
+              <div class="sal-item-desc">미입력 시 통상임금 × 요율 자동 계산</div>
+            </div>
+            <div class="sal-input-wrap">
+              <input type="text" inputmode="numeric" id="sal-ded-union" aria-label="노조조합비 (1.42%)" title="노조조합비 (1.42%)" placeholder="자동 계산" oninput="_formatMoneyInputEl(this);calcSalary(true)" />
+              <span class="sal-input-unit">원</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="sal-save-primary-btn" onclick="saveSalSettingsAndReturn()">
+        설정 저장하고 명세서로 돌아가기
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1792,15 +2719,21 @@ function generateKoreanHolidaysForYear(yr){
 }
 
 // 특정 연도의 공휴일이 메모리에 없으면 즉시 자동 생성하여 채워넣음 (달력을 몇 년도로 넘기든 자동 반영)
+function _getDeletedHolidaysMap(){
+  const m=ls.g('holidays_deleted_cache');
+  return (m&&typeof m==='object')?m:{};
+}
 function ensureYearHolidays(yr){
   yr=parseInt(yr,10);
   if(!yr||_generatedHolidayYears.has(yr))return;
   _generatedHolidayYears.add(yr);
+  const delMap=_getDeletedHolidaysMap();
   const autoMap=generateKoreanHolidaysForYear(yr);
   Object.entries(autoMap).forEach(([k,v])=>{
-    if(!holidays[k])holidays[k]=v;
+    if(!holidays[k]&&!delMap[k])holidays[k]=v;
   });
   applyFixedCompanyHolidays(holidays,yr);
+  Object.keys(delMap).forEach(k=>{if(k.startsWith(yr+'-'))delete holidays[k];});
 }
 
 // 외부 한국천문연구원(KASI) 기반 공개 공휴일 CDN / 오픈 API에서 해당 연도 공휴일(임시공휴일·선거일 포함) 자동 수집
@@ -1878,9 +2811,11 @@ function initLocalHolidays(){
     _cleanLegacyWrongHolidays(cached);
     Object.assign(holidays,cached);
   }
+  const delMap=_getDeletedHolidaysMap();
   targetYears.forEach(y=>{
     applyFixedCompanyHolidays(holidays,y);
   });
+  Object.keys(delMap).forEach(k=>{delete holidays[k];});
   ls.s('holidays_cache',holidays);
 }
 
@@ -1950,6 +2885,7 @@ async function initDefaultHolidays(){
     Object.assign(holidays,data);
     return dbS('holidays/'+y,data);
   }));
+  ls.d('holidays_deleted_cache');
   _salStatsMemoKey='';
   ls.s('holidays_cache',holidays);
   showToast(`${yr}~${yr+2}년 공휴일이 반영되었습니다`);
@@ -1980,8 +2916,11 @@ async function saveHoliday(){
   const type=document.getElementById('hd-type').value;
   if(!date||!name)return;
   const yr=date.slice(0,4);
-  await dbS(`holidays/${yr}/${date}`,{name,type});
-  holidays[date]={name,type};
+  const delMap=_getDeletedHolidaysMap();
+  if(delMap[date]){delete delMap[date];ls.s('holidays_deleted_cache',delMap);}
+  const entry={name,type,manual:true};
+  await dbS(`holidays/${yr}/${date}`,entry);
+  holidays[date]=entry;
   _salStatsMemoKey='';
   ls.s('holidays_cache',holidays);
   cs('holiday-sov');refreshCal();renderHolidayList();
@@ -1991,6 +2930,9 @@ async function saveHoliday(){
 async function deleteHoliday(){
   if(!hdEditKey||!(await askConfirm(`삭제하시겠어요?`)))return;
   const yr=hdEditKey.slice(0,4);
+  const delMap=_getDeletedHolidaysMap();
+  delMap[hdEditKey]=true;
+  ls.s('holidays_deleted_cache',delMap);
   await dbS(`holidays/${yr}/${hdEditKey}`,null);
   delete holidays[hdEditKey];
   _salStatsMemoKey='';
@@ -3362,7 +4304,7 @@ async function deleteDivision(){
   await dbS(`teams/${topId}/divs/${divId}`,null);
   const idx=await dbG('teamIndex/'+topId)||{};
   await dbS('teamIndex/'+topId,{...idx,divNames:(idx.divNames||[]).filter(d=>d.id!==divId)});
-  if(S.topId===topId&&S.divId===divId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();}
+  if(S.topId===topId&&S.divId===divId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();startEventListen();startDgRecruitListen();syncToWidget(true);}
   cs('div-info-sov');renderAllTeams();refreshCal(true);showToast('삭제됨');
 }
 async function deleteTopTeam(topId){
@@ -3376,7 +4318,7 @@ async function deleteTopTeam(topId){
     dbS('recruits/'+topId,null),
     dbS('chats/'+topId,null)
   ]);
-  if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();startEventListen();startDgRecruitListen();}
+  if(S.topId===topId){S.topId='';S.topName='';S.topColor='';S.divId='';S.divName='';await saveProfile();startEventListen();startDgRecruitListen();syncToWidget(true);}
   renderAllTeams();refreshCal();showToast('팀 삭제됨');
 }
 
@@ -3853,10 +4795,10 @@ function computeSalaryAmounts(cfg,moData){
   const hdCnt=Math.max(0,parseInt(moData.hd)||0);
   const hdnCnt=Math.max(0,parseInt(moData.hdn)||0);
 
-  // 명세서 정산 횟수 (개별 수정값이 있으면 우선 적용, 없으면 4칸 합산)
-  const effOtCnt=(moData.effOt!==undefined&&moData.effOt!==null&&moData.effOt!=='')?Math.max(0,parseInt(moData.effOt)||0):(dsCnt+nsCnt);
-  const effHdCnt=(moData.effHd!==undefined&&moData.effHd!==null&&moData.effHd!=='')?Math.max(0,parseInt(moData.effHd)||0):(hdCnt+hdnCnt);
-  const effNtCnt=(moData.effNt!==undefined&&moData.effNt!==null&&moData.effNt!=='')?Math.max(0,parseInt(moData.effNt)||0):(nsCnt+hdnCnt);
+  // 명세서 정산 횟수 (4칸 합산)
+  const effOtCnt=dsCnt+nsCnt;
+  const effHdCnt=hdCnt+hdnCnt;
+  const effNtCnt=nsCnt+hdnCnt;
 
   const giftPay=hasIncome?_num(moData.giftPay,0):0;
   const extraPay=hasIncome?_num(moData.extraPay,0):0;
@@ -3934,22 +4876,62 @@ function computeSalaryAmounts(cfg,moData){
   };
 }
 
-let _salModeDescOpen=false;
-let _salEffWrapOpen=false;
 let _salDedWrapOpen=false;
-function toggleSalModeDesc(){
-  _salModeDescOpen=!_salModeDescOpen;
-  const el=document.getElementById('sal-mode-desc');
-  const btn=document.getElementById('sal-mode-desc-btn');
-  if(el)el.style.display=_salModeDescOpen?'':'none';
-  if(btn)btn.textContent=_salModeDescOpen?'접기 ▲':'설명 ▼';
+let _salBreakdownOpen=false;
+let _salViewMode='main'; // 'main' | 'settings'
+
+function switchSalView(target, openDedSection){
+  _salViewMode=(target==='settings')?'settings':'main';
+  const mainEl=document.getElementById('sal-main-view');
+  const setEl=document.getElementById('sal-settings-view');
+  const topBtnLbl=document.getElementById('sal-top-mode-btn-lbl');
+  if(mainEl)mainEl.classList.toggle('active',_salViewMode==='main');
+  if(setEl)setEl.classList.toggle('active',_salViewMode==='settings');
+  if(topBtnLbl)topBtnLbl.textContent=_salViewMode==='settings'?'명세서 보기':'급여 기준 설정';
+  if(_salViewMode==='settings'&&openDedSection){
+    if(!_salDedWrapOpen)toggleSalDedWrap();
+    setTimeout(()=>{
+      document.getElementById('sal-ded-settings-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+    },60);
+  }else{
+    document.querySelector('#sal-sov .sal-sheet')?.scrollTo({top:0,behavior:'smooth'});
+  }
 }
-function toggleSalEffWrap(){
-  _salEffWrapOpen=!_salEffWrapOpen;
-  const el=document.getElementById('sal-eff-wrap');
-  const btn=document.getElementById('sal-eff-toggle-btn');
-  if(el)el.style.display=_salEffWrapOpen?'':'none';
-  if(btn)btn.textContent=_salEffWrapOpen?'접기 ▲':'정산 횟수 상세 ▼';
+function toggleSalViewMode(){
+  switchSalView(_salViewMode==='settings'?'main':'settings');
+}
+function saveSalSettingsAndReturn(){
+  calcSalary(true);
+  switchSalView('main');
+  showToast('급여 기준 설정이 저장되었습니다');
+}
+function selectSalWorkModeSegment(mode){
+  const sel=document.getElementById('sal-work-mode');
+  if(sel)sel.value=(mode==='day209')?'day209':'shift157';
+  onSalModeChange(true);
+}
+let _salMainDedOpen=false;
+let _salHistWrapOpen=false;
+function toggleSalMainDedWrap(forceOpen){
+  _salMainDedOpen=(typeof forceOpen==='boolean')?forceOpen:!_salMainDedOpen;
+  const el=document.getElementById('sal-main-ded-wrap');
+  const lbl=document.getElementById('sal-main-ded-toggle-lbl');
+  if(el)el.style.display=_salMainDedOpen?'':'none';
+  if(lbl)lbl.textContent=_salMainDedOpen?'접기 ▲':'펼치기 ▼';
+}
+function toggleSalHistWrap(forceOpen){
+  _salHistWrapOpen=(typeof forceOpen==='boolean')?forceOpen:!_salHistWrapOpen;
+  const el=document.getElementById('sal-hist-wrap');
+  const lbl=document.getElementById('sal-hist-toggle-lbl');
+  if(el)el.style.display=_salHistWrapOpen?'':'none';
+  if(lbl)lbl.textContent=_salHistWrapOpen?'접기 ▲':'펼치기 ▼';
+}
+function toggleSalBreakdownWrap(forceOpen){
+  _salBreakdownOpen=(typeof forceOpen==='boolean')?forceOpen:!_salBreakdownOpen;
+  const el=document.getElementById('sal-breakdown-wrap');
+  const lbl=document.getElementById('sal-bd-toggle-lbl');
+  if(el)el.style.display=_salBreakdownOpen?'':'none';
+  if(lbl)lbl.textContent=_salBreakdownOpen?'접기 ▲':'펼치기 ▼';
 }
 function toggleSalDedWrap(){
   _salDedWrapOpen=!_salDedWrapOpen;
@@ -3960,34 +4942,17 @@ function toggleSalDedWrap(){
 }
 function _renderSalYmLabel(){
   const el=document.getElementById('sal-ym-lbl');
-  if(el)el.innerHTML=`${salYr}년 <b style="font-size:.92rem;font-weight:900;color:var(--tx)">${salMo+1}월</b> 명세서`;
+  if(el)el.innerHTML=`${salYr}년 <b style="font-size:1.02rem;font-weight:900">${salMo+1}월</b> 명세서`;
 }
 function _updateSalModeRuleText(mode){
   const p=SAL_MODE_PRESETS[mode]||SAL_MODE_PRESETS.shift157;
-  const divLbl=document.getElementById('sal-div-h-lbl');
-  if(divLbl)divLbl.textContent=p.divH;
+  const isDay=(mode==='day209');
+  document.getElementById('sal-seg-shift')?.classList.toggle('active',!isDay);
+  document.getElementById('sal-seg-day')?.classList.toggle('active',isDay);
   const uLbl=document.getElementById('sal-lbl-union');
   if(uLbl)uLbl.textContent=`노조조합비 (${p.unionRateTxt||'1.42%'})`;
   const uInp=document.getElementById('sal-ded-union');
   if(uInp)uInp.placeholder=`자동(통상×${p.unionRateTxt||'1.42%'})`;
-  const hdRuleEl=document.getElementById('sal-hd-rule-lbl');
-  if(hdRuleEl){
-    if(mode==='day209'){
-      hdRuleEl.innerHTML='<b>일근제(209h)</b>: 고정연장 13h · 고정휴일 12h · 고정야간 8h / 공휴일 1회(6h×1.5배)';
-    }else{
-      hdRuleEl.innerHTML='<b>1회 기준</b>: 연장추가 10.5h×1.5배(15.75h) · 휴일추가 17h(8h×1.5+2.5h×2.0) · 야간추가 8h×0.5배(4h)';
-    }
-  }
-}
-
-function _syncEffInputsFrom4Boxes(){
-  const ds=Math.max(0,parseInt(document.getElementById('sal-cnt-ds').value)||0);
-  const ns=Math.max(0,parseInt(document.getElementById('sal-cnt-ns').value)||0);
-  const hd=Math.max(0,parseInt(document.getElementById('sal-cnt-hd').value)||0);
-  const hdn=Math.max(0,parseInt(document.getElementById('sal-cnt-hdn').value)||0);
-  document.getElementById('sal-eff-ot').value=ds+ns;
-  document.getElementById('sal-eff-hd').value=hd+hdn;
-  document.getElementById('sal-eff-nt').value=ns+hdn;
 }
 
 let _salCurTechItems=[];
@@ -4019,16 +4984,64 @@ let _salPopFixedA=''; // mealPay (tech) | welfarePay (extra)
 let _salPopFixedB=''; // '' (tech) | giftPay (extra)
 
 function _syncSalGroupedDisplayInputs(){
+  const act=document.activeElement;
   const meal=_readMoneyEl('sal-meal-pay',false);
   const tech=_readMoneyEl('sal-tech-only-pay',false);
   const techSum=meal+tech;
   _setMoneyEl('sal-tech-pay',techSum>0?techSum:'');
+  if(act?.id!=='sal-set-meal')_setMoneyEl('sal-set-meal',meal>0?meal:'');
+  if(act?.id!=='sal-set-tech')_setMoneyEl('sal-set-tech',tech>0?tech:'');
 
   const wel=_readMoneyEl('sal-welfare-pay',false);
   const gift=_readMoneyEl('sal-gift-pay',false);
   const ext=_readMoneyEl('sal-extra-only-pay',false);
   const extSum=wel+gift+ext;
   _setMoneyEl('sal-extra-pay',extSum>0?extSum:'');
+  if(act?.id!=='sal-set-welfare')_setMoneyEl('sal-set-welfare',wel>0?wel:'');
+  if(act?.id!=='sal-in-gift')_setMoneyEl('sal-in-gift',gift>0?gift:'');
+  if(act?.id!=='sal-in-incentive')_setMoneyEl('sal-in-incentive',ext>0?ext:'');
+}
+
+function onSalSettingsFixedInput(el,which){
+  _formatMoneyInputEl(el);
+  const val=_readMoneyEl(el.id,false);
+  if(which==='meal'){
+    document.getElementById('sal-meal-pay').value=val;
+  }else if(which==='tech'){
+    document.getElementById('sal-tech-only-pay').value=val;
+    _salCurTechItems=val>0?[val,0,0]:[0,0,0];
+  }else if(which==='welfare'){
+    document.getElementById('sal-welfare-pay').value=val;
+  }
+  const meal=_readMoneyEl('sal-meal-pay',false);
+  const tech=_readMoneyEl('sal-tech-only-pay',false);
+  _setMoneyEl('sal-tech-pay',(meal+tech)>0?(meal+tech):'');
+  const wel=_readMoneyEl('sal-welfare-pay',false);
+  const gift=_readMoneyEl('sal-gift-pay',false);
+  const ext=_readMoneyEl('sal-extra-only-pay',false);
+  _setMoneyEl('sal-extra-pay',(wel+gift+ext)>0?(wel+gift+ext):'');
+  onSalBaseChange();
+}
+
+function onSalMainGiftInput(el){
+  _formatMoneyInputEl(el);
+  const val=_readMoneyEl(el.id,false);
+  document.getElementById('sal-gift-pay').value=val;
+  const wel=_readMoneyEl('sal-welfare-pay',false);
+  const ext=_readMoneyEl('sal-extra-only-pay',false);
+  _setMoneyEl('sal-extra-pay',(wel+val+ext)>0?(wel+val+ext):'');
+  calcSalary(true);
+}
+
+function onSalMainIncentiveInput(el){
+  _formatMoneyInputEl(el);
+  const val=_readMoneyEl(el.id,false);
+  document.getElementById('sal-extra-only-pay').value=val;
+  _salCurExtraItems=val>0?[val]:[];
+  const wel=_readMoneyEl('sal-welfare-pay',false);
+  const gift=_readMoneyEl('sal-gift-pay',false);
+  _setMoneyEl('sal-extra-pay',(wel+gift+val)>0?(wel+gift+val):'');
+  calcSalary(true);
 }
 
 function _calcSalExtraTempSum(){
@@ -4220,6 +5233,7 @@ function openSalaryCalc(){
   _setMoneyEl('sal-ded-meal',cfg.dedMeal!==''&&cfg.dedMeal!==null?cfg.dedMeal:'');
   _setMoneyEl('sal-ded-union',cfg.dedUnion!==''&&cfg.dedUnion!==null?cfg.dedUnion:'');
 
+  switchSalView('main');
   loadSalMonthData();
   os('sal-sov');
   if(S.topId&&S.divId&&!S.patCache[`${S.topId}_${S.divId}`]&&FB){
@@ -4248,12 +5262,6 @@ function selectSalMonth(moIdx){
 }
 
 function onSalCountsManualInput(){
-  _salManualCountsDirty=true;
-  _syncEffInputsFrom4Boxes();
-  calcSalary(true);
-}
-
-function onSalEffCountsInput(){
   _salManualCountsDirty=true;
   calcSalary(true);
 }
@@ -4286,15 +5294,12 @@ function loadSalMonthData(){
   document.getElementById('sal-cnt-ns').value=ns;
   document.getElementById('sal-cnt-hd').value=hd;
   document.getElementById('sal-cnt-hdn').value=hdn;
-  document.getElementById('sal-eff-ot').value=(useSavedManual&&st.effOt!==undefined)?st.effOt:(ds+ns);
-  document.getElementById('sal-eff-hd').value=(useSavedManual&&st.effHd!==undefined)?st.effHd:(hd+hdn);
-  document.getElementById('sal-eff-nt').value=(useSavedManual&&st.effNt!==undefined)?st.effNt:(ns+hdn);
 
   const festName=getHolidayBonusFestivalName(salYr,salMo);
   const hbBadge=document.getElementById('sal-hb-auto-badge');
   if(hbBadge){
-    hbBadge.style.display=festName?'':'none';
-    if(festName)hbBadge.textContent=`${festName} 명절상여(40%) 자동 적용달`;
+    hbBadge.style.display=festName?'inline-block':'none';
+    if(festName)hbBadge.textContent=`${festName} 명절(40%)`;
   }
   document.getElementById('sal-gift-pay').value=_num(savedMo?.giftPay,0);
   _salCurExtraItems=Array.isArray(savedMo?.extraItems)?savedMo.extraItems.map(v=>_num(v,0)).filter(v=>v>0):(savedMo?.extraPay>0?[_num(savedMo.extraPay,0)]:[]);
@@ -4317,7 +5322,6 @@ function resetSalCountsFromCal(){
   document.getElementById('sal-cnt-ns').value=st.ns;
   document.getElementById('sal-cnt-hd').value=st.hd;
   document.getElementById('sal-cnt-hdn').value=st.hdn;
-  _syncEffInputsFrom4Boxes();
   const hist=getSalHist(salYr);
   if(hist[String(salMo+1)]){
     hist[String(salMo+1)].manualCounts=false;
@@ -4338,8 +5342,7 @@ function onSalModeChange(applyPresetHours){
     document.getElementById('sal-cnt-ns').value=st.ns;
     document.getElementById('sal-cnt-hd').value=st.hd;
     document.getElementById('sal-cnt-hdn').value=st.hdn;
-    _syncEffInputsFrom4Boxes();
-  }
+    }
   onSalBaseChange();
 }
 
@@ -4392,14 +5395,18 @@ function readSalFormCfg(){
 function readSalFormMoData(){
   const rawDedMeal=_readMoneyEl('sal-ded-meal',true);
   const rawTax=_readMoneyEl('sal-ded-tax',true);
+  const ds=Math.max(0,parseInt(document.getElementById('sal-cnt-ds').value)||0);
+  const ns=Math.max(0,parseInt(document.getElementById('sal-cnt-ns').value)||0);
+  const hd=Math.max(0,parseInt(document.getElementById('sal-cnt-hd').value)||0);
+  const hdn=Math.max(0,parseInt(document.getElementById('sal-cnt-hdn').value)||0);
   return {
-    ds:Math.max(0,parseInt(document.getElementById('sal-cnt-ds').value)||0),
-    ns:Math.max(0,parseInt(document.getElementById('sal-cnt-ns').value)||0),
-    hd:Math.max(0,parseInt(document.getElementById('sal-cnt-hd').value)||0),
-    hdn:Math.max(0,parseInt(document.getElementById('sal-cnt-hdn').value)||0),
-    effOt:Math.max(0,parseInt(document.getElementById('sal-eff-ot').value)||0),
-    effHd:Math.max(0,parseInt(document.getElementById('sal-eff-hd').value)||0),
-    effNt:Math.max(0,parseInt(document.getElementById('sal-eff-nt').value)||0),
+    ds,
+    ns,
+    hd,
+    hdn,
+    effOt:ds+ns,
+    effHd:hd+hdn,
+    effNt:ns+hdn,
     holidayBonus:isHolidayBonusMonth(salYr,salMo),
     giftPay:_readMoneyEl('sal-gift-pay',false),
     extraPay:_readMoneyEl('sal-extra-only-pay',false),
@@ -4486,6 +5493,7 @@ function syncAllMonthsSalaryToCache(){
   }
   saveSalHist(salYr,hist);
   renderSalHistoryList(cfg,curMoData);
+  if(!_salHistWrapOpen)toggleSalHistWrap(true);
   showToast(`1월~${maxMo}월 급여 내역이 갱신되었습니다`);
 }
 
@@ -4533,7 +5541,7 @@ function renderSalHistoryList(cfg,curMoData){
     sumGross+=gross;
     sumNet+=net;
     rowsHtml.push(`
-      <div onclick="selectSalMonth(${m-1})" style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:10px;cursor:pointer;background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${isCur?'var(--tx2)':'var(--bd)'}">
+      <div onclick="selectSalMonth(${m-1})" style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:10px;cursor:pointer;background:${isCur?'var(--bg3)':'var(--bg2)'};border:1px solid ${isCur?'#2563eb':'var(--bd)'}">
         <div style="display:flex;align-items:center;gap:8px;min-width:0">
           <span style="font-weight:800;font-size:.78rem;color:var(--tx);min-width:32px">${m}월</span>
           <span style="font-size:.63rem;color:var(--tx3);white-space:nowrap">전월대근 ${effOt}회${effHd?` · 공휴일 ${effHd}회`:''}</span>
@@ -4594,15 +5602,117 @@ function calcSalary(shouldSaveCfg){
     }
   }
 
-  document.getElementById('sal-gross-total').textContent=fmtWon(res.grossTotal);
+  // 1) 기본급 미설정 안내 배너 및 상단 요약 카드 업데이트
+  const setupBanner=document.getElementById('sal-setup-alert');
+  if(setupBanner)setupBanner.style.display=res.basePay>0?'none':'flex';
+
+  const isDay=(res.workMode==='day209');
+  const typeLabel=isDay?'일근근무 (209H)':'4조 2교대 (157H)';
+  const hourlyStr=res.exactHourly>0?(res.exactHourly.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})+'원'):'0원';
+  const basisBadge=document.getElementById('sal-applied-basis-badge');
+  if(basisBadge)basisBadge.textContent=`${typeLabel} · 통상시급 ${hourlyStr} 기준`;
+
+  document.getElementById('sal-gross-total').textContent='+'+fmtWon(res.grossTotal);
   document.getElementById('sal-deduct-total').textContent='-'+fmtWon(res.totalDeduct);
   document.getElementById('sal-net-total').textContent=fmtWon(res.netTotal);
-  document.getElementById('sal-unit-hourly').textContent=res.exactHourly>0?(res.exactHourly.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})+'원'):'0원';
+  document.getElementById('sal-unit-hourly').textContent=hourlyStr;
   const hdUnitEl=document.getElementById('sal-unit-hd');
   if(hdUnitEl)hdUnitEl.textContent='+'+fmtWon(res.unitHdPay);
   document.getElementById('sal-unit-ds').textContent='+'+fmtWon(res.unitSubPay);
   const ntUnitEl=document.getElementById('sal-unit-nt');
   if(ntUnitEl)ntUnitEl.textContent='+'+fmtWon(res.unitNtPay);
+
+  // 2) 메인 뷰 지급 내역 카드 업데이트
+  const fixedTotal=res.basePay+res.mealPay+res.techPay+res.welfarePay;
+  const fixedBonusTotal=res.bonusPay+res.holidayBonusPay;
+  const fixedOtTotal=res.baseOtPay+res.baseHdPay+res.baseNtPay;
+  const extraOtTotal=res.addOtPay+res.addHdPay+res.addNtPay;
+
+  const paySecTotEl=document.getElementById('sal-pay-sec-total');
+  if(paySecTotEl)paySecTotEl.textContent=fmtWon(res.grossTotal);
+  const outFixedEl=document.getElementById('sal-out-fixed-total');
+  if(outFixedEl)outFixedEl.textContent=fmtWon(fixedTotal);
+  const fixedDescEl=document.getElementById('sal-fixed-allowance-desc');
+  if(fixedDescEl){
+    fixedDescEl.textContent=res.basePay>0
+      ?`기본급 ${fmtWon(res.basePay)} + 식대 ${fmtWon(res.mealPay)} + 수당 ${fmtWon(res.techPay)} + 복지 ${fmtWon(res.welfarePay)}`
+      :'기본급 + 식대 + 기술·직책·행정 + 복지수당';
+  }
+  const outBonusEl=document.getElementById('sal-out-bonus');
+  if(outBonusEl)outBonusEl.textContent=fmtWon(fixedBonusTotal);
+  const outFixedOtEl=document.getElementById('sal-out-fixed-ot');
+  if(outFixedOtEl)outFixedOtEl.textContent=fmtWon(fixedOtTotal);
+  const fixedOtDescEl=document.getElementById('sal-fixed-ot-desc');
+  if(fixedOtDescEl){
+    fixedOtDescEl.textContent=isDay
+      ?`고정연장 ${res.baseOtRawH}h(${fmtWon(res.baseOtPay)}) · 휴일 ${res.baseHdRawH}h(${fmtWon(res.baseHdPay)}) · 야간 ${res.baseNtRawH}h(${fmtWon(res.baseNtPay)})`
+      :`고정연장 ${res.baseOtRawH}h(${fmtWon(res.baseOtPay)}) + 고정야간 ${res.baseNtRawH}h(${fmtWon(res.baseNtPay)})`;
+  }
+  const outExtraOtEl=document.getElementById('sal-out-extra-ot');
+  if(outExtraOtEl)outExtraOtEl.textContent=fmtWon(extraOtTotal);
+  const extraOtDescEl=document.getElementById('sal-extra-ot-desc');
+  if(extraOtDescEl){
+    extraOtDescEl.textContent=`전월대근 ${res.effOtCnt}회(${fmtWon(res.addOtPay)}) · 공휴일 ${res.effHdCnt}회(${fmtWon(res.addHdPay)}) · 추가야간 ${res.effNtCnt}회(${fmtWon(res.addNtPay)})`;
+  }
+  const incDescEl=document.getElementById('sal-incentive-desc');
+  if(incDescEl){
+    const exList=(moData.extraItems||[]).filter(v=>v>0);
+    incDescEl.textContent=exList.length>1
+      ?`총 ${exList.length}건 합산 (${exList.map(v=>fmtWon(v)).join(' + ')})`
+      :'경영평가·상생금·타결금·소급분 등 직접 입력';
+  }
+
+  // 3) 메인 뷰 공제 내역 카드 업데이트
+  const dedSecTotEl=document.getElementById('sal-ded-sec-total');
+  if(dedSecTotEl)dedSecTotEl.textContent=fmtWon(res.totalDeduct);
+  const outPenEl=document.getElementById('sal-out-pen');
+  if(outPenEl)outPenEl.textContent=fmtWon(res.pension);
+  const outHlthEl=document.getElementById('sal-out-hlth');
+  if(outHlthEl)outHlthEl.textContent=fmtWon(res.health);
+  const outCareEl=document.getElementById('sal-out-care');
+  if(outCareEl)outCareEl.textContent=fmtWon(res.care);
+  const outEmpEl=document.getElementById('sal-out-emp');
+  if(outEmpEl)outEmpEl.textContent=fmtWon(res.empIns);
+  const outUnionEl=document.getElementById('sal-out-union');
+  if(outUnionEl)outUnionEl.textContent=fmtWon(res.unionDues);
+  const unionBadgeEl=document.getElementById('sal-union-rate-badge');
+  if(unionBadgeEl)unionBadgeEl.textContent=cfg.dedUnion!==''?'직접 입력':(isDay?'일근 1.20%':'교대 1.42%');
+  const bPen=document.getElementById('sal-badge-pen');
+  if(bPen)bPen.textContent=cfg.dedPen!==''?'직접 입력':'4.75%';
+  const bHlth=document.getElementById('sal-badge-hlth');
+  if(bHlth)bHlth.textContent=cfg.dedHlth!==''?'직접 입력':'3.595%';
+  const bCare=document.getElementById('sal-badge-care');
+  if(bCare)bCare.textContent=cfg.dedCare!==''?'직접 입력':'건보 13.14%';
+  const bEmp=document.getElementById('sal-badge-emp');
+  if(bEmp)bEmp.textContent=cfg.dedEmp!==''?'직접 입력':'0.9%';
+
+  const outLtaxEl=document.getElementById('sal-out-ltax');
+  if(outLtaxEl)outLtaxEl.textContent=fmtWon(res.localTax);
+  const rowGiftDed=document.getElementById('sal-row-gift-ded');
+  if(rowGiftDed)rowGiftDed.style.display=res.giftDed>0?'flex':'none';
+  const outGiftDedEl=document.getElementById('sal-out-gift-ded');
+  if(outGiftDedEl)outGiftDedEl.textContent=fmtWon(res.giftDed);
+
+  // 4) 설정 뷰 통상시급 프리뷰 및 기술수당 부연설명 업데이트
+  const ordFormulaEl=document.getElementById('sal-ordinary-formula-desc');
+  if(ordFormulaEl){
+    ordFormulaEl.textContent=`통상임금 ${fmtWon(res.ordMonthly)} ÷ ${res.divH}시간`;
+  }
+  const prevHourlyEl=document.getElementById('sal-preview-ordinary-hourly');
+  if(prevHourlyEl)prevHourlyEl.textContent=hourlyStr;
+  const techSubDescEl=document.getElementById('sal-tech-sub-desc');
+  if(techSubDescEl){
+    const rawT=Array.isArray(cfg.techItems)?cfg.techItems:[];
+    const namedParts=[];
+    rawT.forEach((v,i)=>{
+      const n=_num(v,0);
+      if(n>0){
+        const nm=i===0?'기술':(i===1?'직책':(i===2?'행정':`추가${i-2}`));
+        namedParts.push(`${nm} ${fmtWon(n)}`);
+      }
+    });
+    techSubDescEl.textContent=namedParts.length>0?namedParts.join(' + '):'통상임금에 포함되는 고정 수당 합계';
+  }
 
   // 급여명세서와 1:1로 일치하는 개별 항목 분리 표시 (모든 항목 글자색 기본급과 동일한 var(--tx) 적용)
   const box=document.getElementById('sal-breakdown');
@@ -4673,33 +5783,35 @@ function calcSalary(shouldSaveCfg){
     dedRows.push({lbl:'상품권',sub:'상품권 공제',val:res.giftDed});
   }
 
-  box.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;font-size:.68rem;font-weight:800;color:var(--tx2)">
-      <span>[지급내역]</span>
-      <span>지급합계 ${fmtWon(res.grossTotal)}</span>
-    </div>
-  `+payRows.map(r=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
-      <div>
-        <div style="font-weight:700;color:var(--tx)">${r.lbl}</div>
-        <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
+  if(box){
+    box.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;font-size:.68rem;font-weight:800;color:var(--tx2)">
+        <span>[지급내역]</span>
+        <span>지급합계 ${fmtWon(res.grossTotal)}</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--tx)">${fmtWon(r.val)}</div>
-    </div>
-  `).join('')+`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--tx2)">
-      <span>[공제내역]</span>
-      <span>공제합계 ${fmtWon(res.totalDeduct)}</span>
-    </div>
-  `+dedRows.map(r=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
-      <div>
-        <div style="font-weight:700;color:var(--tx)">${r.lbl}</div>
-        <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
+    `+payRows.map(r=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
+        <div>
+          <div style="font-weight:700;color:var(--tx)">${r.lbl}</div>
+          <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--tx)">${fmtWon(r.val)}</div>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--tx)">${fmtWon(r.val)}</div>
-    </div>
-  `).join('');
+    `).join('')+`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--tx2)">
+        <span>[공제내역]</span>
+        <span>공제합계 ${fmtWon(res.totalDeduct)}</span>
+      </div>
+    `+dedRows.map(r=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--bd)">
+        <div>
+          <div style="font-weight:700;color:var(--tx)">${r.lbl}</div>
+          <div style="font-size:.6rem;color:var(--tx3)">${r.sub}</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--tx)">${fmtWon(r.val)}</div>
+      </div>
+    `).join('');
+  }
 
   if(shouldSaveCfg){
     clearTimeout(window._salHistRenderTimer);
@@ -5003,7 +6115,7 @@ function openDgDetailSheet(dateKey,postId,post){
         <span style="font-size:.82rem;font-weight:700;flex:1">${ap.name||'?'}${uid===S.myId?' <span style="color:var(--a);font-size:.6rem">나</span>':''}</span>
         ${ap.status==='accepted'?'<span style="font-size:.65rem;color:var(--vac);font-weight:700">✓ 수락됨</span>':
           ap.status==='rejected'?'<span style="font-size:.65rem;color:var(--red);font-weight:700">✗ 거절됨</span>':
-          isOwner&&!isClosed?`<div class="fl" style="gap:5px"><button class="btn pri sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','accepted')">수락</button><button class="btn dan sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','rejected')">거절</button></div>`:
+          (isOwner||isAdmin())&&!isClosed?`<div class="fl" style="gap:5px"><button class="btn pri sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','accepted')">수락</button><button class="btn dan sm" style="padding:4px 9px;font-size:.68rem" onclick="dgRespond('${uid}','rejected')">거절</button></div>`:
           uid===S.myId?'<span style="font-size:.62rem;color:var(--tx3)">지원 중</span>':''}`;
       applBox.appendChild(r);
     });
@@ -5101,6 +6213,14 @@ async function dgRespond(uid,status){
         rOv[dgDetailKey].shift='vc';
         rOv[dgDetailKey].fromMyRecruit=true;
         writes.push(dbS('profiles/'+latestPost.uid+'/ov',rOv));
+        if(divs){
+          for(const [dId,dObj] of Object.entries(divs)){
+            if(dObj?.members?.[latestPost.uid]){
+              writes.push(dbS(`teams/${S.topId}/divs/${dId}/members/${latestPost.uid}/ov`,rOv));
+              break;
+            }
+          }
+        }
       }
     }
     if(subShift==='ds'||subShift==='ns'){
@@ -6464,7 +7584,18 @@ function closeLightbox(fromHistory){
 window.addEventListener('popstate',()=>{
   if(_lightboxOpen){closeLightbox(true);return;}
   const openSov=_getTopOpenSov();
-  if(openSov){_modalHistoryPushed=false;cs(openSov.id,true);}
+  if(openSov){
+    if(openSov.id==='sal-sov'&&typeof _salViewMode!=='undefined'&&_salViewMode==='settings'){
+      switchSalView('main');
+      _modalHistoryPushed=_pushHashState('modal');
+      return;
+    }
+    _modalHistoryPushed=false;
+    cs(openSov.id,true);
+    if(_getTopOpenSov()){
+      _modalHistoryPushed=_pushHashState('modal');
+    }
+  }
 });
 window.addEventListener('hashchange',()=>{
   if(_lightboxOpen&&location.hash!=='#lightbox'){closeLightbox(true);return;}
@@ -6485,7 +7616,14 @@ window.handleBackPress=function(){
   const isLbVisible=_lightboxOpen||(lb&&(lb.classList.contains('op')||lb.style.opacity==='1'));
   if(isLbVisible){closeLightbox(true);return true;}
   const openSov=_getTopOpenSov();
-  if(openSov){cs(openSov.id,true);return true;}
+  if(openSov){
+    if(openSov.id==='sal-sov'&&typeof _salViewMode!=='undefined'&&_salViewMode==='settings'){
+      switchSalView('main');
+      return true;
+    }
+    cs(openSov.id,true);
+    return true;
+  }
   const activePage=document.querySelector('.page.on');
   if(activePage&&activePage.id&&activePage.id!=='page-cal'){
     goTab('cal');
@@ -7128,10 +8266,21 @@ async function onFbReady(){
         showErr('삭제되었거나 만료된 계정입니다');
         return;
       }
-      const profData=remoteProf||ls.g('prof_'+S.myId);
+      const localProf=ls.g('prof_'+S.myId);
+      const isLocalNewer=!!(localProf?.updatedAt&&remoteProf?.updatedAt&&localProf.updatedAt>remoteProf.updatedAt);
+      const profData=isLocalNewer?localProf:(remoteProf||localProf);
       if(profData){
-        if(remoteProf)S.ov=remoteProf.ov||{};
-        Object.assign(S,profData);
+        const baseOv= {...(profData.ov||{})};
+        if(isLocalNewer&&remoteProf?.ov){
+          Object.entries(remoteProf.ov).forEach(([k,rv])=>{
+            if(rv&&(rv.fromRecruit||rv.fromMyRecruit)&&!baseOv[k]?.manualShift){
+              baseOv[k]={...(baseOv[k]||{}),...rv};
+            }
+          });
+        }
+        S.ov=baseOv;
+        Object.assign(S,profData,{ov:baseOv});
+        if(isLocalNewer)saveProfile();
       }
       const nextProfSig=JSON.stringify({ov:S.ov,vacTotal:S.vacTotal,topId:S.topId,divId:S.divId});
       window._profChangedOnBoot=(prevProfSig!==nextProfSig);
