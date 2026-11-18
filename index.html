@@ -430,6 +430,10 @@ body.light .hate-chip{background:#ffe4e6;color:#be123c;border-color:#fda4af}
 .md-wk-table{width:100%;border-collapse:collapse;font-size:.71rem;table-layout:fixed}
 .md-wk-table th,.md-wk-table td{border:1px solid var(--bd);padding:7px 2px;text-align:center;vertical-align:top;word-break:break-all;overflow-wrap:anywhere;line-height:1.36;letter-spacing:-.035em}
 .md-wk-table th{background:var(--bg3);font-weight:800;color:var(--tx);padding:7px 1px;letter-spacing:-.02em}
+.md-wk-table th.md-today,.md-wk-table td.md-today{border-left:2.5px solid var(--tx);border-right:2.5px solid var(--tx)}
+.md-wk-table th.md-today-top{border-top:2.5px solid var(--tx)}
+.md-wk-table td.md-today-bot{border-bottom:2.5px solid var(--tx)}
+.md-today-chip{display:inline-block;margin-top:2px;padding:0 5px;border-radius:999px;background:var(--tx);color:var(--bg);font-size:.52rem;font-weight:800;line-height:1.5;letter-spacing:0}
 .md-wk-sec{width:23px;background:var(--bg3);color:var(--tx2);font-weight:800;font-size:.54rem;line-height:1.15;padding:4px 1px!important;vertical-align:middle!important;letter-spacing:0}
 .md-wk-subrow td{padding:2px 1.5px!important;line-height:1.15!important;vertical-align:middle!important}
 .md-wk-subrow .md-wk-sec{font-size:.47rem;letter-spacing:-.05em;line-height:1.05;white-space:nowrap;padding:2px .5px!important}
@@ -2846,7 +2850,9 @@ async function loadHolidays(forceDb){
       dbList.forEach((dbMap,idx)=>{
         if(dbMap&&typeof dbMap==='object'){
           _cleanLegacyWrongHolidays(dbMap);
-          Object.entries(dbMap).forEach(([k,v])=>{if(v&&v.deleted)delete holidays[k];else if(v)holidays[k]=v;});
+          {const _dm=_getDeletedHolidaysMap();let _dmDirty=false;
+           Object.entries(dbMap).forEach(([k,v])=>{if(v&&v.deleted){delete holidays[k];if(!_dm[k]){_dm[k]=true;_dmDirty=true;}}else if(v){holidays[k]=v;if(_dm[k]){delete _dm[k];_dmDirty=true;}}});
+           if(_dmDirty)ls.s('holidays_deleted_cache',_dm);}
         }
         applyFixedCompanyHolidays(holidays,targetYears[idx]);
       });
@@ -3134,6 +3140,7 @@ async function loadProfile(){
 async function doLogin(){
   const name=document.getElementById('ln').value.trim(),pw=document.getElementById('lp').value;
   if(!name||!pw){showErr('이름과 비밀번호를 입력해주세요');return;}
+  if(/[.#$\[\]\/]/.test(name)||name.startsWith('__')){showErr('이름에 . # $ [ ] / 문자와 __ 시작은 사용할 수 없습니다');return;}
   if(!FB&&window._fb)FB=window._fb;
   if(!FB){showErr('서버에 연결 중입니다. 잠시 후 다시 시도해주세요');return;}
   document.getElementById('lerr').style.display='none';
@@ -3583,7 +3590,6 @@ function mkDgCell(date,other,todayKey){
   const mw=document.createElement('div');
   const posts=dgPostCache[k];
   const postList=posts?Object.values(posts).filter(Boolean).sort((a,b)=>(a.closed?1:0)-(b.closed?1:0)):[];
-  const hasPost=postList.length>0;
   if(isLargeStyle){
     mw.className='mid-wrap big-mode';
     const shSlot=document.createElement('div');shSlot.className='big-sh-slot';
@@ -4719,11 +4725,16 @@ function calcSimpleIncomeTax(pay,fam,kids,yr,mo){
   return Math.floor(Math.max(0,base-credit)/10)*10;
 }
 function _readFamKids(){
-  const fam=Math.min(20,Math.max(1,parseInt(document.getElementById('sal-fam')?.value)||1));
-  const kids=Math.max(0,Math.min(parseInt(document.getElementById('sal-kids')?.value)||0,fam-1));
+  let fam=Math.min(20,Math.max(1,parseInt(document.getElementById('sal-fam')?.value)||1));
+  const kids=Math.max(0,Math.min(parseInt(document.getElementById('sal-kids')?.value)||0,19));
+  if(kids>fam-1)fam=kids+1;
   return {fam,kids};
 }
-function onSalFamilyInput(){calcSalary(true);}
+function onSalFamilyInput(){
+  const fk=_readFamKids(),fe=document.getElementById('sal-fam');
+  if(fe&&(parseInt(fe.value)||1)!==fk.fam){fe.value=fk.fam>1?fk.fam:'';showToast('자녀 수에 맞춰 부양가족 수를 '+fk.fam+'명으로 조정했습니다');}
+  calcSalary(true);
+}
 function getSalCfg(){
   const def={
     workMode:'shift157',
@@ -4909,7 +4920,7 @@ function computeSalaryAmounts(cfg,moData){
   const _hasMoTax=moData.customTax!==''&&moData.customTax!==null&&moData.customTax!==undefined;
   const _hasCfgTax=cfg.dedTax!==''&&cfg.dedTax!==null&&cfg.dedTax!==undefined;
   const famN=Math.max(1,parseInt(cfg.dependents)||1),kidsN=Math.max(0,parseInt(cfg.children)||0);
-  const autoTax=hasIncome?calcSimpleIncomeTax(empTaxable,famN,kidsN,(typeof salYr!=='undefined'&&salYr)||new Date().getFullYear(),(typeof salMo!=='undefined')?salMo:new Date().getMonth()):0;
+  const autoTax=hasIncome?calcSimpleIncomeTax(empTaxable,famN,kidsN,moData.payYr??((typeof salYr!=='undefined'&&salYr)||new Date().getFullYear()),moData.payMo??((typeof salMo!=='undefined')?salMo:new Date().getMonth())):0;
   const taxSrc=_hasMoTax?'month':(_hasCfgTax?'fixed':'auto');
   const incomeTax=hasIncome?(_hasMoTax?_num(moData.customTax,0):(_hasCfgTax?_num(cfg.dedTax,0):autoTax)):0;
   const localTax=Math.floor((incomeTax*0.1)/10)*10;
@@ -5474,6 +5485,7 @@ function readSalFormMoData(){
     effOt:ds+ns,
     effHd:hd+hdn,
     effNt:ns+hdn,
+    payYr:salYr,payMo:salMo,
     holidayBonus:isHolidayBonusMonth(salYr,salMo),
     giftPay:_readMoneyEl('sal-gift-pay',false),
     extraPay:_readMoneyEl('sal-extra-only-pay',false),
@@ -5529,6 +5541,7 @@ function syncAllMonthsSalaryToCache(){
     const baseCounts=useSavedCounts?prev.counts:getSalarySettledShiftStats(salYr,m-1,cfg.workMode,cfg.settleMode);
     const st=(m-1===salMo)?curMoData:{
       ...baseCounts,
+      payYr:salYr,payMo:m-1,
       holidayBonus:isHolidayBonusMonth(salYr,m-1),
       giftPay:prev.giftPay||0,
       extraPay:prev.extraPay||0,
@@ -5594,7 +5607,7 @@ function renderSalHistoryList(cfg,curMoData){
       const st=useSavedCounts?saved.counts:liveSt;
       const mCfg=(saved?.manualSaved&&saved?.basePay>0)?{...cfg,basePay:saved.basePay}:cfg;
       if(_num(mCfg.basePay,0)>0||hasWage){
-        const moInput={...st,holidayBonus:isHolidayBonusMonth(salYr,m-1),giftPay:saved?.giftPay||0,extraPay:saved?.extraPay||0,dedMeal:saved?.dedMeal??'',customTax:saved?.customTax??''};
+        const moInput={...st,payYr:salYr,payMo:m-1,holidayBonus:isHolidayBonusMonth(salYr,m-1),giftPay:saved?.giftPay||0,extraPay:saved?.extraPay||0,dedMeal:saved?.dedMeal??'',customTax:saved?.customTax??''};
         const calc=computeSalaryAmounts(mCfg,moInput);
         gross=calc.grossTotal;
         net=calc.netTotal;
@@ -6789,6 +6802,30 @@ function renderWeekOrigImgCard(){
 }
 
 
+// 오늘 요일 칸을 굵은 선으로 표시 (rowspan이 있어도 열 위치를 계산해서 맞춤)
+function _markMealToday(box){
+  const tbl=box&&box.querySelector('.md-wk-table');
+  if(!tbl||!_curMealMondayKey)return;
+  const todayKey=dkey(new Date());
+  let col=-1;
+  for(let i=0;i<5;i++){if(_addDaysToKey(_curMealMondayKey,i)===todayKey){col=i;break;}}
+  if(col<0)return;
+  const rows=[...tbl.rows],occ=[];
+  rows.forEach((tr,r)=>{
+    occ[r]=occ[r]||[];let c=0;
+    [...tr.cells].forEach(td=>{
+      while(occ[r][c])c++;
+      const rs=td.rowSpan||1;
+      for(let k=1;k<rs;k++){occ[r+k]=occ[r+k]||[];occ[r+k][c]=true;}
+      if(c===col+1){
+        td.classList.add('md-today');
+        if(r===0){td.classList.add('md-today-top');td.insertAdjacentHTML('beforeend','<div class="md-today-chip">오늘</div>');}
+        if(r+rs>=rows.length)td.classList.add('md-today-bot');
+      }
+      c++;
+    });
+  });
+}
 function renderDigitalMealBoard(){
   if(!_curMealMondayKey)_curMealMondayKey=_getMondayOfDate(new Date());
   const wkLbl=document.getElementById('meal-week-label');
@@ -6931,6 +6968,7 @@ function renderDigitalMealBoard(){
       ${menu.uploadedBy?`<div style="margin-top:4px;text-align:right;font-size:.58rem;color:var(--tx3)">등록: ${escHtml(menu.uploadedBy)}</div>`:''}
     </div>
   `;
+  _markMealToday(box);
   renderWeekOrigImgCard();
 }
 
@@ -8167,7 +8205,7 @@ function renderSavedAccts(){
   const box=document.getElementById('saved-accts');if(!box)return;box.innerHTML='';
   const sess=ls.g('sess');if(!sess?.name)return;
   const lbl=document.createElement('div');lbl.style.cssText='font-size:.66rem;color:var(--tx3);text-align:center;margin-bottom:5px';lbl.textContent='최근 계정';box.appendChild(lbl);
-  const btn=document.createElement('button');btn.className='qbtn';btn.innerHTML=`${sess.name} 계정으로 로그인`;
+  const btn=document.createElement('button');btn.className='qbtn';btn.textContent=`${sess.name} 계정으로 로그인`;
   btn.onclick=()=>{document.getElementById('ln').value=sess.name;document.getElementById('lp').focus();};box.appendChild(btn);
 }
 
