@@ -430,10 +430,14 @@ body.light .hate-chip{background:#ffe4e6;color:#be123c;border-color:#fda4af}
 .md-wk-table{width:100%;border-collapse:collapse;font-size:.71rem;table-layout:fixed}
 .md-wk-table th,.md-wk-table td{border:1px solid var(--bd);padding:7px 2px;text-align:center;vertical-align:top;word-break:break-all;overflow-wrap:anywhere;line-height:1.36;letter-spacing:-.035em}
 .md-wk-table th{background:var(--bg3);font-weight:800;color:var(--tx);padding:7px 1px;letter-spacing:-.02em}
-.md-wk-table th.md-today,.md-wk-table td.md-today{border-left:2.5px solid var(--tx);border-right:2.5px solid var(--tx)}
-.md-wk-table th.md-today-top{border-top:2.5px solid var(--tx)}
-.md-wk-table td.md-today-bot{border-bottom:2.5px solid var(--tx)}
-.md-today-chip{display:inline-block;margin-top:2px;padding:0 5px;border-radius:999px;background:var(--tx);color:var(--bg);font-size:.52rem;font-weight:800;line-height:1.5;letter-spacing:0}
+.md-wk-table th.md-today,.md-wk-table td.md-today{border-left:2.5px solid #000;border-right:2.5px solid #000}
+.md-wk-table th.md-today-top{border-top:2.5px solid #000}
+.md-wk-table td.md-today-bot{border-bottom:2.5px solid #000}
+body:not(.light) .md-wk-table th.md-today,body:not(.light) .md-wk-table td.md-today{border-left-color:#f8fafc;border-right-color:#f8fafc}
+body:not(.light) .md-wk-table th.md-today-top{border-top-color:#f8fafc}
+body:not(.light) .md-wk-table td.md-today-bot{border-bottom-color:#f8fafc}
+.md-today-chip{display:inline-block;margin-top:2px;padding:0 5px;border-radius:999px;background:#000;color:#fff;font-size:.52rem;font-weight:800;line-height:1.5;letter-spacing:0}
+body:not(.light) .md-today-chip{background:#f8fafc;color:#0d1017}
 .md-wk-sec{width:23px;background:var(--bg3);color:var(--tx2);font-weight:800;font-size:.54rem;line-height:1.15;padding:4px 1px!important;vertical-align:middle!important;letter-spacing:0}
 .md-wk-subrow td{padding:2px 1.5px!important;line-height:1.15!important;vertical-align:middle!important}
 .md-wk-subrow .md-wk-sec{font-size:.47rem;letter-spacing:-.05em;line-height:1.05;white-space:nowrap;padding:2px .5px!important}
